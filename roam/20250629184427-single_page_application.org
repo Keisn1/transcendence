@@ -1,0 +1,13 @@
+:PROPERTIES:
+:ID:       f738fa42-98fe-4aa3-91e2-9e3e051efd05
+:END:
+#+title: single-page application
+#+date: [2025-06-29 Sun 18:44]
+#+startup: overview
+
+An application that loads a single HTML pages and updates the contents dynamically rather then loading new pages from the server.
+
+What makes an application a SPA:
+- subsequent page updates happen via JavaScript
+- navigation in between different pages doesn't trigger a full page reload
+- uses [[id:4dede980-9343-4ed3-9089-34b057b07a30][AJAX/fetch]] to communicate with the server for data

@@ -1,0 +1,17 @@
+:PROPERTIES:
+:ID:       4dede980-9343-4ed3-9089-34b057b07a30
+:END:
+#+title: AJAX/fetch
+#+date: [2025-06-29 Sun 18:50]
+#+startup: overview
+
+Technique to load data from the server with *asynchronous* HTTP requests.
+
+They don't refresh the page
+You can request data from the server in the background.
+You can receive and process server responses.
+You can update parts of the web page with new data.
+You can send data to the server.
+
+[[id:8d5c014d-f323-467c-b2f5-5610c8dfdf2d][AJAX]]
+[[id:a62990e8-5528-4937-b9c7-facee8def740][Fetch API]]

@@ -1,0 +1,28 @@
+:PROPERTIES:
+:ID:       8d5c014d-f323-467c-b2f5-5610c8dfdf2d
+:END:
+#+title: AJAX
+#+date: [2025-06-29 Sun 18:49]
+#+startup: overview
+
+Acronym for *Asynchronous Javascript and XML*
+
+It has been named "and XML" for historical reasons but is able to handle any data-format (i.e. JSON)
+JSON is nowadays the preferred data format.
+
+* How it works
+1. JavaScript creates a new XMLHttpRequest object (newer approach is using fetch API)
+2. The request is send to the server.
+3. Server processes the request and returns the data.
+4. JavaScript receives the data and updates the DOM.
+
+* Benefits
+1. Reduces the bandwidth usage.
+2. Provides smoother user experience without page refreshes.
+3. Enables interactive applications that feel more responsive.
+
+* Example use cases
+- Autocomplete suggestions
+- form submissions without page reload
+- infinite scrolling
+- real-time updates

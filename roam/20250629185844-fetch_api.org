@@ -1,0 +1,14 @@
+:PROPERTIES:
+:ID:       a62990e8-5528-4937-b9c7-facee8def740
+:END:
+#+title: Fetch API
+#+date: [2025-06-29 Sun 18:58]
+#+startup: overview
+
+It is a modern JavaScript interface for making asynchronous HTTP requests (replacing AJAX approach with XMLHttpRequest).
+
+* Key features
+- It is [[id:f4e98fc6-b359-410d-bd05-f23b91c9d78b][promise]] based
+- It has a simpler, more elegant syntax
+- It is part of the browser's standard JavaScript API
+- Returns a Promise that resolves to a Response object

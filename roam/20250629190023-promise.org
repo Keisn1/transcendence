@@ -1,0 +1,46 @@
+:PROPERTIES:
+:ID:       f4e98fc6-b359-410d-bd05-f23b91c9d78b
+:END:
+#+title: promise
+#+date: [2025-06-29 Sun 19:00]
+#+startup: overview
+
+Is an object that represents the eventual completion or failure of an asynchronous operation and its resulting value.
+
+Promises resolve the [[id:607124a6-f58a-4b31-929c-d698680f6434][Callback Hell]] by
+- allowing chaining of asynchronous operations
+- providing better error handling for asynchronous code
+
+* Key charateristics
+- It represents a value that may yet not be available
+- It has 3 states
+  1. *Pending*:
+     - it's the initial state which is neither of the other 2
+  2. *Fulfilled*: Operation completed successfully
+  3. *Rejected*: Operation failed
+* Basic syntax
+
+- Creating a Promise
+  #+begin_src javascript
+const Promise = new Promise((resolve, reject)) => {
+    // Asynchronous operation
+    if (/* operation successful */) {
+        resolve(value);
+    } else {
+        reject(error);
+    }
+}
+  #+end_src
+
+- Handling a Promise
+  #+begin_src javascript
+myPromise.then(value => {
+    // Handle success
+})
+.catch(error => {
+    // Handle error
+})
+.finally(() => {
+    // Executes regardless of success/failure
+})
+  #+end_src
