@@ -43,7 +43,7 @@
 
 # 🏓 Game
 
-- both players use the same keyboard ([5.3.1](#*Remote players (major))
+- both players use the same keyboard ([5.4.1](#*Remote players (major))
   enhances that)
   - same rules for everyong
     - identical paddle speed
@@ -52,9 +52,9 @@
   - who plays against who
   - the order of playing
   - must work with or without user registration
-    - without [5.2.1](#*Standard User Management (major)):
+    - without [5.3.1](#*Standard User Management (major)):
       - users input alias
-    - with [5.2.1](#*Standard User Management (major)):
+    - with [5.3.1](#*Standard User Management (major)):
       - aliases are linked to registerd accounts
       - allows persistent stats and friend lists
   - **Matchmaking system**
@@ -64,10 +64,10 @@
   1.  each player needs to input their alias
       - in default version, users enter an alias manually
   2.  Aliases are reset at the start of a *new* tournament
-      - can be altered by [5.2.1](#*Standard User Management (major)):
+      - can be altered by [5.3.1](#*Standard User Management (major)):
 - must adhere to Frontend constraints
   - may use Frontend module
-  - override it with [5.8](#*Graphics modules)
+  - override it with [5.9](#*Graphics modules)
 
 # Security concerns
 
@@ -90,6 +90,8 @@
     route handlers
 
 # Modules
+
+## Points
 
 - 2 minor moduls count as one major module
 - 100% project completion = 7 major modules

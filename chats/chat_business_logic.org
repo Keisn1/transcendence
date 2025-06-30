@@ -1,0 +1,61 @@
+:PROPERTIES:
+:GPTEL_MODEL: claude-sonnet-4-20250514
+:GPTEL_BACKEND: Claude
+:GPTEL_SYSTEM: You are a large language model living in Emacs and a helpful assistant. Avoid long answers.
+:GPTEL_BOUNDS: ((response (734 2225)))
+:END:
+
+*** We are building a single-page application that will host a Pong game with the following features
+- user management, some elaborate monitoring
+- frontend with TailwindCSS
+- Remote Player (playing pong game remotely from different computers)
+- Chat (chat inbetween players)
+- Security
+  - WAF/ModSecurity/HashiCorp
+  - 2FA + JWT
+- GDPR (anonymization)
+- Microservices
+- Prometheus and Grafana
+- Infrastructure Setup with ELK
+
+I'm trying to figure out the core business logic of this application
+
+
+
+Here's the core business logic for your Pong application:
+
+**** Game Engine
+- *Game State Management*: Position tracking, collision detection, scoring
+- *Real-time Synchronization*: WebSocket connections for paddle/ball updates
+- *Game Session Lifecycle*: Start, pause, end, reconnection handling
+- *Physics Engine*: Ball movement, paddle physics, boundary detection
+
+**** User Management
+- *Authentication Flow*: Registration, login, 2FA verification
+- *Player Profiles*: Stats, rankings, game history
+- *Session Management*: JWT token handling, refresh logic
+- *GDPR Compliance*: Data anonymization, deletion requests
+
+**** Matchmaking
+- *Player Queuing*: Find opponents, skill-based matching
+- *Room Management*: Create/join game rooms
+- *Spectator Mode*: Allow others to watch games
+
+**** Communication
+- *Real-time Chat*: In-game messaging, lobby chat
+- *Game Events*: Score updates, game state broadcasts
+- *Notifications*: Match found, game invites
+
+**** Core Services (Microservices)
+- *Auth Service*: User authentication, 2FA
+- *Game Service*: Game logic, state management
+- *Chat Service*: Messaging, moderation
+- *User Service*: Profile management, GDPR
+- *Analytics Service*: Game stats, monitoring
+
+**** Data Flow
+- Frontend ↔ API Gateway ↔ Microservices
+- WebSocket connections for real-time game/chat
+- Event-driven architecture for game state changes
+
+The business logic centers around managing real-time multiplayer game sessions while handling user interactions securely.

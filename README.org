@@ -65,6 +65,7 @@
   - [ ] Role-based access controls: Restrict routes based on user roles
   - [ ] Middleware implementations: security checks performed before the route handlers
 * Modules
+** Points
 - 2 minor moduls count as one major module
 - 100% project completion = 7 major modules
 
