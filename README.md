@@ -197,7 +197,15 @@
 
 ## AI-Algo
 
-### WAIT Introduce AI opponent (major)
+### <span class="todo TODO">TODO</span> Introduce AI opponent (major)
+
+  - no **A\*Algorithm**
+  - challenging and engaging gameplay experience for users
+  - replicate human behavior
+      - must simulate keyboard input
+  - constraint:
+      - AI can only refresh its view of the game once per second,
+        requiring it to anticipate bounces and other actions
 
 ### WAIT User and Game stats Dashboards (minor)
 
