@@ -1,0 +1,10 @@
+:PROPERTIES:
+:ID:       3872f2dc-cb57-4fe1-90c2-2c7d10bdc839
+:END:
+#+title: Microservices
+#+date: [2025-07-01 Tue 09:22]
+#+startup: overview
+
+
+* Resources
+[[https://astconsulting.in/java-script/nodejs/fastify/building-microservices-with-fastify-and-node-js][Building Microservices with Fastify and Node.js]]

@@ -1,0 +1,9 @@
+:PROPERTIES:
+:ID:       50cf3d5a-f36f-4138-88dd-cf8ecd428166
+:END:
+#+title: User management service
+#+date: [2025-07-01 Tue 11:01]
+#+startup: overview
+
+1) add a user
+2) delete a user

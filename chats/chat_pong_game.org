@@ -271,7 +271,7 @@ Create a simple HTML file with a script to connect to your server:
 - This setup only manages paddle positions for simplicity. You'll need to add game logic for ball movement, scoring, etc.
 - Ensure that the game logic is synchronized between clients by letting the server manage authoritative game state updates.
 
-*** Do I understand it correctly that messages each message sent from a client to the server via a websocket is going to be sent immediately to all the other players?
+*** Do I understand it correctly that messages sent from a client to the server via a websocket is going to be sent immediately to all the other players?
 
 Yes, that's correct. In the basic implementation described, each message that a client sends to the server over the WebSocket connection is broadcast to all connected players, excluding the sender. This means that when a client (player) sends a message, such as a paddle movement or an input event, the server immediately relays that message to all other connected clients.
 

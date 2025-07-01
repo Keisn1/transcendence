@@ -1,0 +1,47 @@
+:PROPERTIES:
+:ID:       700b42b7-32e8-4a0f-8602-a7900b7f3c55
+:END:
+#+title: Node.js
+#+date: [2025-07-01 Tue 09:26]
+#+startup: overview
+
+- It is a javascript runtime which allows you to execute JavaScript code outside of the browser
+
+* [[id:ab2652dc-1b53-4d17-8b43-d25d38a09fb8][npm]]
+* nvm
+- Node Version Manager
+- *Update nvm* (optional but recommended):
+   #+begin_src sh
+nvm install --lts
+   #+end_src
+* update
+* Commands
+** Create new Node project
+  #+begin_src sh
+npm init
+  #+end_src
+
+** Update node
+- *Install the latest Node.js version*:
+  #+begin_src sh
+nvm install latest
+nvm use latest
+  #+end_src
+** update npm
+#+begin_src sh
+npm install -g npm
+#+end_src
+* index point
+- specified inside package.json
+#+begin_src json
+{
+  "name": "my-app",
+  "version": "1.0.0",
+  "main": "index.js",  // entry point specified here
+  "scripts": {
+    "start": "node index.js"
+  }
+}
+#+end_src
+- often named index.js or app.js
+- node (or another tool) will use the index point file as the starting poiont for the application

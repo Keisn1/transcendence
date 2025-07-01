@@ -1,0 +1,20 @@
+:PROPERTIES:
+:ID:       1c7b7ca4-942e-45cc-a090-e1ad07d5c67e
+:END:
+#+title: fastify
+#+date: [2025-07-01 Tue 10:57]
+#+startup: overview
+* commands
+** install fastify
+#+begin_src
+npm install fastify
+#+end_src
+
+** uninstall fastify
+#+begin_src
+npm uninstall fastify
+#+end_src
+** cleanup
+#+begin_src bash
+npm prune
+#+end_src
