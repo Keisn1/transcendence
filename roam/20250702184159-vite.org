@@ -1,0 +1,14 @@
+:PROPERTIES:
+:ID:       05b9fa11-4c3d-47a3-9783-a7a89432822d
+:END:
+#+title: vite
+#+date: [2025-07-02 Wed 18:41]
+#+startup: overview
+
+- uses =esnext= as the transform target
+- does a lot of scaffolding for you
+* Creating a project
+#+begin_src sh
+npm create vite@latest project_name
+#+end_src
+* install tailwindcss
