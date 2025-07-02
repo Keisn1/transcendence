@@ -1,25 +1,27 @@
-// Import Fastify
 import Fastify from 'fastify';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import fastifyStatic from '@fastify/static';
-import routes from './routes/routes.js';
+
+import dbPlugin       from './config/db.js';
+import apiRoutes      from './routes/api.js';
+import fastifyStatic  from '@fastify/static';
+import routes         from './routes/routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
+const __dirname  = path.dirname(__filename);
 const fastify = Fastify({ logger: true });
 
-// Register static plugin first
+fastify.register(dbPlugin);
+
+fastify.register(apiRoutes, { prefix: '/api' });
+
 fastify.register(fastifyStatic, {
   root: path.join(__dirname, 'views'),
   prefix: '/',
 });
 
-// Then register routes
 fastify.register(routes);
 
-// Start the server and await listen to catch errors
 const start = async () => {
   try {
     await fastify.listen({ port: 3000 });

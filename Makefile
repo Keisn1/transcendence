@@ -5,11 +5,16 @@ SRC  := src/server.js
 all: install
 
 install:
-	@echo "Installing dependencies…"
+	@echo "Installing dependencies..."
 	$(NPM) ci
+	@touch data/dev.sqlite
 
 start:
-	@echo "Starting server…"
+	@echo "Starting server..."
 	$(NODE) $(SRC)
 
-.PHONY: all install start 
+clean:
+	@echo "Deleting database..."
+	@rm -fr data/dev.sqlite
+
+.PHONY: all install start clean
