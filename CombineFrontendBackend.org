@@ -1,3 +1,9 @@
+:PROPERTIES:
+:GPTEL_MODEL: claude-sonnet-4-20250514
+:GPTEL_BACKEND: Claude
+:GPTEL_SYSTEM: You are a large language model living in Emacs and a helpful assistant. Avoid long answers.
+:GPTEL_BOUNDS: ((response (574 764) (766 974) (975 1228) (1229 1435) (1436 1964) (1965 2174) (2177 2391) (2392 2619) (2621 2659) (2663 2681) (2682 3148) (3149 3288) (3292 3301) (3302 3305) (3306 3601) (3602 3642) (3663 3866) (3867 4471) (4472 4826) (4827 5795) (5805 7130) (7159 7222) (7240 7400) (7412 8428) (8430 9676) (9720 11274)))
+:END:
 #+title: Combine Frontend Backend
 
 * FrontendCDN
@@ -206,4 +212,238 @@ class App {
     }
 }
 #+end_src
+* Nginx
 
+** nginx.conf for SPA Routing:
+
+#+begin_src nginx
+server {
+    listen 80;
+    server_name yourapp.com;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Handle all routes - serve index.html for SPA
+    location / {
+        try_files $uri $uri/ /index.html; # otherwise it will return 404
+    }
+
+    # Optional: API proxy to backend
+    location /api/ {
+        proxy_pass http://backend:4000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # Cache static assets
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+}
+#+end_src
+
+** Docker Setup:
+
+#+begin_src dockerfile
+# Dockerfile.frontend
+FROM nginx:alpine
+COPY dist/ /usr/share/nginx/html/
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+#+end_src
+
+*docker-compose.yml:*
+
+#+begin_src yaml
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+  backend:
+    build: ./backend
+    ports:
+      - "4000:4000"
+#+end_src
+
+** Key Points:
+- =try_files $uri $uri/ /index.html= = Always fallback to index.html
+- =/dashboard=, =/login=, =/anything= → All serve index.html
+- Your JS router handles the actual routing client-side
+
+
+* Caching of static files
+This nginx block *caches static files* to improve performance:
+#+begin_src nginx
+    # Cache static assets
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+#+end_src
+
+** What it does:
+- =~*= = case-insensitive regex match
+- =\.(js|css|png|jpg|jpeg|gif|ico|svg)$= = matches files ending with these extensions
+- =expires 1y= = tells browser to cache for 1 year
+- =Cache-Control "public, immutable"= = additional caching headers
+
+** Example:
+#+begin_src
+Request: https://yourapp.com/main.js
+Response Headers:
+  Cache-Control: public, immutable
+  Expires: Thu, 01 Jan 2025 00:00:00 GMT
+#+end_src
+
+** Browser behavior:
+- First visit: Downloads =main.js=, stores in browser cache
+- Next visits: Uses cached version, *no network request* for 1 year
+- Only downloads again if filename changes (e.g., =main.abc123.js=)
+
+** Why it helps:
+- *Faster page loads* - no re-downloading CSS/JS
+- *Less server load* - fewer requests
+- *Better user experience* - instant loading
+
+** Modern build tools automatically add hashes:
+#+begin_src
+main.js → main.a8b7c9d.js  (content hash)
+styles.css → styles.f3e2d1.css
+#+end_src
+
+When you update code → new hash → browser downloads new version automatically.
+
+*** Modern Build Tools with Content Hashing:
+
+*/ /Frontend Build Tools:/
+- *Vite* (most popular, fastest)
+- *Webpack* (older but still widely used)
+- *Parcel* (zero-config)
+- *Rollup* (library bundling)
+- *esbuild* (extremely fast)
+
+*/ /Framework-Specific:/
+- *Next.js* (React)
+- *Nuxt.js* (Vue)
+- *SvelteKit* (Svelte)
+- *Angular CLI* (Angular)
+
+*/ /Example with Vite:/
+#+begin_src bash
+npm create vite@latest my-app
+cd my-app
+npm install
+npm run build
+#+end_src
+
+/Output:/
+#+begin_src
+dist/
+├── index.html
+├── assets/
+│   ├── index-a8b7c9d.js     # ← Hashed filename
+│   ├── index-f3e2d1.css     # ← Hashed filename
+│   └── logo-xyz123.png      # ← Hashed filename
+└── ...
+#+end_src
+
+*/ /Vite config example:/
+#+begin_src typescript
+// vite.config.ts
+export default {
+  build: {
+    rollupOptions: {
+      output: {
+        // Customize hash format
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]'
+      }
+    }
+  }
+}
+#+end_src
+
+*/ /Why Hashing Works:/
+- Change code → new hash → new filename
+- Browser sees new filename → downloads fresh version
+- Unchanged files keep same hash → stay cached
+
+This is why you can set =expires 1y= safely!
+
+*** is it possible with tailwindcss/cli?
+
+*** Yes! TailwindCSS CLI can generate hashed filenames:
+
+*/ Basic Setup:
+#+begin_src bash
+# Install TailwindCSS CLI
+npm install -D tailwindcss
+npx tailwindcss init
+
+# Build with output filename containing hash
+npx tailwindcss -i ./src/input.css -o ./dist/styles-$(date +%s).css --watch
+#+end_src
+
+*/ Better approach - Use with a bundler:
+
+/Option 1: Vite + TailwindCSS (Recommended)/
+#+begin_src bash
+npm create vite@latest my-app
+cd my-app
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+#+end_src
+
+#+begin_src css
+/* src/style.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+#+end_src
+
+#+begin_src javascript
+// main.js
+import './style.css'
+#+end_src
+
+Build output:
+#+begin_src
+dist/assets/style-a8b7c9d.css  # ← Auto-hashed!
+#+end_src
+
+/Option 2: PostCSS + Custom Build Script/
+#+begin_src json
+// package.json
+{
+  "scripts": {
+    "build:css": "tailwindcss -i ./src/input.css -o ./dist/styles.css",
+    "build:hash": "node scripts/hash-assets.js"
+  }
+}
+#+end_src
+
+#+begin_src javascript
+// scripts/hash-assets.js
+const fs = require('fs');
+const crypto = require('crypto');
+
+const cssContent = fs.readFileSync('./dist/styles.css');
+const hash = crypto.createHash('md5').update(cssContent).digest('hex').slice(0, 8);
+const hashedName = `styles-${hash}.css`;
+
+fs.renameSync('./dist/styles.css', `./dist/${hashedName}`);
+console.log(`Generated: ${hashedName}`);
+#+end_src
+
+*/ Recommendation:
+Use /Vite + TailwindCSS/ - it handles hashing automatically and is much simpler than standalone CLI with manual hashing.
+
+***
