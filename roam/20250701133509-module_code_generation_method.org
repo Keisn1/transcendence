@@ -1,0 +1,28 @@
+:PROPERTIES:
+:ID:       ce4f03e4-78cc-4040-b515-a04d5d2f1129
+:END:
+#+title: module code generation method
+#+date: [2025-07-01 Tue 13:35]
+#+startup: overview
+
+- refers to how modules are transformed and executed in certain environments
+- concerned with how modules are imported and exported
+- concerned with how modules are loaded and executed
+
+* ECMAScript Modules (ESM):
+Modern JavaScript uses ESM, which allows you to use =import= and =export= statements. This method is supported natively in modern browsers and Node.js (starting with version 12 and fully stabilized in version 14).
+- Importing:
+  #+begin_src javascript
+import { something } from './module.js';
+import defaultExport from './module.js';
+  #+end_src
+- Exporting:
+  #+begin_src javascript
+export const something = ...;
+export default someValue;
+  #+end_src
+
+* CommonJS
+- This is the module system used by Node.js
+- uses =require()= to import modules and =module.exports= to export them
+- CommonJS is synchronous

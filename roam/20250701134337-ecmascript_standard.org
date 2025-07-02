@@ -1,0 +1,11 @@
+:PROPERTIES:
+:ID:       40fad1d4-3099-44d1-8485-d957fb636a92
+:END:
+#+title: ECMAScript Standard
+#+date: [2025-07-01 Tue 13:43]
+#+startup: overview
+
+
+- serves as foundation for JavaScript (and others)
+- defines syntax, semantics, required behaviors
+- ES6 is [[id:40fad1d4-3099-44d1-8485-d957fb636a92][ECMAScript Standard]] 2015

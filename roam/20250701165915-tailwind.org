@@ -1,0 +1,23 @@
+:PROPERTIES:
+:ID:       cf067345-0ff2-4f13-a9f1-d07b97f7f0e3
+:END:
+#+title: tailwind
+#+date: [2025-07-01 Tue 16:59]
+#+startup: overview
+
+https://play.tailwindcss.com/
+* postcss
+
+- tool that processing/transforming CSS using JavaScript plugins
+- can extend the language (CSS)
+- can automate routine CSS tasks (vendor prefixing, minification, Linting)
+* JIT
+- just in time compiler
+- one goal of tailwindcss is make the css bundle as small as possible
+- optimizes performance
+- generates only what you need
+- doesn't need to precompile classes (that could be in the thousands)
+- supports arbitrary values
+  #+begin_src html
+<h1 class="text-[30px]">Example JIT Compiler</h1>
+  #+end_src

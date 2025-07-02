@@ -1,0 +1,50 @@
+#+title: Project Creation Backend
+
+
+* Create a minimalist Typescript Fastify Server
+[[https://fastify.dev/docs/latest/Reference/TypeScript/][TypeScript in Fastify]]
+#+begin_src
+npm install --save fastify
+#+end_src
+- adds fastify to package.json
+
+#+begin_src
+npm i -D typescript @types/node
+#+end_src
+- adds =@types/node": "^24.0.8"= to package.json in devDependencies
+
+- add to scripts section inside package.json
+  #+begin_src js
+{
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node index.js"
+  }
+}
+  #+end_src
+
+- initialize typescript configuration file
+  #+begin_src
+npx tsc --init
+  #+end_src
+
+- Note: Set target property in tsconfig.json to es2017 or greater (changed it to es2022) to avoid FastifyDeprecation warning.
+
+- build the project
+  #+begin_src
+npm run build
+  #+end_src
+
+- run the project
+  #+begin_src sh
+npm run start # or "npm start"
+  #+end_src
+* add dev script to package.json
+- install ts-node
+#+begin_src sh
+npm install --save-dev ts-node
+#+end_src
+- add dev script
+#+begin_src js
+"dev": "ts-node index.ts"
+#+end_src

@@ -1,0 +1,62 @@
+#+title: Create Tailwind And Typescript Project
+
+* Following YT-Video (the best)
+https://www.youtube.com/watch?v=n9widGM__Lg
+** install tailwindcss and tailwindcss cli
+#+begin_src
+npm install tailwindcss @tailwindcss/cli
+#+end_src
+** import tailwind in your css
+1. create src/
+   #+begin_src
+mkdir src
+   #+end_src
+2. Touch =input.css=
+   #+begin_src
+touch src/input.css
+   #+end_src
+3. Add this to input.css
+   #+begin_src css
+@import "tailwindcss";
+   #+end_src
+** start tailwind cli build process
+#+begin_src
+npx @tailwindcss/cli -i ./src/input.css -o ./src/output.css --watch
+#+end_src
+- watch: this is a running process which updats ./src/outpu.css
+** start using tailwind in html
+#+begin_src html
+<!-- index.html -->
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="./output.css" rel="stylesheet">
+</head>
+<body>
+  <h1 class="text-3xl font-bold underline">
+    Hello world!
+  </h1>
+</body>
+</html>
+#+end_src
+** serve directory (and in emacs do impatient mode 8080/imp)
+** put the compile code into package.json
+#+begin_src
+npx @tailwindcss/cli -i ./src/input.css -o ./src/output.css --watch
+#+end_src
+** install language-server
+#+begin_src emacs-lisp
+(add-to-list 'eglot-server-programs '((mhtml-mode) "tailwindcss-language-server")))
+#+end_src
+** restructure project layout
+1. put index.html into dist/
+2. change dev command to
+   #+begin_src
+    "dev": "npx @tailwindcss/cli -i ./src/input.css -o ./dist/styles.css --watch"
+   #+end_src
+3. change source file in html
+   #+begin_src html
+    <link href="./styles.css" rel="stylesheet">
+   #+end_src

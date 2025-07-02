@@ -1,0 +1,27 @@
+:PROPERTIES:
+:ID:       b66176f0-093e-418e-9689-b963e03602bf
+:END:
+#+title: React
+#+date: [2025-07-01 Tue 17:10]
+#+startup: overview
+
+- reusable UI components
+  - reuse buttons, cards, avatar components etc. throughout your application
+
+- uses a virtual DOM
+  - can update and render components independently
+  - original javascript requires direct manipulation of the DOM
+
+- manages state of the application
+  - state: data that determines how a component renders/behaves
+
+* Components
+- building blocks of React applications
+- allow developers to break down UI into manageable pieces
+** functional
+- more modern
+- javascript-functions which return elements that describe the UI
+** class-based
+* JSX
+- syntax extension for Java Script which resembles HTML
+- allows a more declarative way

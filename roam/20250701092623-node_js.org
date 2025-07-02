@@ -7,7 +7,13 @@
 
 - It is a javascript runtime which allows you to execute JavaScript code outside of the browser
 
-* [[id:ab2652dc-1b53-4d17-8b43-d25d38a09fb8][npm]]
+* npm
+- Package manager for javascript.
+- Default Package manager for [[id:700b42b7-32e8-4a0f-8602-a7900b7f3c55][Node.js]]
+- *Update npm to the latest version*:
+   #+begin_src sh
+   npm install -g npm
+   #+end_src
 * nvm
 - Node Version Manager
 - *Update nvm* (optional but recommended):

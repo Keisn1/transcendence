@@ -1,0 +1,9 @@
+:PROPERTIES:
+:ID:       401f3fa3-44fb-426a-8cc9-157f1b24af6f
+:END:
+#+title: output level level
+#+date: [2025-07-01 Tue 13:40]
+#+startup: overview
+
+- refers to version/features of JavaScript
+- shall ensure that the JS code you produce will run in target environment

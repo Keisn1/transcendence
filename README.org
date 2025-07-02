@@ -223,12 +223,8 @@
 ** Server-Side Pong
 *** Replace Basic Pong with Server-Side Pong (Major)
 
-
 * Bonus
 - Five points will be avarded for each minor module
 - ten points will be awarded for each major module
 - therefore 2.5 points would be 125
 
-* questions
-- seperation Kay/Erik - Chris
-- 22.august
