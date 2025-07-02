@@ -1,10 +1,10 @@
 // Import Fastify
-const fastify = require("fastify")({ logger: true });
+import Fastify from "fastify";
+const fastify = Fastify({ logger: true });
 
-// Define routes and handlers
-fastify.get("/api/v1/hello", (request, reply) => {
-  reply.send({ message: "Hello, World!" });
-});
+import routes from "./routes/routes.js";
+
+await fastify.register(routes);
 
 // // Start the server
 fastify.listen({ port: 3000 }, function (err, address) {
