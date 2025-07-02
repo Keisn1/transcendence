@@ -5,7 +5,12 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "npx @tailwindcss/cli -i ./src/input.css -o ./dist/styles.css --watch"
+    "dev": "npm run copy-html && concurrently \"npm run watch-css\" \"npm run watch-ts\" \"npm run serve\"",
+    "watch-css": "npx @tailwindcss/cli -i ./src/styles/input.css -o ./dist/styles.css --watch",
+    "watch-ts": "tsc --watch",
+    "copy-html": "cp src/*.html dist/",
+    "build": "tsc && npx @tailwindcss/cli -i ./src/styles/input.css -o ./dist/styles.css --minify",
+    "serve": "live-server dist --port=3000"
   },
   "keywords": [],
   "author": "",
@@ -14,5 +19,10 @@
   "dependencies": {
     "@tailwindcss/cli": "^4.1.11",
     "tailwindcss": "^4.1.11"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0",
+    "live-server": "^1.2.0",
+    "typescript": "^5.8.3"
   }
 }

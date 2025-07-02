@@ -1,0 +1,209 @@
+#+title: Combine Frontend Backend
+
+* FrontendCDN
+A *Frontend CDN (Content Delivery Network)* is a globally distributed network of servers that cache and serve your frontend static files (HTML, CSS, JS) from locations closest to your users.
+
+** Benefits:
+- *Faster loading* - Files served from nearest location
+- *Reduced server load* - Static files don't hit your backend
+- *Better SEO* - Faster page loads
+- *Global availability* - Works worldwide
+
+** How it works:
+
+#+begin_src
+User in Tokyo    →  CDN Edge Server (Tokyo)     →  Your Frontend Files
+User in London   →  CDN Edge Server (London)    →  Your Frontend Files
+User in New York →  CDN Edge Server (New York)  →  Your Frontend Files
+#+end_src
+
+** Popular Frontend CDN Services:
+
+*Static Site Hosting with CDN:*
+- *Vercel* - =vercel.com= (easiest for frontend)
+- *Netlify* - =netlify.com=
+- *AWS CloudFront + S3*
+- *Cloudflare Pages*
+- *GitHub Pages*
+
+*** Example Setup with Vercel:
+
+*1. Build your frontend:*
+#+begin_src bash
+cd frontend
+npm run build  # Creates ./dist folder
+#+end_src
+
+*2. Deploy to Vercel:*
+#+begin_src bash
+npm install -g vercel
+vercel --prod
+# Your frontend is now at: https://your-app.vercel.app
+#+end_src
+
+*3. Update your API configuration:*
+#+begin_src typescript
+// frontend/src/config/api.ts
+const API_BASE_URL = process.env.NODE_ENV === 'production'
+  ? 'https://api.yourdomain.com'  // Your backend API Gateway
+  : 'http://localhost:4000';
+#+end_src
+
+*** Complete Architecture:
+
+#+begin_src
+[User Browser]
+    ↓
+[CDN - serves static files (HTML/CSS/JS)]
+    ↓ (API calls only)
+[Load Balancer]
+    ↓
+[API Gateway - your backend]
+    ↓
+[Microservices]
+#+end_src
+
+* Alternative: No CDN (Simple Setup)
+For a simple project, you can skip the CDN and just serve frontend files directly from your server.
+CDN becomes important when you have users worldwide or need better performance.
+
+#+begin_src yaml
+# docker-compose.yml
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./frontend/dist:/usr/share/nginx/html
+    # Serves frontend directly from your server
+#+end_src
+
+* How Frontend and Backend work together
+** First Html Request
+*** Option 1: CDN/Static Host Serves HTML (Most Common SPA Setup)
+
+#+begin_src
+User Browser → CDN/Static Host → Returns index.html
+     ↓
+Browser loads index.html → Downloads CSS/JS → JS runs → Calls API Gateway
+#+end_src
+
+*Example with Vercel/Netlify:*
+#+begin_src
+https://yourapp.vercel.app  → Vercel CDN serves index.html
+                            → Browser loads main.js
+                            → main.js calls http://api.yourapp.com/api/health
+#+end_src
+
+
+*** Option 2: Your Own Server Serves HTML
+
+#+begin_src
+User Browser → Load Balancer → Nginx/Frontend Service → Returns index.html
+#+end_src
+** Detailed Flow
+*** 1. Initial Page Load:
+#+begin_src
+1. User types: https://yourapp.com
+2. DNS resolves to CDN/your server
+3. CDN serves: frontend/dist/index.html
+4. Browser renders HTML
+5. Browser downloads: styles.css, main.js
+6. main.js executes and calls API: https://api.yourapp.com/api/health
+#+end_src
+
+
+*** 2. User Bookmarks and Returns Later (Client-Side Routing):
+#+begin_src
+1. User pastes: https://yourapp.com/some-route
+2. CDN still serves the SAME index.html (SPA behavior)
+3. Browser loads main.js
+4. JavaScript router handles /some-route client-side
+#+end_src
+** Complete Architecture Example:
+*** Production Setup:
+#+begin_src
+Frontend (Static Files):
+https://yourapp.vercel.app  ← Serves HTML/CSS/JS
+
+Backend (API):
+https://api.yourapp.com     ← API Gateway + Microservices
+#+end_src
+
+*** Your nginx.conf for SPA routing:
+#+begin_src nginx
+# If serving from your own server
+server {
+    listen 80;
+    root /usr/share/nginx/html;
+
+    # Serve index.html for all routes (SPA routing)
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # API calls go to backend
+    location /api/ {
+        proxy_pass http://api-gateway:4000;
+    }
+}
+#+end_src
+
+** Key Point: SPA vs Traditional Apps
+*** Single Page App (Your Setup):
+- *One HTML file* serves ALL routes
+- JavaScript handles routing client-side
+- =yourapp.com/login= → Same index.html → JS shows login page
+
+*** Traditional Multi-Page App:
+- Different HTML for each route
+- =yourapp.com/login= → login.html
+- =yourapp.com/dashboard= → dashboard.html
+
+** *Practical Example:*
+*** *Your Current Setup:*
+#+begin_src html
+<!-- This ONE file serves ALL routes -->
+<!-- frontend/dist/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My SPA</title>
+    <link href="./styles.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app"></div>
+    <script src="./main.js"></script>  <!-- This handles ALL routing -->
+</body>
+</html>
+#+end_src
+
+*** *Your main.js handles routing:*
+#+begin_src typescript
+// main.ts
+class App {
+    constructor() {
+        this.handleRouting();
+    }
+
+    private handleRouting() {
+        const path = window.location.pathname;
+
+        switch(path) {
+            case '/':
+                this.showHomePage();
+                break;
+            case '/login':
+                this.showLoginPage();
+                break;
+            case '/dashboard':
+                this.showDashboard();
+                break;
+            default:
+                this.show404();
+        }
+    }
+}
+#+end_src
+

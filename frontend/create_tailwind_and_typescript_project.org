@@ -60,3 +60,93 @@ npx @tailwindcss/cli -i ./src/input.css -o ./src/output.css --watch
    #+begin_src html
     <link href="./styles.css" rel="stylesheet">
    #+end_src
+* add typescript
+** install typescript
+#+begin_src sh
+npm install --save-dev typescript
+#+end_src
+** init typescript
+- =npx tsc --init= creates a default TypeScript configuration file (=tsconfig.json=) in your current directory.
+
+#+begin_src sh
+npx tsc --init
+#+end_src
+** change tsconfig.json
+#+begin_src js
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "lib": ["ES2020", "DOM"],
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
+#+end_src
+
+* update package.json
+** add concurrently and liveserver
+#+begin_src sh
+npm install --save-dev concurrently live-server
+#+end_src
+** update scripts
+
+#+begin_src json
+{
+  "scripts": {
+    "dev": "npm run copy-html && concurrently \"npm run watch-css\" \"npm run watch-ts\" \"npm run watch-html\" \"npm run serve\"",
+    "watch-css": "npx @tailwindcss/cli -i ./src/styles/input.css -o ./dist/styles.css --watch",
+    "watch-ts": "tsc --watch",
+    "watch-html": "chokidar \"src/**/*.html\" -c \"npm run copy-html\"",
+    "copy-html": "cp src/*.html dist/",
+    "build": "npm run copy-html && tsc && npx @tailwindcss/cli -i ./src/styles/input.css -o ./dist/styles.css --minify",
+    "serve": "live-server dist --port=3000"
+  }
+}
+#+end_src
+** run frontend development server
+#+begin_src sh
+npm run dev
+#+end_src
+
+* Project Structure
+#+begin_src
+my-spa-project/
+├── frontend/
+│   ├── src/
+│   │   ├── index.html
+│   │   ├── main.ts
+│   │   ├── styles/
+│   │   │   └── input.css
+│   │   └── types/
+│   │       └── index.ts
+│   ├── dist/
+│   ├── package.json
+│   ├── tsconfig.json
+│   └── tailwind.config.js
+├── backend/
+│   ├── services/
+│   │   ├── api-gateway/
+│   │   │   ├── src/
+│   │   │   │   └── server.ts
+│   │   │   └── package.json
+│   │   ├── user-service/
+│   │   │   ├── src/
+│   │   │   │   └── server.ts
+│   │   │   └── package.json
+│   │   └── auth-service/
+│   │       ├── src/
+│   │       │   └── server.ts
+│   │       └── package.json
+│   └── shared/
+│       └── types/
+│           └── index.ts
+└── docker-compose.yml
+#+end_src

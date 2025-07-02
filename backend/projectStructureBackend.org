@@ -1,0 +1,405 @@
+#+title: Project Structure Backend
+
+* Backend Structure
+** Structure
+#+begin_src
+backend/
+├── services/
+│   ├── api-gateway/
+│   │   ├── src/
+│   │   │   ├── server.ts
+│   │   │   ├── routes/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── auth.ts
+│   │   │   │   └── users.ts
+│   │   │   ├── middleware/
+│   │   │   │   ├── auth.ts
+│   │   │   │   ├── cors.ts
+│   │   │   │   └── rateLimit.ts
+│   │   │   ├── services/
+│   │   │   │   └── httpClient.ts
+│   │   │   └── config/
+│   │   │       └── index.ts
+│   │   ├── package.json
+│   │   ├── tsconfig.json
+│   │   └── Dockerfile
+│   │
+│   ├── user-service/
+│   │   ├── src/
+│   │   │   ├── server.ts
+│   │   │   ├── routes/
+│   │   │   │   └── users.ts
+│   │   │   ├── controllers/
+│   │   │   │   └── userController.ts
+│   │   │   ├── models/
+│   │   │   │   └── User.ts
+│   │   │   ├── services/
+│   │   │   │   └── userService.ts
+│   │   │   ├── repositories/
+│   │   │   │   └── userRepository.ts
+│   │   │   ├── middleware/
+│   │   │   │   └── validation.ts
+│   │   │   ├── database/
+│   │   │   │   └── connection.ts
+│   │   │   └── config/
+│   │   │       └── index.ts
+│   │   ├── package.json
+│   │   ├── tsconfig.json
+│   │   └── Dockerfile
+│   │
+│   ├── auth-service/
+│   │   ├── src/
+│   │   │   ├── server.ts
+│   │   │   ├── routes/
+│   │   │   │   └── auth.ts
+│   │   │   ├── controllers/
+│   │   │   │   └── authController.ts
+│   │   │   ├── services/
+│   │   │   │   ├── authService.ts
+│   │   │   │   ├── tokenService.ts
+│   │   │   │   └── passwordService.ts
+│   │   │   ├── middleware/
+│   │   │   │   └── validation.ts
+│   │   │   ├── database/
+│   │   │   │   └── connection.ts
+│   │   │   └── config/
+│   │   │       └── index.ts
+│   │   ├── package.json
+│   │   ├── tsconfig.json
+│   │   └── Dockerfile
+│   │
+│   └── notification-service/
+│       ├── src/
+│       │   ├── server.ts
+│       │   ├── routes/
+│       │   │   └── notifications.ts
+│       │   ├── controllers/
+│       │   │   └── notificationController.ts
+│       │   ├── services/
+│       │   │   ├── emailService.ts
+│       │   │   └── smsService.ts
+│       │   └── config/
+│       │       └── index.ts
+│       ├── package.json
+│       ├── tsconfig.json
+│       └── Dockerfile
+│
+├── shared/
+│   ├── types/
+│   │   ├── index.ts
+│   │   ├── user.ts
+│   │   ├── auth.ts
+│   │   └── api.ts
+│   ├── utils/
+│   │   ├── logger.ts
+│   │   ├── validation.ts
+│   │   └── constants.ts
+│   ├── middleware/
+│   │   ├── errorHandler.ts
+│   │   └── requestLogger.ts
+│   └── database/
+│       ├── migrations/
+│       └── seeds/
+│
+├── docker-compose.yml
+├── docker-compose.dev.yml
+├── .env.example
+└── README.md
+#+end_src
+
+This structure provides:
+- *Microservice separation* with distinct services
+- *Shared types and utilities* for consistency
+- *Docker containerization* for easy deployment
+- *Database integration* with PostgreSQL
+- *Caching* with Redis
+- *API Gateway* for request routing
+- *Clean architecture* with controllers, services, and repositories
+
+- The frontend is served separately and communicates with the backend through the API Gateway
+** Key Backend Files
+*** API Gateway (=backend/services/api-gateway/src/server.ts=)
+#+begin_src typescript
+import Fastify from 'fastify';
+import cors from '@fastify/cors';
+import rateLimit from '@fastify/rate-limit';
+import { config } from './config';
+import routes from './routes';
+
+const server = Fastify({ logger: true });
+
+// Register plugins
+server.register(cors, { origin: true });
+server.register(rateLimit, {
+  max: 100,
+  timeWindow: '1 minute'
+});
+
+// Register routes
+server.register(routes, { prefix: '/api' });
+
+const start = async () => {
+  try {
+    await server.listen({ port: config.port, host: '0.0.0.0' });
+    console.log(`API Gateway running on port ${config.port}`);
+  } catch (err) {
+    server.log.error(err);
+    process.exit(1);
+  }
+};
+
+start();
+#+end_src
+
+*** User Service (=backend/services/user-service/package.json=)
+#+begin_src json
+{
+  "name": "user-service",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "fastify": "^4.24.3",
+    "@fastify/cors": "^8.4.0",
+    "prisma": "^5.6.0",
+    "@prisma/client": "^5.6.0",
+    "bcryptjs": "^2.4.3",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "tsx": "^4.6.0",
+    "@types/node": "^20.9.0",
+    "@types/bcryptjs": "^2.4.6"
+  }
+}
+#+end_src
+
+*** Docker Compose (=docker-compose.yml=)
+#+begin_src yaml
+version: '3.8'
+
+services:
+  api-gateway:
+    build: ./backend/services/api-gateway
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - USER_SERVICE_URL=http://user-service:3001
+      - AUTH_SERVICE_URL=http://auth-service:3002
+    depends_on:
+      - user-service
+      - auth-service
+
+  user-service:
+    build: ./backend/services/user-service
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://user:password@postgres:5432/userdb
+    depends_on:
+      - postgres
+
+  auth-service:
+    build: ./backend/services/auth-service
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://user:password@postgres:5432/authdb
+      - JWT_SECRET=your-jwt-secret
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=maindb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data:
+#+end_src
+
+*** Shared Types (=backend/shared/types/index.ts=)
+#+begin_src typescript
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+}
+#+end_src
+
+* Service Deployment
+** Separate Service Deployment
+
+Each service can be deployed independently:
+*** Individual Service Deployment:
+
+*Structure for separate deployment:*
+#+begin_src
+backend/
+├── services/
+│   ├── api-gateway/
+│   │   ├── docker-compose.yml      # Gateway-specific
+│   │   ├── k8s/                    # Kubernetes manifests
+│   │   └── .env.production
+│   ├── user-service/
+│   │   ├── docker-compose.yml      # User service specific
+│   │   ├── k8s/
+│   │   └── .env.production
+│   └── auth-service/
+│       ├── docker-compose.yml
+│       └── k8s/
+#+end_src
+
+*Individual Docker Compose (user-service/docker-compose.yml):*
+#+begin_src yaml
+version: '3.8'
+services:
+  user-service:
+    build: .
+    ports:
+      - "3001:3001"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+    networks:
+      - microservices
+
+  user-db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: userdb
+    volumes:
+      - user_data:/var/lib/postgresql/data
+
+networks:
+  microservices:
+    external: true  # Shared network
+
+volumes:
+  user_data:
+#+end_src
+
+*** Deployment Strategies:
+
+*1. Docker Swarm:*
+#+begin_src bash
+# Deploy each service separately
+docker stack deploy -c user-service/docker-compose.yml user-stack
+docker stack deploy -c auth-service/docker-compose.yml auth-stack
+docker stack deploy -c api-gateway/docker-compose.yml gateway-stack
+#+end_src
+
+*2. Kubernetes:*
+#+begin_src yaml
+# user-service/k8s/deployment.yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    spec:
+      containers:
+      - name: user-service
+        image: your-registry/user-service:latest
+        ports:
+        - containerPort: 3001
+#+end_src
+
+*3. CI/CD Pipeline Example (.github/workflows/deploy-user-service.yml):*
+#+begin_src yaml
+name: Deploy User Service
+on:
+  push:
+    paths:
+      - 'backend/services/user-service/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build and push Docker image
+        run: |
+          cd backend/services/user-service
+          docker build -t your-registry/user-service:${{ github.sha }} .
+          docker push your-registry/user-service:${{ github.sha }}
+      - name: Deploy to production
+        run: |
+          kubectl set image deployment/user-service user-service=your-registry/user-service:${{ github.sha }}
+#+end_src
+
+*** Service Discovery:
+
+*Using Environment Variables:*
+#+begin_src bash
+# Each service knows about others through env vars
+USER_SERVICE_URL=http://user-service:3001
+AUTH_SERVICE_URL=http://auth-service:3002
+#+end_src
+
+*Using Service Mesh (Istio) or Service Discovery (Consul):*
+#+begin_src typescript
+// services/api-gateway/src/services/serviceDiscovery.ts
+export class ServiceDiscovery {
+  async getServiceUrl(serviceName: string): Promise<string> {
+    // Dynamic service discovery logic
+    return process.env[`${serviceName.toUpperCase()}_URL`] ||
+           await this.consulLookup(serviceName);
+  }
+}
+#+end_src
+
+*** Production Architecture:
+#+begin_src
+[Frontend CDN] → [Load Balancer] → [API Gateway] → [Services]
+                                       ↓
+[User Service] [Auth Service] [Notification Service]
+      ↓              ↓              ↓
+  [User DB]      [Auth DB]    [Message Queue]
+#+end_src
+
+This setup allows you to:
+- Deploy services independently
+- Scale services based on demand
+- Update services without affecting others
+- Use different databases per service
+- Frontend communicates only with API Gateway
+
+Would you like me to elaborate on any specific deployment strategy or frontend integration pattern?

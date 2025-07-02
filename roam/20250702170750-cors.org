@@ -1,0 +1,25 @@
+:PROPERTIES:
+:ID:       03bf7d83-840e-4577-b406-d7b3074128ec
+:END:
+#+title: cors
+#+date: [2025-07-02 Wed 17:07]
+#+startup: overview
+
+
+CORS (Cross-Origin Resource Sharing) is a security mechanism that allows web pages to make requests to a different domain than the one serving the web page.
+
+*Key points:*
+- *Same-Origin Policy*:
+  - Browsers block requests between different origins (protocol + domain + port) by default
+- *CORS headers*:
+  - Server includes special HTTP headers to permit cross-origin requests
+- *Preflight requests*:
+  - For complex requests, browsers send an OPTIONS request first
+
+*Common CORS headers:*
+- =Access-Control-Allow-Origin: *= (or specific domain)
+- =Access-Control-Allow-Methods: GET, POST, PUT=
+- =Access-Control-Allow-Headers: Content-Type, Authorization=
+
+*Example scenario:*
+Website at =https://example.com= wants to fetch data from =https://api.other.com= - CORS headers from the API server determine if this is allowed.
