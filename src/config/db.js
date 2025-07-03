@@ -14,7 +14,7 @@ export default fp(async (fastify) => {
 	db.exec(`
 	CREATE TABLE IF NOT EXISTS scores (
 		id      INTEGER PRIMARY KEY AUTOINCREMENT,
-		player  TEXT    NOT NULL,
+		player  TEXT    NOT NULL UNIQUE,
 		score   INTEGER NOT NULL,
 		played  DATETIME DEFAULT CURRENT_TIMESTAMP
 	)

@@ -1,6 +1,6 @@
 export async function listScores(request, reply) {
   const stmt = request.server.db.prepare(
-    'SELECT player, score, played FROM scores ORDER BY score DESC LIMIT 3'
+    'SELECT * FROM scores ORDER BY score DESC LIMIT 3'
   );
   const top3 = stmt.all();
   return reply.send({ top3 });
