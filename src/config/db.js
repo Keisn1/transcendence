@@ -11,13 +11,25 @@ export default fp(async (fastify) => {
 
 	const db = new Database(dbPath);
 
+	// users table
 	db.exec(`
-	CREATE TABLE IF NOT EXISTS scores (
-		id      INTEGER PRIMARY KEY AUTOINCREMENT,
-		player  TEXT    NOT NULL UNIQUE,
-		score   INTEGER NOT NULL,
-		played  DATETIME DEFAULT CURRENT_TIMESTAMP
-	)
+		CREATE TABLE users (
+			id			INTEGER	PRIMARY	KEY AUTOINCREMENT,
+			name		TEXT	NOT NULL,
+			username	TEXT	NOT NULL UNIQUE,
+			email		TEXT	NOT NULL UNIQUE,
+			joined		DATETIME DEFAULT CURRENT_TIMESTAMP
+		);
+	`);
+
+	// scores table that references the user
+	db.exec(`
+		CREATE TABLE scores (
+			id		INTEGER	PRIMARY KEY AUTOINCREMENT,
+			user_id	INTEGER	NOT NULL REFERENCES users(id),
+			score	INTEGER	NOT NULL,
+			played	DATETIME DEFAULT CURRENT_TIMESTAMP
+		);
 	`);
 
 	fastify.decorate('db', db);
