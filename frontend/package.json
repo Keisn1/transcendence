@@ -1,28 +1,19 @@
 {
   "name": "frontend",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "npm run copy-html && concurrently \"npm run watch-css\" \"npm run watch-ts\" \"npm run serve\"",
-    "watch-css": "npx @tailwindcss/cli -i ./src/styles/input.css -o ./dist/styles.css --watch",
-    "watch-ts": "tsc --watch",
-    "copy-html": "cp src/*.html dist/",
-    "build": "tsc && npx @tailwindcss/cli -i ./src/styles/input.css -o ./dist/styles.css --minify",
-    "serve": "live-server dist --port=3000"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "dependencies": {
-    "@tailwindcss/cli": "^4.1.11",
-    "tailwindcss": "^4.1.11"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
   },
   "devDependencies": {
-    "concurrently": "^9.2.0",
-    "live-server": "^1.2.0",
-    "typescript": "^5.8.3"
+    "typescript": "~5.8.3",
+    "vite": "^7.0.0"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.11",
+    "tailwindcss": "^4.1.11"
   }
 }

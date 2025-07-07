@@ -167,8 +167,8 @@ server {
 - =yourapp.com/login= → login.html
 - =yourapp.com/dashboard= → dashboard.html
 
-** *Practical Example:*
-*** *Your Current Setup:*
+** Practical Example:
+*** Your Current Setup:
 #+begin_src html
 <!-- This ONE file serves ALL routes -->
 <!-- frontend/dist/index.html -->
@@ -185,7 +185,7 @@ server {
 </html>
 #+end_src
 
-*** *Your main.js handles routing:*
+*** Your main.js handles routing:
 #+begin_src typescript
 // main.ts
 class App {
@@ -212,8 +212,8 @@ class App {
     }
 }
 #+end_src
-* Nginx
 
+* Nginx
 ** nginx.conf for SPA Routing:
 
 #+begin_src nginx
@@ -276,7 +276,6 @@ services:
 - =try_files $uri $uri/ /index.html= = Always fallback to index.html
 - =/dashboard=, =/login=, =/anything= → All serve index.html
 - Your JS router handles the actual routing client-side
-
 
 * Caching of static files
 This nginx block *caches static files* to improve performance:
@@ -377,73 +376,3 @@ export default {
 - Unchanged files keep same hash → stay cached
 
 This is why you can set =expires 1y= safely!
-
-*** is it possible with tailwindcss/cli?
-
-*** Yes! TailwindCSS CLI can generate hashed filenames:
-
-*/ Basic Setup:
-#+begin_src bash
-# Install TailwindCSS CLI
-npm install -D tailwindcss
-npx tailwindcss init
-
-# Build with output filename containing hash
-npx tailwindcss -i ./src/input.css -o ./dist/styles-$(date +%s).css --watch
-#+end_src
-
-*/ Better approach - Use with a bundler:
-
-/Option 1: Vite + TailwindCSS (Recommended)/
-#+begin_src bash
-npm create vite@latest my-app
-cd my-app
-npm install -D tailwindcss postcss autoprefixer
-npx tailwindcss init -p
-#+end_src
-
-#+begin_src css
-/* src/style.css */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-#+end_src
-
-#+begin_src javascript
-// main.js
-import './style.css'
-#+end_src
-
-Build output:
-#+begin_src
-dist/assets/style-a8b7c9d.css  # ← Auto-hashed!
-#+end_src
-
-/Option 2: PostCSS + Custom Build Script/
-#+begin_src json
-// package.json
-{
-  "scripts": {
-    "build:css": "tailwindcss -i ./src/input.css -o ./dist/styles.css",
-    "build:hash": "node scripts/hash-assets.js"
-  }
-}
-#+end_src
-
-#+begin_src javascript
-// scripts/hash-assets.js
-const fs = require('fs');
-const crypto = require('crypto');
-
-const cssContent = fs.readFileSync('./dist/styles.css');
-const hash = crypto.createHash('md5').update(cssContent).digest('hex').slice(0, 8);
-const hashedName = `styles-${hash}.css`;
-
-fs.renameSync('./dist/styles.css', `./dist/${hashedName}`);
-console.log(`Generated: ${hashedName}`);
-#+end_src
-
-*/ Recommendation:
-Use /Vite + TailwindCSS/ - it handles hashing automatically and is much simpler than standalone CLI with manual hashing.
-
-***

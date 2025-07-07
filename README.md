@@ -96,33 +96,32 @@
 - 2 minor moduls count as one major module
 - 100% project completion = 7 major modules
 
-|                                                       | Major | Minor |
-|-------------------------------------------------------|-------|-------|
-| Web                                                   |       |       |
-| \- Backend Framework (quick win)                      | 1     |       |
-| \- Database (quick win)                               |       | 0.5   |
-| \- framework/toolkit Frontend (quick win)             | 1     |       |
-|                                                       |       |       |
-| User Management                                       |       |       |
-| \- Standard User Management (quick win)               | 1     |       |
-| GamePlay and User experience                          |       |       |
-| \- Remote players (major project)                     | 0     |       |
-| \- Live Chat (major project)                          | 0     |       |
-| Cyber-Security                                        |       |       |
-| non-negotiable                                        |       |       |
-| \- WAF/ModSecurity/HashiCorp                          | 1     |       |
-| \- GDPR                                               |       | 0.5   |
-| \- 2FA and JWT                                        | 1     |       |
-|                                                       |       |       |
-| AI-Algo                                               |       |       |
-| \- AI opponent                                        | 1     |       |
-| Devops                                                |       |       |
-| \- Designing the Backend as Microservices (quick win) | 1     |       |
-| \- Monitoring System                                  |       | 0.5   |
-| \- Infrastructure Setup with ELK                      | 1     |       |
-| Accessibility                                         |       |       |
-| \- Server-Side Rendering                              |       | 0     |
-| Sum                                                   | 8     | 1.5   |
+|                                                            | Major | Minor |
+|------------------------------------------------------------|-------|-------|
+| Web                                                        |       |       |
+| \- Backend Framework (quick win)                           | 1     |       |
+| \- Database (quick win)                                    |       | 0.5   |
+| \- framework/toolkit Frontend (quick win)                  | 1     |       |
+|                                                            |       |       |
+| User Management                                            |       |       |
+| \- Standard User Management (quick win)                    | 1     |       |
+| GamePlay and User experience                               |       |       |
+| \- Remote players (major project)                          | 0     |       |
+| \- Live Chat (major project)                               | 0     |       |
+| Cyber-Security (non-negotiable)                            |       |       |
+| \- WAF/ModSecurity/HashiCorp                               | 1     |       |
+| \- GDPR                                                    |       | 0.5   |
+| \- 2FA and JWT                                             | 1     |       |
+|                                                            |       |       |
+| AI-Algo                                                    |       |       |
+| \- AI opponent (non-negotiable)                            | 1     |       |
+| Devops                                                     |       |       |
+| \- Designing the Backend as Microservices (non-negotiable) | 1     |       |
+| \- Monitoring System                                       |       | 0     |
+| \- Infrastructure Setup with ELK                           | 0     |       |
+| Accessibility                                              |       |       |
+| \- Server-Side Rendering                                   |       | 0     |
+| Sum                                                        | 7     | 1\.   |
 
 ## Web
 

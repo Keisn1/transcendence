@@ -1,11 +1,7 @@
 import "./style.css";
-import typescriptLogo from "/typescript.svg";
+import typescriptLogo from "./typescript.svg";
 import viteLogo from "/vite.svg";
 import { setupCounter } from "./counter.ts";
-import navbarTemplate from "./templates/navbar.html?raw";
-
-document.querySelector<HTMLDivElement>("#navbar-container")!.innerHTML =
-  navbarTemplate;
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
@@ -24,17 +20,5 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     </p>
   </div>
 `;
-
-document
-  .getElementById("user-menu-button")!
-  .addEventListener("click", function () {
-    const menu = document.querySelector('[role="menu"]');
-
-    if (menu!.classList.contains("hidden")) {
-      menu!.classList.remove("hidden");
-    } else {
-      menu!.classList.add("hidden");
-    }
-  });
 
 setupCounter(document.querySelector<HTMLButtonElement>("#counter")!);

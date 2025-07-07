@@ -1,0 +1,24 @@
+#+title: Readme
+
+* Dev Setup
+* Setup
+https://tailwindcss.com/docs/installation/using-vite
+1. Create project (framework: vanilla, variant: typescript)
+   #+begin_src shell
+npm create vite@latest my-project
+   #+end_src
+2. Install Tailwind CSS
+   #+begin_src shell
+npm install tailwindcss @tailwindcss/vite
+   #+end_src
+3. Configure Vite Plugin
+   #+begin_src typescript
+# vite.config.ts
+import { defineConfig } from 'vite'
+import tailwindcss from '@tailwindcss/vite'
+export default defineConfig({
+  plugins: [
+    tailwindcss(),
+  ],
+})
+   #+end_src
