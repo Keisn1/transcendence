@@ -25,6 +25,7 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   </div>
 `;
 
+// menu
 const userMenuButton = document.getElementById("user-menu-button")!;
 const menu = document.querySelector('[role="menu"]')!;
 
@@ -39,6 +40,31 @@ document.addEventListener("click", (e) => {
   if (!menu.contains(target)) {
     menu.classList.add("hidden");
   }
+});
+
+// advertisement
+const adLightbox = document.getElementById('ad-lightbox')!;
+const adCloseButton = document.getElementById('ad-close-btn')!;
+
+function showAd(): void {
+  adLightbox.classList.remove('hidden');
+}
+
+function hideAd(): void {
+  adLightbox.classList.add('hidden');
+}
+
+adCloseButton.addEventListener('click', hideAd);
+
+adLightbox.addEventListener('click', (e) => {
+  const target = e.target as HTMLElement;
+  if (target === adLightbox) {
+    hideAd();
+  }
+});
+
+window.addEventListener('load', () => {
+  setTimeout(showAd, 2000); // wait 2 seconds
 });
 
 setupCounter(document.querySelector<HTMLButtonElement>("#counter")!);
