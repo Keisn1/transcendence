@@ -25,16 +25,20 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   </div>
 `;
 
-document
-  .getElementById("user-menu-button")!
-  .addEventListener("click", function () {
-    const menu = document.querySelector('[role="menu"]');
+const userMenuButton = document.getElementById("user-menu-button")!;
+const menu = document.querySelector('[role="menu"]')!;
 
-    if (menu!.classList.contains("hidden")) {
-      menu!.classList.remove("hidden");
-    } else {
-      menu!.classList.add("hidden");
-    }
-  });
+document.addEventListener("click", (e) => {
+  const target = e.target as HTMLElement;
+
+  if (userMenuButton.contains(target)) {
+    menu.classList.toggle("hidden");
+    return;
+  }
+
+  if (!menu.contains(target)) {
+    menu.classList.add("hidden");
+  }
+});
 
 setupCounter(document.querySelector<HTMLButtonElement>("#counter")!);
