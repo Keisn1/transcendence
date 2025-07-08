@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pong in Java Script</title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+		}
+	</style>
+  </head>
+  <body>
+	<canvas id="canvas"></canvas>
+
+	<script>
+		const canvas = document.getElementById("canvas");
+		const context = canvas.getContext("2d");
+
+		canvas.width = window.innerWidth;
+		canvas.height = window.innerHeight;
+
+		ballX = canvas.width / 2; // middle of page
+		ballY = canvas.height / 2;	// middle of page
+		ballR = 10 // radius
+		ballV = [2, 2]; // velocity
+
+		function gameUpdate() {
+			ballX += ballV[0];
+			ballY += ballV[1];
+		}
+
+		function gameDraw() {
+			context.beginPath();
+			context.arc(ballX, ballY, ballR, 0, Math.PI * 2);
+			context.stroke();
+		}
+
+		function gameLoop() {
+			context.clearRect(0, 0, canvas.width, canvas.height);
+			window.requestAnimationFrame(gameLoop);
+
+			gameUpdate();
+			gameDraw();
+		}
+
+		gameLoop();
+
+	</script>
+  </body>
+</html>
