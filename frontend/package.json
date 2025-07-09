@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@tailwindcss/language-server": "^0.14.24",
     "typescript": "~5.8.3",
     "vite": "^7.0.0"
   },

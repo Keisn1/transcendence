@@ -3,9 +3,13 @@ import typescriptLogo from "/typescript.svg";
 import viteLogo from "/vite.svg";
 import { setupCounter } from "./counter.ts";
 import navbarTemplate from "./templates/navbar.html?raw";
+import adLightboxTemplate from "./templates/adLightbox.html?raw";
 
 document.querySelector<HTMLDivElement>("#navbar-container")!.innerHTML =
   navbarTemplate;
+
+document.querySelector<HTMLDivElement>("#ad-lightbox")!.innerHTML =
+  adLightboxTemplate;
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
@@ -43,27 +47,28 @@ document.addEventListener("click", (e) => {
 });
 
 // advertisement
-const adLightbox = document.getElementById('ad-lightbox')!;
-const adCloseButton = document.getElementById('ad-close-btn')!;
+const adLightbox = document.getElementById("ad-lightbox")!;
+const adCloseButton = document.getElementById("ad-close-btn")!;
 
 function showAd(): void {
-  adLightbox.classList.remove('hidden');
+  adLightbox.classList.remove("hidden");
 }
 
 function hideAd(): void {
-  adLightbox.classList.add('hidden');
+  adLightbox.classList.add("hidden");
 }
 
-adCloseButton.addEventListener('click', hideAd);
+adCloseButton.addEventListener("click", hideAd);
 
-adLightbox.addEventListener('click', (e) => {
+adLightbox.addEventListener("click", (e) => {
   const target = e.target as HTMLElement;
   if (target === adLightbox) {
     hideAd();
   }
 });
 
-window.addEventListener('load', () => {
+window.addEventListener("load", () => {
+  console.log("hello");
   setTimeout(showAd, 2000); // wait 2 seconds
 });
 
