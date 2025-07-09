@@ -1,0 +1,5 @@
+#+title: Notes Game
+
+- [X] change to typescript
+- [ ] ball is sliding at the edge of the paddle
+  - [ ] actually implement behavior of ball hitting the top or bottom side and corners respectively

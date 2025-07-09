@@ -1,9 +1,7 @@
-const canvas = document.getElementById('canvas')! as HTMLCanvasElement;
-const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-canvas.width  = window.innerWidth / 2;
+const canvas = document.getElementById("canvas")! as HTMLCanvasElement;
+const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+canvas.width = window.innerWidth / 2;
 canvas.height = window.innerHeight / 2;
-
-
 
 class Ball {
 	public posX: number;
@@ -12,22 +10,27 @@ class Ball {
 	public vx: number;
 	public vy: number;
 
-	constructor(x:number, y:number, radius:number, vx:number, vy:number) {
-		this.posX = x; this.posY = y;
+	constructor(x: number, y: number, radius: number, vx: number, vy: number) {
+		this.posX = x;
+		this.posY = y;
 		this.radius = radius;
-		this.vx = vx; this.vy = vy;
+		this.vx = vx;
+		this.vy = vy;
 	}
 	update() {
 		this.posX += this.vx;
 		this.posY += this.vy;
-		if (this.posY - this.radius < 0 || this.posY + this.radius > canvas.height) {
+		if (
+			this.posY - this.radius < 0 ||
+			this.posY + this.radius > canvas.height
+		) {
 			this.vy *= -1; // bounce
 		}
 	}
 	draw() {
 		ctx.beginPath();
-		ctx.fillStyle = '#fff';
-		ctx.arc(this.posX, this.posY, this.radius, 0, Math.PI*2);
+		ctx.fillStyle = "#fff";
+		ctx.arc(this.posX, this.posY, this.radius, 0, Math.PI * 2);
 		ctx.fill();
 	}
 }
@@ -37,45 +40,53 @@ class Paddle {
 	public height: number = 100;
 	public speed: number = 5;
 	public posX: number;
-	public posY: number = (canvas.height - this.height)/2;
+	public posY: number = (canvas.height - this.height) / 2;
 
-	constructor(x:number) {
+	constructor(x: number) {
 		this.posX = x;
 	}
-	move(dy:number) {
-		this.posY = Math.max(0, Math.min(canvas.height - this.height, this.posY + dy));
+	move(dy: number) {
+		this.posY = Math.max(
+			0,
+			Math.min(canvas.height - this.height, this.posY + dy),
+		);
 	}
 	draw() {
-		ctx.fillStyle = '#fff';
+		ctx.fillStyle = "#fff";
 		ctx.fillRect(this.posX, this.posY, this.width, this.height);
 	}
 }
 
-const ball   = new Ball(canvas.width / 2, canvas.height / 2, 10, 2, 2); // x position, y position, radius, x velocity, y velocity
-const leftP  = new Paddle(20); // 20 pixels away from left boarder
+const ball = new Ball(canvas.width / 2, canvas.height / 2, 10, 2, 2); // x position, y position, radius, x velocity, y velocity
+const leftP = new Paddle(20); // 20 pixels away from left boarder
 const rightP = new Paddle(canvas.width - 20 - 10); // 20 pixels away from right boarder + 10 pixels for paddel width
 
 const keys = new Map<string, boolean>([
-	["w",  false],
-	["s",  false],
-  	["ArrowUp", false],
-  	["ArrowDown", false ],
+	["w", false],
+	["s", false],
+	["ArrowUp", false],
+	["ArrowDown", false],
 ]);
 
-window.addEventListener('keydown', e => { keys.set(e.key, true); });
-window.addEventListener('keyup',   e => { keys.set(e.key, false); });
+window.addEventListener("keydown", (e) => {
+	keys.set(e.key, true);
+});
+window.addEventListener("keyup", (e) => {
+	keys.set(e.key, false);
+});
 
-function handleInput() { // moving paddels
+function handleInput() {
+	// moving paddels
 	// W / S
-	if (keys.get('w')) leftP.move(-leftP.speed);
-	if (keys.get('s')) leftP.move(leftP.speed);
+	if (keys.get("w")) leftP.move(-leftP.speed);
+	if (keys.get("s")) leftP.move(leftP.speed);
 	// ↑ / ↓
-	if (keys.get('ArrowUp'))   rightP.move(-rightP.speed);
-	if (keys.get('ArrowDown')) rightP.move(rightP.speed);
+	if (keys.get("ArrowUp")) rightP.move(-rightP.speed);
+	if (keys.get("ArrowDown")) rightP.move(rightP.speed);
 }
 
-function checkPaddleCollision(paddle:Paddle) {
-	// 
+function checkPaddleCollision(paddle: Paddle) {
+	//
 	if (
 		ball.posX - ball.radius < paddle.posX + paddle.width &&
 		ball.posX + ball.radius > paddle.posX &&
