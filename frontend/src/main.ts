@@ -25,6 +25,8 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   </div>
 `;
 
+document.querySelector<HTMLAnchorElement>("#link-2")!.href = "game.html";
+
 // menu
 const userMenuButton = document.getElementById("user-menu-button")!;
 const menu = document.querySelector('[role="menu"]')!;

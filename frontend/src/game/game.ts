@@ -1,42 +1,53 @@
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
+const canvas = document.getElementById('canvas')! as HTMLCanvasElement;
+const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
 canvas.width  = window.innerWidth / 2;
 canvas.height = window.innerHeight / 2;
 
+
+
 class Ball {
-	constructor(x, y, radius, vx, vy) {
-		this.x = x; this.y = y;
+	public posX: number;
+	public posY: number;
+	public radius: number;
+	public vx: number;
+	public vy: number;
+
+	constructor(x:number, y:number, radius:number, vx:number, vy:number) {
+		this.posX = x; this.posY = y;
 		this.radius = radius;
 		this.vx = vx; this.vy = vy;
 	}
 	update() {
-		this.x += this.vx;
-		this.y += this.vy;
-		if (this.y - this.radius < 0 || this.y + this.radius > canvas.height) {
-		this.vy *= -1; // bounce
+		this.posX += this.vx;
+		this.posY += this.vy;
+		if (this.posY - this.radius < 0 || this.posY + this.radius > canvas.height) {
+			this.vy *= -1; // bounce
 		}
 	}
 	draw() {
 		ctx.beginPath();
 		ctx.fillStyle = '#fff';
-		ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+		ctx.arc(this.posX, this.posY, this.radius, 0, Math.PI*2);
 		ctx.fill();
 	}
 }
 
 class Paddle {
-	constructor(x) {
-		this.width = 10; this.height = 100;
-		this.x = x;
-		this.y = (canvas.height - this.height)/2;
-		this.speed = 5;
+	public width: number = 10;
+	public height: number = 100;
+	public speed: number = 5;
+	public posX: number;
+	public posY: number = (canvas.height - this.height)/2;
+
+	constructor(x:number) {
+		this.posX = x;
 	}
-	move(dy) {
-		this.y = Math.max(0, Math.min(canvas.height - this.height, this.y + dy));
+	move(dy:number) {
+		this.posY = Math.max(0, Math.min(canvas.height - this.height, this.posY + dy));
 	}
 	draw() {
 		ctx.fillStyle = '#fff';
-		ctx.fillRect(this.x, this.y, this.width, this.height);
+		ctx.fillRect(this.posX, this.posY, this.width, this.height);
 	}
 }
 
@@ -44,42 +55,49 @@ const ball   = new Ball(canvas.width / 2, canvas.height / 2, 10, 2, 2); // x pos
 const leftP  = new Paddle(20); // 20 pixels away from left boarder
 const rightP = new Paddle(canvas.width - 20 - 10); // 20 pixels away from right boarder + 10 pixels for paddel width
 
-const keys = {};
-window.addEventListener('keydown', e => { keys[e.key] = true; });
-window.addEventListener('keyup',   e => { keys[e.key] = false; });
+const keys = new Map<string, boolean>([
+	["w",  false],
+	["s",  false],
+  	["ArrowUp", false],
+  	["ArrowDown", false ],
+]);
+
+window.addEventListener('keydown', e => { keys.set(e.key, true); });
+window.addEventListener('keyup',   e => { keys.set(e.key, false); });
 
 function handleInput() { // moving paddels
-// W / S
-if (keys['w']) leftP.move(-leftP.speed);
-if (keys['s']) leftP.move(leftP.speed);
-// ↑ / ↓
-if (keys['ArrowUp'])   rightP.move(-rightP.speed);
-if (keys['ArrowDown']) rightP.move(rightP.speed);
+	// W / S
+	if (keys.get('w')) leftP.move(-leftP.speed);
+	if (keys.get('s')) leftP.move(leftP.speed);
+	// ↑ / ↓
+	if (keys.get('ArrowUp'))   rightP.move(-rightP.speed);
+	if (keys.get('ArrowDown')) rightP.move(rightP.speed);
 }
 
-function checkPaddleCollision(paddle) {
+function checkPaddleCollision(paddle:Paddle) {
+	// 
 	if (
-		ball.x - ball.radius < paddle.x + paddle.width &&
-		ball.x + ball.radius > paddle.x &&
-		ball.y + ball.radius > paddle.y &&
-		ball.y - ball.radius < paddle.y + paddle.height
+		ball.posX - ball.radius < paddle.posX + paddle.width &&
+		ball.posX + ball.radius > paddle.posX &&
+		ball.posY + ball.radius > paddle.posY &&
+		ball.posY - ball.radius < paddle.posY + paddle.height
 	) {
 		ball.vx *= -1;
 	}
 }
 
 function gameLoop() {
-ball.update();
-handleInput();
-checkPaddleCollision(leftP);
-checkPaddleCollision(rightP);
+	ball.update();
+	handleInput();
+	checkPaddleCollision(leftP);
+	checkPaddleCollision(rightP);
 
-ctx.clearRect(0, 0, canvas.width, canvas.height); // clean previous drawings
-ball.draw();
-leftP.draw();
-rightP.draw();
+	ctx.clearRect(0, 0, canvas.width, canvas.height); // clean previous drawings
+	ball.draw();
+	leftP.draw();
+	rightP.draw();
 
-requestAnimationFrame(gameLoop);
+	requestAnimationFrame(gameLoop);
 }
 
 gameLoop();
