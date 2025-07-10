@@ -3,8 +3,8 @@ import { Paddle } from './paddle'
 
 const canvas = document.getElementById("canvas")! as HTMLCanvasElement;
 const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
-canvas.width = window.innerWidth / 2;
-canvas.height = window.innerHeight / 2;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
 const ballConfig = {
 	posX: canvas.width / 2,
@@ -84,7 +84,7 @@ function checkPaddleCollision(paddle: Paddle) {
 
 function checkGameFinished() {
 	if (ball.posX < 0 || ball.posX > canvas.width) {
-		ball.posX < 0 ? scores.player1++ : scores.player2++;
+		ball.posX < 0 ? scores.player2++ : scores.player1++;
 		ball.posX = canvas.width / 2;
 		ball.posY = canvas.height / 2;
 		ball.vx *= -1;
@@ -112,7 +112,32 @@ function gameLoop() {
 	leftP.draw(ctx);
 	rightP.draw(ctx);
 
+	ctx.font = "42px serif";
+	ctx.fillText(`${scores.player1}`, canvas.width / 4.2, canvas.height / 10);
+	ctx.fillText(`${scores.player2}`, canvas.width / 2 + canvas.width / 4.2, canvas.height / 10);
+
 	requestAnimationFrame(gameLoop);
 }
+
+const delay = ms => new Promise(res => setTimeout(res, ms)); 
+
+async function startTimer() {
+	ctx.font = "200px serif";
+	ctx.fillStyle = "#fff";
+
+	for (let i = 0; i <= 3; ++i) {
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		ctx.fillText(`${i}`, canvas.width / 2, canvas.height / 2);
+		await delay(1000);
+	}
+}
+
+// function checkGameOver() {
+// 	if (scores.player1 === 10 || scores.player2 === 10) {
+
+// 	}
+// }
+
+await startTimer();
 
 gameLoop();
