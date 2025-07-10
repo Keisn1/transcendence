@@ -10,8 +10,8 @@ const ballConfig = {
 	posX: canvas.width / 2,
 	posY: canvas.height / 2,
 	radius: 10,
-	vx: 10,
-	vy: 10,
+	vx: 6,
+	vy: 6,
 	color: "#fff"
 };
 
@@ -83,6 +83,7 @@ function checkPaddleCollision(paddle: Paddle) {
 
 	if (isBallInsidePaddle()) {
 		ball.vx *= -1;
+		ball.vy = Math.round(Math.random() * 4 + 2);
 	}
 }
 
@@ -104,8 +105,6 @@ function drawCenterLine(ctx:CanvasRenderingContext2D, canvas:HTMLCanvasElement) 
 }
 
 function gameLoop() {
-	checkGameOver();
-	ball.update(canvas);
 	handleInput();
 	checkPaddleCollision(leftP);
 	checkPaddleCollision(rightP);
@@ -113,9 +112,12 @@ function gameLoop() {
 
 	ctx.clearRect(0, 0, canvas.width, canvas.height); // clean previous drawings
 	drawCenterLine(ctx, canvas);
-	ball.draw(ctx);
 	leftP.draw(ctx);
 	rightP.draw(ctx);
+	if (!isGameOver()) {
+		ball.update(canvas);
+		ball.draw(ctx);
+	}
 
 	ctx.font = "42px serif";
 	ctx.fillText(`${scores.player1}`, canvas.width / 4.2, canvas.height / 10);
@@ -137,13 +139,13 @@ async function startTimer() {
 	}
 }
 
-function checkGameOver() {
-		console.log("here");
-	if (scores.player1 === 2 || scores.player2 === 2) {
-		console.log("there");
+function isGameOver(): boolean {
+	if (scores.player1 >= 5 || scores.player2 >= 5) {
 		removeEventListener("keydown", setEventKeyTrue);
 		removeEventListener("keyup", setEventKeyFalse);
+		return true;
 	}
+	return false;
 }
 
 await startTimer();
