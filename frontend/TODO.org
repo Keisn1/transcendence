@@ -6,6 +6,8 @@
 - [ ] ball is sliding at the edge of the paddle
   - [ ] actually implement behavior of ball hitting the top or bottom side and corners respectively
 - [ ] adjust the paddle dimensions to the canvas
+  - [ ] adjust all the dimensions to the canvas dimensions
+
 
 * TODO Frontend
 - [ ] typify navbar
