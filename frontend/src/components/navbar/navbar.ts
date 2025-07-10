@@ -1,19 +1,30 @@
 import navbarTemplate from "./navbar.html?raw";
 
 export class Navbar {
+    private container: HTMLDivElement;
     private eventListeners: (() => void)[] = [];
 
-    render(): string {
-        return navbarTemplate;
+    constructor() {
+        const navbarContainer = document.createElement("div");
+        navbarContainer.id = "navbar-container";
+        navbarContainer.innerHTML = navbarTemplate;
+
+        this.container = navbarContainer;
+        this.setupEvents();
+        this.setupLinks();
+    }
+
+    getContainer(): HTMLDivElement {
+        return this.container;
     }
 
     setupLinks() {
-        document.querySelector<HTMLAnchorElement>("#link-2")!.href = "/src/game/game.html";
+        this.container.querySelector<HTMLAnchorElement>("#link-2")!.href = "/src/game/game.html";
     }
 
     setupEvents() {
-        const button = document.getElementById("user-menu-button")!;
-        const menu = document.querySelector('[role="menu"]')!;
+        const button = this.container.querySelector("#user-menu-button")!;
+        const menu = this.container.querySelector('[role="menu"]')!;
 
         const toggleMenu = () => menu.classList.toggle("hidden");
 

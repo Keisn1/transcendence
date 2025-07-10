@@ -5,7 +5,5 @@ export default class {
         document.title = title;
     }
 
-    render() {
-        return "";
-    }
+    render() {}
 }

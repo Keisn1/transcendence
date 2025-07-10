@@ -10,12 +10,9 @@ export default class extends AbstractView {
 
     render() {
         let navbar = new Navbar();
-        document.body.innerHTML = navbar.render();
-        navbar.setupLinks();
-        navbar.setupEvents();
+        document.body.appendChild(navbar.getContainer());
 
         let adLightBox = new AdLightBox();
-        adLightBox.render();
-        return "";
+        document.body.appendChild(adLightBox.getContainer());
     }
 }
