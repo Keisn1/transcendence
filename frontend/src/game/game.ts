@@ -10,8 +10,8 @@ const ballConfig = {
 	posX: canvas.width / 2,
 	posY: canvas.height / 2,
 	radius: 10,
-	vx: 2,
-	vy: 2,
+	vx: 10,
+	vy: 10,
 	color: "#fff"
 };
 
@@ -43,12 +43,16 @@ const keys = new Map<string, boolean>([
 	["ArrowDown", false],
 ]);
 
-window.addEventListener("keydown", (e) => {
+const setEventKeyTrue = (e:KeyboardEvent) => {
 	keys.set(e.key, true);
-});
-window.addEventListener("keyup", (e) => {
+}
+
+const setEventKeyFalse = (e:KeyboardEvent) => {
 	keys.set(e.key, false);
-});
+}
+
+window.addEventListener("keydown", setEventKeyTrue);
+window.addEventListener("keyup", setEventKeyFalse);
 
 function handleInput() {
 	// W / S
@@ -100,6 +104,7 @@ function drawCenterLine(ctx:CanvasRenderingContext2D, canvas:HTMLCanvasElement) 
 }
 
 function gameLoop() {
+	checkGameOver();
 	ball.update(canvas);
 	handleInput();
 	checkPaddleCollision(leftP);
@@ -119,7 +124,7 @@ function gameLoop() {
 	requestAnimationFrame(gameLoop);
 }
 
-const delay = ms => new Promise(res => setTimeout(res, ms)); 
+const delay = (ms:number) => new Promise(res => setTimeout(res, ms)); 
 
 async function startTimer() {
 	ctx.font = "200px serif";
@@ -128,15 +133,18 @@ async function startTimer() {
 	for (let i = 0; i <= 3; ++i) {
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		ctx.fillText(`${i}`, canvas.width / 2, canvas.height / 2);
-		await delay(1000);
+		await delay(100);
 	}
 }
 
-// function checkGameOver() {
-// 	if (scores.player1 === 10 || scores.player2 === 10) {
-
-// 	}
-// }
+function checkGameOver() {
+		console.log("here");
+	if (scores.player1 === 2 || scores.player2 === 2) {
+		console.log("there");
+		removeEventListener("keydown", setEventKeyTrue);
+		removeEventListener("keyup", setEventKeyFalse);
+	}
+}
 
 await startTimer();
 
