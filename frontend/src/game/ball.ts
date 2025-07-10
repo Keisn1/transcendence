@@ -1,16 +1,20 @@
-export default class Ball {
+interface BallConfig { posX:number, posY:number, radius:number, vx:number, vy:number, color:string };
+
+export class Ball {
 	public posX: number;
 	public posY: number;
 	public radius: number;
 	public vx: number;
 	public vy: number;
+	public color: string;
 
-	constructor(x: number, y: number, radius: number, vx: number, vy: number) {
-		this.posX = x;
-		this.posY = y;
-		this.radius = radius;
-		this.vx = vx;
-		this.vy = vy;
+	constructor(config:BallConfig) {
+		this.posX = config.posX;
+		this.posY = config.posY;
+		this.radius = config.radius;
+		this.vx = config.vx;
+		this.vy = config.vy;
+		this.color = config.color;
 	}
 	update(canvas:HTMLCanvasElement) {
 		this.posX += this.vx;
@@ -24,7 +28,7 @@ export default class Ball {
 	}
 	draw(ctx:CanvasRenderingContext2D) {
 		ctx.beginPath();
-		ctx.fillStyle = "#fff";
+		ctx.fillStyle = this.color;
 		ctx.arc(this.posX, this.posY, this.radius, 0, Math.PI * 2);
 		ctx.fill();
 	}

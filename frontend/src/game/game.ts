@@ -1,35 +1,35 @@
-import Ball from './ball.ts'
+import { Ball } from './ball'
+import { Paddle } from './paddle'
 
 const canvas = document.getElementById("canvas")! as HTMLCanvasElement;
 const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 canvas.width = window.innerWidth / 2;
 canvas.height = window.innerHeight / 2;
 
-class Paddle {
-	public width: number = 10;
-	public height: number = 100;
-	public speed: number = 5;
-	public posX: number;
-	public posY: number = (canvas.height - this.height) / 2;
+const ballConfig = {
+	posX: canvas.width / 2,
+	posY: canvas.height / 2,
+	radius: 10,
+	vx: 2,
+	vy: 2,
+	color: "#fff"
+};
 
-	constructor(x: number) {
-		this.posX = x;
-	}
-	move(dy: number) {
-		this.posY = Math.max(
-			0,
-			Math.min(canvas.height - this.height, this.posY + dy),
-		);
-	}
-	draw() {
-		ctx.fillStyle = "#fff";
-		ctx.fillRect(this.posX, this.posY, this.width, this.height);
-	}
+const leftPaddleConfig = {
+	posX: 20,
+	posY: (canvas.height - 100) / 2,
+	width: 10,
+	height: 100,
+	speed: 5,
+	color: "#fff"
 }
 
-const ball = new Ball(canvas.width / 2, canvas.height / 2, 10, 2, 2); // x position, y position, radius, x velocity, y velocity
-const leftP = new Paddle(20); // 20 pixels away from left boarder
-const rightP = new Paddle(canvas.width - 20 - 10); // 20 pixels away from right boarder + 10 pixels for paddel width
+const rightPaddleConfig = {...leftPaddleConfig};
+rightPaddleConfig.posX = canvas.width - 20 - 10;
+
+const ball = new Ball(ballConfig);
+const leftP = new Paddle(leftPaddleConfig);
+const rightP = new Paddle(rightPaddleConfig);
 
 const keys = new Map<string, boolean>([
 	["w", false],
@@ -46,17 +46,15 @@ window.addEventListener("keyup", (e) => {
 });
 
 function handleInput() {
-	// moving paddels
 	// W / S
-	if (keys.get("w")) leftP.move(-leftP.speed);
-	if (keys.get("s")) leftP.move(leftP.speed);
+	if (keys.get("w")) leftP.move(canvas, -leftP.speed);
+	if (keys.get("s")) leftP.move(canvas, leftP.speed);
 	// ↑ / ↓
-	if (keys.get("ArrowUp")) rightP.move(-rightP.speed);
-	if (keys.get("ArrowDown")) rightP.move(rightP.speed);
+	if (keys.get("ArrowUp")) rightP.move(canvas, -rightP.speed);
+	if (keys.get("ArrowDown")) rightP.move(canvas, rightP.speed);
 }
 
 function checkPaddleCollision(paddle: Paddle) {
-	//
 	if (
 		ball.posX - ball.radius < paddle.posX + paddle.width &&
 		ball.posX + ball.radius > paddle.posX &&
@@ -84,8 +82,8 @@ function gameLoop() {
 
 	ctx.clearRect(0, 0, canvas.width, canvas.height); // clean previous drawings
 	ball.draw(ctx);
-	leftP.draw();
-	rightP.draw();
+	leftP.draw(ctx);
+	rightP.draw(ctx);
 
 	requestAnimationFrame(gameLoop);
 }
