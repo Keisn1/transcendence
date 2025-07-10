@@ -1,5 +1,6 @@
 import AbstractView from "./AbstractView.ts";
-import "../templates/navbar/navbar.ts";
+import { Navbar } from "../components/navbar/navbar.ts";
+import { AdLightBox } from "../components/adLightbox/adLightbox.ts";
 
 export default class extends AbstractView {
     constructor() {
@@ -8,11 +9,11 @@ export default class extends AbstractView {
     }
 
     render() {
-        return `<h1>Welcome back, Dom</h1>
-<p>lorem ipsum</p>
-<p>
-<a href="/posts" data-link>View recent posts</a>.
-</p>
-`;
+        let navbar = new Navbar();
+        navbar.render();
+
+        let adLightBox = new AdLightBox();
+        adLightBox.render();
+        return "";
     }
 }

@@ -5,7 +5,7 @@ export default class {
         document.title = title;
     }
 
-    getHtml() {
+    render() {
         return "";
     }
 }

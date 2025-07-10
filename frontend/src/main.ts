@@ -1,6 +1,6 @@
 import "./style.css";
-import "./templates/navbar/navbar.ts"; // Add this line
-import "./templates/adLightbox/adLightbox.ts"; // Add this line
+import "./components/navbar/navbar.ts"; // Add this line
+import "./components/adLightbox/adLightbox.ts"; // Add this line
 import Dashboard from "./views/Dashboard.ts";
 
 const router = () => {
@@ -32,10 +32,7 @@ const router = () => {
     }
 
     const view = new match.route.view();
-
-    document.querySelector("#app")!.innerHTML = view.getHtml();
+    view.render();
 };
-
-document.querySelector<HTMLAnchorElement>("#link-2")!.href = "/src/game/game.html";
 
 router();
