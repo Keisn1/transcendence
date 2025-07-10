@@ -1,8 +1,7 @@
 // menu
 import navbarTemplate from "./navbar.html?raw";
 
-document.querySelector<HTMLDivElement>("#navbar-container")!.innerHTML =
-    navbarTemplate;
+document.querySelector<HTMLDivElement>("#navbar-container")!.innerHTML = navbarTemplate;
 
 const userMenuButton = document.getElementById("user-menu-button")!;
 const menu = document.querySelector('[role="menu"]')!;

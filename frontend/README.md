@@ -1,5 +1,4 @@
 ---
-author: Kay Freyer
 title: Readme
 ---
 
