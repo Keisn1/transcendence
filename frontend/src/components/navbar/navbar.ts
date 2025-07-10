@@ -19,7 +19,7 @@ export class Navbar {
     }
 
     setupLinks() {
-        this.container.querySelector<HTMLAnchorElement>("#link-2")!.href = "/src/components/game/game.html";
+        this.container.querySelector<HTMLAnchorElement>("#link-2")!.href = "/game";
     }
 
     setupEvents() {
