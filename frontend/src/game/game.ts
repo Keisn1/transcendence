@@ -1,39 +1,9 @@
+import Ball from './ball.ts'
+
 const canvas = document.getElementById("canvas")! as HTMLCanvasElement;
 const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 canvas.width = window.innerWidth / 2;
 canvas.height = window.innerHeight / 2;
-
-class Ball {
-	public posX: number;
-	public posY: number;
-	public radius: number;
-	public vx: number;
-	public vy: number;
-
-	constructor(x: number, y: number, radius: number, vx: number, vy: number) {
-		this.posX = x;
-		this.posY = y;
-		this.radius = radius;
-		this.vx = vx;
-		this.vy = vy;
-	}
-	update() {
-		this.posX += this.vx;
-		this.posY += this.vy;
-		if (
-			this.posY - this.radius < 0 ||
-			this.posY + this.radius > canvas.height
-		) {
-			this.vy *= -1; // bounce
-		}
-	}
-	draw() {
-		ctx.beginPath();
-		ctx.fillStyle = "#fff";
-		ctx.arc(this.posX, this.posY, this.radius, 0, Math.PI * 2);
-		ctx.fill();
-	}
-}
 
 class Paddle {
 	public width: number = 10;
@@ -97,14 +67,23 @@ function checkPaddleCollision(paddle: Paddle) {
 	}
 }
 
+function checkGameFinished() {
+	if (ball.posX < 0 || ball.posX > canvas.width) {
+		ball.posX = canvas.width / 2;
+		ball.posY = canvas.height / 2;
+		ball.vx *= -1;
+	}
+}
+
 function gameLoop() {
-	ball.update();
+	ball.update(canvas);
 	handleInput();
 	checkPaddleCollision(leftP);
 	checkPaddleCollision(rightP);
+	checkGameFinished();
 
 	ctx.clearRect(0, 0, canvas.width, canvas.height); // clean previous drawings
-	ball.draw();
+	ball.draw(ctx);
 	leftP.draw();
 	rightP.draw();
 
