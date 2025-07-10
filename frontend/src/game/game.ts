@@ -92,6 +92,13 @@ function checkGameFinished() {
 	}
 }
 
+function drawCenterLine(ctx:CanvasRenderingContext2D, canvas:HTMLCanvasElement) {
+	const segmentHeight = 20, gap = 10;
+	for (let y = 0; y < canvas.height; y += segmentHeight + gap) {
+		ctx.fillRect(canvas.width/2 - 1, y, 2, segmentHeight);
+	}
+}
+
 function gameLoop() {
 	ball.update(canvas);
 	handleInput();
@@ -100,6 +107,7 @@ function gameLoop() {
 	checkGameFinished();
 
 	ctx.clearRect(0, 0, canvas.width, canvas.height); // clean previous drawings
+	drawCenterLine(ctx, canvas);
 	ball.draw(ctx);
 	leftP.draw(ctx);
 	rightP.draw(ctx);
