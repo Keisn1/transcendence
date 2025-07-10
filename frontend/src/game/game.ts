@@ -24,6 +24,11 @@ const leftPaddleConfig = {
 	color: "#fff"
 }
 
+const scores = {
+	player1: 0,
+	player2: 0
+}
+
 const rightPaddleConfig = {...leftPaddleConfig};
 rightPaddleConfig.posX = canvas.width - 20 - 10;
 
@@ -55,21 +60,35 @@ function handleInput() {
 }
 
 function checkPaddleCollision(paddle: Paddle) {
-	if (
-		ball.posX - ball.radius < paddle.posX + paddle.width &&
-		ball.posX + ball.radius > paddle.posX &&
-		ball.posY + ball.radius > paddle.posY &&
-		ball.posY - ball.radius < paddle.posY + paddle.height
-	) {
+	const ballLeft = ball.posX - ball.radius;
+	const ballRight = ball.posX + ball.radius;
+	const ballBottom = ball.posY + ball.radius;
+	const ballTop = ball.posY - ball.radius;
+
+	const paddleRight = paddle.posX + paddle.width;
+	const paddleLeft = paddle.posX;
+	const paddleTop = paddle.posY;
+	const paddleBottom = paddle.posY + paddle.height;
+
+	const isBallInsidePaddle = () => {
+		return ballLeft < paddleRight &&
+		ballRight > paddleLeft &&
+		ballBottom > paddleTop &&
+		ballTop < paddleBottom;
+	}
+
+	if (isBallInsidePaddle()) {
 		ball.vx *= -1;
 	}
 }
 
 function checkGameFinished() {
 	if (ball.posX < 0 || ball.posX > canvas.width) {
+		ball.posX < 0 ? scores.player1++ : scores.player2++;
 		ball.posX = canvas.width / 2;
 		ball.posY = canvas.height / 2;
 		ball.vx *= -1;
+		console.log(scores);
 	}
 }
 
