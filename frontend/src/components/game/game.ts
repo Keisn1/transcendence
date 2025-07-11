@@ -190,6 +190,7 @@ export class PongGame {
         if (this.scores.player1 >= 5 || this.scores.player2 >= 5) {
             removeEventListener("keydown", setEventKeyTrue);
             removeEventListener("keyup", setEventKeyFalse);
+			for (let k of keys.keys()) keys.set(k, false);
             return true;
         }
         return false;
@@ -211,7 +212,10 @@ export class PongGame {
         }
 
         this.ctx.font = "42px serif";
-        this.ctx.fillText(`${this.scores.player1}`, this.canvas.width / 4.2, this.canvas.height / 10);
+        this.ctx.fillText(
+			`${this.scores.player1}`,
+			this.canvas.width / 4.2,
+			this.canvas.height / 10);
         this.ctx.fillText(
             `${this.scores.player2}`,
             this.canvas.width / 2 + this.canvas.width / 4.2,
