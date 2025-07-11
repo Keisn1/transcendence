@@ -1,5 +1,6 @@
 import { Ball } from "./ball";
 import { Paddle } from "./paddle";
+// import normal from "@stdlib/random-base-normal";
 
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
@@ -51,18 +52,19 @@ export class PongGame {
     private leftPaddle: Paddle;
     private rightPaddle: Paddle;
     private scores = { player1: 0, player2: 0 };
+	private matchCount: number = 0;
 
     constructor(canvas: HTMLCanvasElement, config: GameConfig) {
         this.canvas = canvas;
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        canvas.width = window.innerWidth * 0.8;
+        canvas.height = window.innerHeight * 0.8;
         this.ctx = canvas.getContext("2d")!;
         this.config = {
             winningScore: config.winningScore ?? 10,
             vx: config.vx ?? 6,
             vy: config.vy ?? 6,
             ballRadius: config.ballRadius ?? 10,
-            paddleSpeed: config.paddleSpeed ?? 5,
+            paddleSpeed: config.paddleSpeed ?? 7,
             colors: {
                 ball: config.colors?.ball ?? "#fff",
                 paddle: config.colors?.paddle ?? "#fff",
@@ -132,20 +134,44 @@ export class PongGame {
         };
 
         if (isBallInsidePaddle()) {
-            ball.vx *= -1;
-            ball.vy = Math.round(Math.random() * 4 + 2);
+			const paddleCenterY = paddle.posY + paddle.height / 2;
+			const relativeIntersectY = (ball.posY - paddleCenterY) / (paddle.height / 2); // in range pf -1 to 1
+
+			const maxAngle = 45 * Math.PI / 180;
+			const theta = maxAngle * relativeIntersectY;
+
+			const ballSpeed = Math.hypot(ball.vx, ball.vy);
+			const xDirection = ball.vx < 0 ? 1 : -1;
+
+			ball.vx = ballSpeed * Math.cos(theta) * xDirection;
+			ball.vy = ballSpeed * Math.sin(theta);
         }
     }
+
+	private resetBall() {
+		let ball = this.ball;
+
+		const speedMagnitude = 10;
+		const angleRange = 60 * Math.PI /180;
+
+		ball.posX = this.canvas.width / 2;
+        ball.posY = this.canvas.height / 2;
+
+		const xDirection = (this.matchCount % 2 === 0) ? 1 : -1;
+
+		const theta = (Math.random() - 0.5) * angleRange;
+		
+		ball.vx = speedMagnitude * Math.cos(theta) * xDirection;
+		ball.vy = speedMagnitude * Math.sin(theta);
+	}
 
     private checkGameFinished() {
         let ball = this.ball;
         let scores = this.scores;
         if (ball.posX < 0 || ball.posX > this.canvas.width) {
             ball.posX < 0 ? scores.player2++ : scores.player1++;
-            ball.posX = this.canvas.width / 2;
-            ball.posY = this.canvas.height / 2;
-            ball.vx *= -1;
-            console.log(scores);
+			this.matchCount++;
+			this.resetBall();
         }
     }
 

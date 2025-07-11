@@ -8,6 +8,7 @@ export class GameComponent {
 
     constructor() {
         const gameContainer = document.createElement("div");
+        gameContainer.classList.add("relative", "flex", "items-center", "justify-center", "h-screen");
         gameContainer.id = "game-container";
         gameContainer.innerHTML = gameTemplate;
 
