@@ -1,6 +1,7 @@
 import { Ball } from "./ball";
 import { Paddle } from "./paddle";
 import { InputManager } from "./inputManager";
+import { predictYIntersection } from "./aiOpponent";
 
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
@@ -33,6 +34,8 @@ export class PongGame {
     private rightPaddle: Paddle;
     private scores = { player1: 0, player2: 0 };
     private matchCount: number = 0;
+	private aiEnabled = true;
+	private aiDir: "up" | "down" | "chill" = "chill";
 
     private setupControls() {
         this.inputManager.bindKey(this.config.controls.player1.up, () => this.leftPaddle.moveUp(this.canvas));
@@ -48,9 +51,9 @@ export class PongGame {
         };
 
         this.config = {
-            winningScore: config.winningScore ?? 2,
-            vx: config.vx ?? 6,
-            vy: config.vy ?? 6,
+            winningScore: config.winningScore ?? 5,
+            vx: config.vx ?? 7.5,
+            vy: config.vy ?? 7.5,
             ballRadius: config.ballRadius ?? 10,
             paddleSpeed: config.paddleSpeed ?? 7,
             colors: {
@@ -95,7 +98,33 @@ export class PongGame {
             speed: 5,
             color: this.config.colors.paddle,
         });
+		if (this.aiEnabled) {
+			this.runAIOpponent();
+		}
     }
+
+	private async runAIOpponent() {
+		const targetX = this.leftPaddle.posX + this.leftPaddle.width;
+		while (true) {
+			const yHit = predictYIntersection(
+				this.ball.posX, this.ball.posY,
+				this.ball.vx, this.ball.vy,
+				this.canvas.height,
+				targetX
+			);
+			
+			const centerY = this.leftPaddle.posY + this.leftPaddle.height / 2;
+
+			if (Math.abs(yHit - centerY) < this.leftPaddle.height / 2) {
+				this.aiDir = "chill";
+			} else {
+				this.aiDir = yHit > centerY ? "down" : "up";
+			}
+
+			await delay(100); // the delay of 1 second unfortunately makes my "AI" not so intelligent
+		}
+	}
+	
 
     async start() {
         await this.startTimer();
@@ -168,7 +197,7 @@ export class PongGame {
     private resetBall() {
         let ball = this.ball;
 
-        const speedMagnitude = 10;
+        const speedMagnitude = 15;
         const angleRange = (60 * Math.PI) / 180;
 
         ball.posX = this.canvas.width / 2;
@@ -213,6 +242,15 @@ export class PongGame {
 
     private gameLoop() {
         this.inputManager.processInput();
+
+		if (this.aiEnabled) {
+			if (this.aiDir === "up") {
+				this.leftPaddle.moveUp(this.canvas);
+			} else if (this.aiDir === "down") {
+				this.leftPaddle.moveDown(this.canvas);
+			}
+		}
+
         this.checkPaddleCollision(this.leftPaddle);
         this.checkPaddleCollision(this.rightPaddle);
         this.checkGameFinished();
