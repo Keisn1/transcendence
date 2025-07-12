@@ -1,6 +1,5 @@
 #+title: Project Creation Backend
 
-
 * Create a minimalist Typescript Fastify Server
 [[https://fastify.dev/docs/latest/Reference/TypeScript/][TypeScript in Fastify]]
 #+begin_src

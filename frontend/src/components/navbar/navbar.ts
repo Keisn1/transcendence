@@ -21,6 +21,7 @@ export class Navbar {
     setupLinks() {
         this.container.querySelector<HTMLAnchorElement>("#link-1")!.href = "/";
         this.container.querySelector<HTMLAnchorElement>("#link-2")!.href = "/game";
+        this.container.querySelector<HTMLAnchorElement>("#profile-link")!.href = "/profile";
     }
 
     setupEvents() {

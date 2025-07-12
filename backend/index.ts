@@ -6,6 +6,10 @@ server.get("/ping", async (request, reply) => {
     return "pong\n";
 });
 
+server.get("/profile", async (request, reply) => {
+    return "your profile\n";
+});
+
 server.listen({ port: 3000 }, (err, address) => {
     if (err) {
         console.error(err);

@@ -3,6 +3,7 @@ import "./components/navbar/navbar.ts"; // Add this line
 import "./components/adLightbox/adLightbox.ts"; // Add this line
 import DashboardView from "./views/DashboardView.ts";
 import GameView from "./views/GameView.ts";
+import ProfileView from "./views/ProfileView.ts";
 
 const pathToRegex = (path: string) =>
     new RegExp(
@@ -28,6 +29,10 @@ const router = () => {
         {
             path: "/game",
             view: GameView,
+        },
+        {
+            path: "/profile",
+            view: ProfileView,
         },
     ];
 
