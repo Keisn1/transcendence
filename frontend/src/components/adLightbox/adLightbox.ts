@@ -20,6 +20,7 @@ export class AdLightBox {
     }
 
     setupEvents() {
+        console.log("setup events for lightbox");
         const showAd = () => this.container.classList.remove("hidden");
         const hideAd = () => this.container.classList.add("hidden");
 
@@ -29,7 +30,12 @@ export class AdLightBox {
         window.addEventListener("load", showAdAfterTimeout);
 
         this.eventListeners.push(() => {
-            window.removeEventListener("load", showAdAfterTimeout);
+            window.removeEventListener("load", showAdAfterTimeout); // only initially page load
+            // if you insist of seeing the load everytime on Dashboard
+            // just put
+            // showAdAfterTimeout();
+            // instead of
+            // window.addEventListener("load", showAdAfterTimeout);
         });
 
         const hideAdAfterClick = (e: Event) => {

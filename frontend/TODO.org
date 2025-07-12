@@ -34,3 +34,4 @@ this.ball = new Ball(canvas, config.ballConfig);
 - [ ] rather setup CORS with fastify and environment variables
   - right now it is vite, with a proxy server making it possible during developement
 - [ ] setup nginx and setup production environment
+- [ ] why does adlightbox does not show up when you return to the dashboard
