@@ -24,9 +24,9 @@ export class Ball {
         this.color = config.color;
     }
 
-    update(canvas: HTMLCanvasElement) {
-        this.posX += this.vx;
-        this.posY += this.vy;
+    update(canvas: HTMLCanvasElement, elapsed) {
+        this.posX += this.vx * elapsed;
+        this.posY += this.vy * elapsed;
         if (this.posY - this.radius < 0 || this.posY + this.radius > canvas.height) {
             this.vy *= -1; // bounce
         }

@@ -49,8 +49,8 @@ export class PongGame {
 
         this.config = {
             winningScore: config.winningScore ?? 2,
-            vx: config.vx ?? 6,
-            vy: config.vy ?? 6,
+            vx: config.vx ?? canvas.width / 1000, // px per millisecond
+            vy: config.vy ?? canvas.width / 1000,
             ballRadius: config.ballRadius ?? 10,
             paddleSpeed: config.paddleSpeed ?? 7,
             colors: {
@@ -99,7 +99,7 @@ export class PongGame {
 
     async start() {
         await this.startTimer();
-        this.gameLoop();
+        requestAnimationFrame((t) => this.gameLoop(t, undefined));
     }
 
     private drawCenterLine() {
@@ -211,7 +211,13 @@ export class PongGame {
         return false;
     }
 
-    private gameLoop() {
+    private gameLoop(timestamp, lastTime) {
+        if (lastTime === undefined) {
+            lastTime = timestamp;
+        }
+        const elapsed = timestamp - lastTime;
+        console.log(elapsed);
+
         this.inputManager.processInput();
         this.checkPaddleCollision(this.leftPaddle);
         this.checkPaddleCollision(this.rightPaddle);
@@ -222,7 +228,7 @@ export class PongGame {
         this.leftPaddle.draw(this.ctx);
         this.rightPaddle.draw(this.ctx);
         if (!this.isGameOver()) {
-            this.ball.update(this.canvas);
+            this.ball.update(this.canvas, elapsed);
             this.ball.draw(this.ctx);
         }
 
@@ -234,7 +240,7 @@ export class PongGame {
             this.canvas.height / 10,
         );
 
-        requestAnimationFrame(() => this.gameLoop());
+        requestAnimationFrame((t) => this.gameLoop(t, timestamp));
     }
 
     destroy() {
