@@ -4,39 +4,6 @@ import { Paddle } from "./paddle";
 
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
-const keys = new Map<string, boolean>([
-    ["w", false],
-    ["s", false],
-    ["ArrowUp", false],
-    ["ArrowDown", false],
-]);
-
-const setEventKeyTrue = (e: KeyboardEvent) => {
-    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-        e.preventDefault();
-    }
-    keys.set(e.key, true);
-};
-
-const setEventKeyFalse = (e: KeyboardEvent) => {
-    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-        e.preventDefault();
-    }
-    keys.set(e.key, false);
-};
-
-window.addEventListener("keydown", setEventKeyTrue);
-window.addEventListener("keyup", setEventKeyFalse);
-
-function handleInput(canvas: HTMLCanvasElement, leftPaddle: Paddle, rightPaddle: Paddle) {
-    // W / S
-    if (keys.get("w")) leftPaddle.moveUp(canvas);
-    if (keys.get("s")) leftPaddle.moveDown(canvas);
-    // ↑ / ↓
-    if (keys.get("ArrowUp")) rightPaddle.moveUp(canvas);
-    if (keys.get("ArrowDown")) rightPaddle.moveDown(canvas);
-}
-
 export interface GameConfig {
     winningScore?: number;
     vx?: number;
@@ -51,6 +18,7 @@ export interface GameConfig {
 }
 
 export class PongGame {
+    private keys = new Map<string, boolean>();
     private canvas: HTMLCanvasElement;
     private config: Required<GameConfig>;
     private ctx: CanvasRenderingContext2D;
@@ -60,13 +28,46 @@ export class PongGame {
     private scores = { player1: 0, player2: 0 };
     private matchCount: number = 0;
 
+    private setupInputHandling() {
+        const keys = ["w", "s", "ArrowUp", "ArrowDown"];
+        keys.forEach((key) => this.keys.set(key, false));
+
+        document.addEventListener("keydown", this.handleKeyDown.bind(this));
+        document.addEventListener("keyup", this.handleKeyUp.bind(this));
+    }
+
+    private handleKeyDown(e: KeyboardEvent) {
+        if (this.keys.has(e.key)) {
+            if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+                e.preventDefault();
+            }
+            this.keys.set(e.key, true);
+        }
+    }
+
+    private handleKeyUp(e: KeyboardEvent) {
+        if (this.keys.has(e.key)) {
+            if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+                e.preventDefault();
+            }
+            this.keys.set(e.key, false);
+        }
+    }
+
+    private handleInput() {
+        if (this.keys.get("w")) this.leftPaddle.moveUp(this.canvas);
+        if (this.keys.get("s")) this.leftPaddle.moveDown(this.canvas);
+        if (this.keys.get("ArrowUp")) this.rightPaddle.moveUp(this.canvas);
+        if (this.keys.get("ArrowDown")) this.rightPaddle.moveDown(this.canvas);
+    }
+
     constructor(canvas: HTMLCanvasElement, config: GameConfig) {
         this.canvas = canvas;
         canvas.width = window.innerWidth * 0.8;
         canvas.height = window.innerHeight * 0.8;
         this.ctx = canvas.getContext("2d")!;
         this.config = {
-            winningScore: config.winningScore ?? 10,
+            winningScore: config.winningScore ?? 2,
             vx: config.vx ?? 6,
             vy: config.vy ?? 6,
             ballRadius: config.ballRadius ?? 10,
@@ -104,6 +105,8 @@ export class PongGame {
             speed: 5,
             color: this.config.colors.paddle,
         });
+
+        this.setupInputHandling();
     }
 
     async start() {
@@ -213,17 +216,18 @@ export class PongGame {
     }
 
     private isGameOver(): boolean {
-        if (this.scores.player1 >= 5 || this.scores.player2 >= 5) {
-            removeEventListener("keydown", setEventKeyTrue);
-            removeEventListener("keyup", setEventKeyFalse);
-            for (let k of keys.keys()) keys.set(k, false);
+        if (this.scores.player1 >= this.config.winningScore || this.scores.player2 >= this.config.winningScore) {
+            this.destroy();
+            // removeEventListener("keydown", setEventKeyTrue);
+            // removeEventListener("keyup", setEventKeyFalse);
+            // for (let k of keys.keys()) keys.set(k, false);
             return true;
         }
         return false;
     }
 
     private gameLoop() {
-        handleInput(this.canvas, this.leftPaddle, this.rightPaddle);
+        this.handleInput();
         this.checkPaddleCollision(this.leftPaddle);
         this.checkPaddleCollision(this.rightPaddle);
         this.checkGameFinished();
@@ -246,5 +250,10 @@ export class PongGame {
         );
 
         requestAnimationFrame(() => this.gameLoop());
+    }
+
+    destroy() {
+        document.removeEventListener("keydown", this.handleKeyDown);
+        document.removeEventListener("keyup", this.handleKeyUp);
     }
 }

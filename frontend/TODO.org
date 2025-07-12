@@ -7,16 +7,17 @@
   - [X] prevent sliding inside paddle
   - [X] actually implement behavior of ball hitting the top or bottom side and corners respectively
     - [X] we didn't do it but it looks alright now
+- [X] rename Dashboard.ts to DashboardView.ts
 - [X] Bug: ball is accelerating when ArrowUp or ArrowDown is used
   - solved: prevent default browser behavior on ArrowUp and ArrowDown
 
-- [ ] rename Dashboard.ts to DashboardView.ts
-
 - [ ] adjust the paddle dimensions to the canvas (still need to have a look)
   - [ ] adjust all the dimensions to the canvas dimensions
-
 - [ ] lot of "this" usage in game.ts. How can we improve that?
+- [ ] refactor input handling
 
 * TODO Frontend
 - [ ] typify navbar
 - [ ] typify lightbox
+- [ ] re-check when you need to destroy views
+  - [[file:~/workspace/transcendence/chats/component_based_architecture.org::*when do i destroy views?][when do i destroy views?]]
