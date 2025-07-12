@@ -1,6 +1,6 @@
 import { Ball } from "./ball";
 import { Paddle } from "./paddle";
-// import normal from "@stdlib/random-base-normal";
+import { InputManager } from "./inputManager";
 
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
@@ -18,7 +18,7 @@ export interface GameConfig {
 }
 
 export class PongGame {
-    private keys = new Map<string, boolean>();
+    private inputManager: InputManager;
     private canvas: HTMLCanvasElement;
     private config: Required<GameConfig>;
     private ctx: CanvasRenderingContext2D;
@@ -28,41 +28,17 @@ export class PongGame {
     private scores = { player1: 0, player2: 0 };
     private matchCount: number = 0;
 
-    private setupInputHandling() {
-        const keys = ["w", "s", "ArrowUp", "ArrowDown"];
-        keys.forEach((key) => this.keys.set(key, false));
-
-        document.addEventListener("keydown", this.handleKeyDown.bind(this));
-        document.addEventListener("keyup", this.handleKeyUp.bind(this));
-    }
-
-    private handleKeyDown(e: KeyboardEvent) {
-        if (this.keys.has(e.key)) {
-            if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-                e.preventDefault();
-            }
-            this.keys.set(e.key, true);
-        }
-    }
-
-    private handleKeyUp(e: KeyboardEvent) {
-        if (this.keys.has(e.key)) {
-            if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-                e.preventDefault();
-            }
-            this.keys.set(e.key, false);
-        }
-    }
-
-    private handleInput() {
-        if (this.keys.get("w")) this.leftPaddle.moveUp(this.canvas);
-        if (this.keys.get("s")) this.leftPaddle.moveDown(this.canvas);
-        if (this.keys.get("ArrowUp")) this.rightPaddle.moveUp(this.canvas);
-        if (this.keys.get("ArrowDown")) this.rightPaddle.moveDown(this.canvas);
+    private setupControls() {
+        this.inputManager.bindKey("w", () => this.leftPaddle.moveUp(this.canvas));
+        this.inputManager.bindKey("s", () => this.leftPaddle.moveDown(this.canvas));
+        this.inputManager.bindKey("ArrowUp", () => this.rightPaddle.moveUp(this.canvas));
+        this.inputManager.bindKey("ArrowDown", () => this.rightPaddle.moveDown(this.canvas));
     }
 
     constructor(canvas: HTMLCanvasElement, config: GameConfig) {
         this.canvas = canvas;
+        this.inputManager = new InputManager();
+        this.setupControls();
         canvas.width = window.innerWidth * 0.8;
         canvas.height = window.innerHeight * 0.8;
         this.ctx = canvas.getContext("2d")!;
@@ -105,8 +81,6 @@ export class PongGame {
             speed: 5,
             color: this.config.colors.paddle,
         });
-
-        this.setupInputHandling();
     }
 
     async start() {
@@ -227,7 +201,7 @@ export class PongGame {
     }
 
     private gameLoop() {
-        this.handleInput();
+        this.inputManager.processInput();
         this.checkPaddleCollision(this.leftPaddle);
         this.checkPaddleCollision(this.rightPaddle);
         this.checkGameFinished();
@@ -253,7 +227,6 @@ export class PongGame {
     }
 
     destroy() {
-        document.removeEventListener("keydown", this.handleKeyDown);
-        document.removeEventListener("keyup", this.handleKeyUp);
+        this.inputManager.destroy();
     }
 }
