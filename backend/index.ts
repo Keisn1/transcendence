@@ -6,7 +6,7 @@ server.get("/ping", async (request, reply) => {
     return "pong\n";
 });
 
-server.get("/profile", async (request, reply) => {
+server.get("/api/profile", async (request, reply) => {
     return "your profile\n";
 });
 

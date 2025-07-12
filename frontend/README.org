@@ -1,6 +1,5 @@
 #+title: Readme
 
-
 * Dev Setup
 * Setup
 https://tailwindcss.com/docs/installation/using-vite
@@ -28,3 +27,7 @@ export default defineConfig({
    #+begin_src css
 @import "tailwindcss";
    #+end_src
+* CORS
+- Cross-oriring resource sharing
+* AI opponent
+- don't use A* algorithm

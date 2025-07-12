@@ -38,3 +38,11 @@ title: Readme
     ``` css
     @import "tailwindcss";
     ```
+
+# CORS
+
+- Cross-oriring resource sharing
+
+# AI opponent
+
+- don't use A\* algorithm
