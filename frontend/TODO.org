@@ -3,11 +3,19 @@
 * TODO Game
 - [X] change to typescript
 - [X] eliminate magic nbrs
-- [ ] ball is sliding at the edge of the paddle
-  - [ ] actually implement behavior of ball hitting the top or bottom side and corners respectively
-- [ ] adjust the paddle dimensions to the canvas
-  - [ ] adjust all the dimensions to the canvas dimensions
+- [X] Bug: ball is sliding at the edge of the paddle
+  - [X] prevent sliding inside paddle
+  - [X] actually implement behavior of ball hitting the top or bottom side and corners respectively
+    - [X] we didn't do it but it looks alright now
+- [X] Bug: ball is accelerating when ArrowUp or ArrowDown is used
+  - solved: prevent default browser behavior on ArrowUp and ArrowDown
+
 - [ ] rename Dashboard.ts to DashboardView.ts
+
+- [ ] adjust the paddle dimensions to the canvas (still need to have a look)
+  - [ ] adjust all the dimensions to the canvas dimensions
+
+- [ ] lot of "this" usage in game.ts. How can we improve that?
 
 * TODO Frontend
 - [ ] typify navbar

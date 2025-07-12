@@ -12,10 +12,16 @@ const keys = new Map<string, boolean>([
 ]);
 
 const setEventKeyTrue = (e: KeyboardEvent) => {
+    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+        e.preventDefault();
+    }
     keys.set(e.key, true);
 };
 
 const setEventKeyFalse = (e: KeyboardEvent) => {
+    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+        e.preventDefault();
+    }
     keys.set(e.key, false);
 };
 
@@ -24,11 +30,11 @@ window.addEventListener("keyup", setEventKeyFalse);
 
 function handleInput(canvas: HTMLCanvasElement, leftPaddle: Paddle, rightPaddle: Paddle) {
     // W / S
-    if (keys.get("w")) leftPaddle.move(canvas, -leftPaddle.speed);
-    if (keys.get("s")) leftPaddle.move(canvas, leftPaddle.speed);
+    if (keys.get("w")) leftPaddle.moveUp(canvas);
+    if (keys.get("s")) leftPaddle.moveDown(canvas);
     // ↑ / ↓
-    if (keys.get("ArrowUp")) rightPaddle.move(canvas, -rightPaddle.speed);
-    if (keys.get("ArrowDown")) rightPaddle.move(canvas, rightPaddle.speed);
+    if (keys.get("ArrowUp")) rightPaddle.moveUp(canvas);
+    if (keys.get("ArrowDown")) rightPaddle.moveDown(canvas);
 }
 
 export interface GameConfig {
@@ -52,7 +58,7 @@ export class PongGame {
     private leftPaddle: Paddle;
     private rightPaddle: Paddle;
     private scores = { player1: 0, player2: 0 };
-	private matchCount: number = 0;
+    private matchCount: number = 0;
 
     constructor(canvas: HTMLCanvasElement, config: GameConfig) {
         this.canvas = canvas;
@@ -112,6 +118,10 @@ export class PongGame {
             this.ctx.fillRect(this.canvas.width / 2 - 1, y, 2, segmentHeight);
         }
     }
+
+    // Add these properties
+    private leftPaddleCollision = false;
+    private rightPaddleCollision = false;
     private checkPaddleCollision(paddle: Paddle) {
         let ball = this.ball;
         const ballLeft = ball.posX - ball.radius;
@@ -133,45 +143,61 @@ export class PongGame {
             );
         };
 
-        if (isBallInsidePaddle()) {
-			const paddleCenterY = paddle.posY + paddle.height / 2;
-			const relativeIntersectY = (ball.posY - paddleCenterY) / (paddle.height / 2); // in range pf -1 to 1
+        const isLeftPaddle = paddle === this.leftPaddle;
+        const hasCollided = isLeftPaddle ? this.leftPaddleCollision : this.rightPaddleCollision;
+        if (isBallInsidePaddle() && !hasCollided) {
+            // Set collision state
+            if (isLeftPaddle) {
+                this.leftPaddleCollision = true;
+            } else {
+                this.rightPaddleCollision = true;
+            }
 
-			const maxAngle = 45 * Math.PI / 180;
-			const theta = maxAngle * relativeIntersectY;
+            const paddleCenterY = paddle.posY + paddle.height / 2;
+            const relativeIntersectY = (ball.posY - paddleCenterY) / (paddle.height / 2); // in range pf -1 to 1
 
-			const ballSpeed = Math.hypot(ball.vx, ball.vy);
-			const xDirection = ball.vx < 0 ? 1 : -1;
+            const maxAngle = (45 * Math.PI) / 180;
+            const theta = maxAngle * relativeIntersectY;
 
-			ball.vx = ballSpeed * Math.cos(theta) * xDirection;
-			ball.vy = ballSpeed * Math.sin(theta);
+            const ballSpeed = Math.hypot(ball.vx, ball.vy);
+            const xDirection = ball.vx < 0 ? 1 : -1;
+
+            ball.vx = ballSpeed * Math.cos(theta) * xDirection;
+            ball.vy = ballSpeed * Math.sin(theta);
+        } else {
+            // Reset collision state when ball is no longer inside paddle
+            if (isLeftPaddle) {
+                this.leftPaddleCollision = false;
+            } else {
+                this.rightPaddleCollision = false;
+            }
         }
     }
 
-	private resetBall() {
-		let ball = this.ball;
+    private resetBall() {
+        let ball = this.ball;
 
-		const speedMagnitude = 10;
-		const angleRange = 60 * Math.PI /180;
+        const speedMagnitude = 10;
+        const angleRange = (60 * Math.PI) / 180;
 
-		ball.posX = this.canvas.width / 2;
+        ball.posX = this.canvas.width / 2;
         ball.posY = this.canvas.height / 2;
 
-		const xDirection = (this.matchCount % 2 === 0) ? 1 : -1;
+        const xDirection = this.matchCount % 2 === 0 ? 1 : -1;
 
-		const theta = (Math.random() - 0.5) * angleRange;
-		
-		ball.vx = speedMagnitude * Math.cos(theta) * xDirection;
-		ball.vy = speedMagnitude * Math.sin(theta);
-	}
+        const theta = (Math.random() - 0.5) * angleRange;
+
+        ball.vx = speedMagnitude * Math.cos(theta) * xDirection;
+        ball.vy = speedMagnitude * Math.sin(theta);
+    }
 
     private checkGameFinished() {
         let ball = this.ball;
         let scores = this.scores;
         if (ball.posX < 0 || ball.posX > this.canvas.width) {
             ball.posX < 0 ? scores.player2++ : scores.player1++;
-			this.matchCount++;
-			this.resetBall();
+            this.matchCount++;
+            this.resetBall();
         }
     }
 
@@ -190,7 +216,7 @@ export class PongGame {
         if (this.scores.player1 >= 5 || this.scores.player2 >= 5) {
             removeEventListener("keydown", setEventKeyTrue);
             removeEventListener("keyup", setEventKeyFalse);
-			for (let k of keys.keys()) keys.set(k, false);
+            for (let k of keys.keys()) keys.set(k, false);
             return true;
         }
         return false;
@@ -212,10 +238,7 @@ export class PongGame {
         }
 
         this.ctx.font = "42px serif";
-        this.ctx.fillText(
-			`${this.scores.player1}`,
-			this.canvas.width / 4.2,
-			this.canvas.height / 10);
+        this.ctx.fillText(`${this.scores.player1}`, this.canvas.width / 4.2, this.canvas.height / 10);
         this.ctx.fillText(
             `${this.scores.player2}`,
             this.canvas.width / 2 + this.canvas.width / 4.2,
