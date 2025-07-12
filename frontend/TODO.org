@@ -10,11 +10,17 @@
 - [X] rename Dashboard.ts to DashboardView.ts
 - [X] Bug: ball is accelerating when ArrowUp or ArrowDown is used
   - solved: prevent default browser behavior on ArrowUp and ArrowDown
+- [X] refactor input handling
 
 - [ ] adjust the paddle dimensions to the canvas (still need to have a look)
   - [ ] adjust all the dimensions to the canvas dimensions
 - [ ] lot of "this" usage in game.ts. How can we improve that?
-- [ ] refactor input handling
+- [ ] change layout of GameConfig interface
+  - [ ] make a BallConfig
+    #+begin_src js
+this.ball = new Ball(canvas, config.ballConfig);
+    #+end_src
+  - [ ] make a PaddleConfig
 
 * TODO Frontend
 - [ ] typify navbar

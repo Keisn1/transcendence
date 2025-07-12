@@ -4,6 +4,10 @@ import { InputManager } from "./inputManager";
 
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
+interface ControlsConfig {
+    player1: { up: string; down: string };
+    player2: { up: string; down: string };
+}
 export interface GameConfig {
     winningScore?: number;
     vx?: number;
@@ -15,6 +19,8 @@ export interface GameConfig {
         paddle: string;
         background: string;
     };
+
+    controls?: ControlsConfig;
 }
 
 export class PongGame {
@@ -29,19 +35,18 @@ export class PongGame {
     private matchCount: number = 0;
 
     private setupControls() {
-        this.inputManager.bindKey("w", () => this.leftPaddle.moveUp(this.canvas));
-        this.inputManager.bindKey("s", () => this.leftPaddle.moveDown(this.canvas));
-        this.inputManager.bindKey("ArrowUp", () => this.rightPaddle.moveUp(this.canvas));
-        this.inputManager.bindKey("ArrowDown", () => this.rightPaddle.moveDown(this.canvas));
+        this.inputManager.bindKey(this.config.controls.player1.up, () => this.leftPaddle.moveUp(this.canvas));
+        this.inputManager.bindKey(this.config.controls.player1.down, () => this.leftPaddle.moveDown(this.canvas));
+        this.inputManager.bindKey(this.config.controls.player2.up, () => this.rightPaddle.moveUp(this.canvas));
+        this.inputManager.bindKey(this.config.controls.player2.down, () => this.rightPaddle.moveDown(this.canvas));
     }
 
     constructor(canvas: HTMLCanvasElement, config: GameConfig) {
-        this.canvas = canvas;
-        this.inputManager = new InputManager();
-        this.setupControls();
-        canvas.width = window.innerWidth * 0.8;
-        canvas.height = window.innerHeight * 0.8;
-        this.ctx = canvas.getContext("2d")!;
+        const defaultControls: ControlsConfig = {
+            player1: { up: "w", down: "s" },
+            player2: { up: "ArrowUp", down: "ArrowDown" },
+        };
+
         this.config = {
             winningScore: config.winningScore ?? 2,
             vx: config.vx ?? 6,
@@ -53,7 +58,16 @@ export class PongGame {
                 paddle: config.colors?.paddle ?? "#fff",
                 background: config.colors?.background ?? "#000",
             },
+            controls: config.controls ?? defaultControls,
         };
+
+        this.canvas = canvas;
+        this.inputManager = new InputManager();
+        this.setupControls();
+
+        canvas.width = window.innerWidth * 0.8;
+        canvas.height = window.innerHeight * 0.8;
+        this.ctx = canvas.getContext("2d")!;
 
         this.ball = new Ball({
             posX: this.canvas.width / 2,
@@ -192,9 +206,6 @@ export class PongGame {
     private isGameOver(): boolean {
         if (this.scores.player1 >= this.config.winningScore || this.scores.player2 >= this.config.winningScore) {
             this.destroy();
-            // removeEventListener("keydown", setEventKeyTrue);
-            // removeEventListener("keyup", setEventKeyFalse);
-            // for (let k of keys.keys()) keys.set(k, false);
             return true;
         }
         return false;
