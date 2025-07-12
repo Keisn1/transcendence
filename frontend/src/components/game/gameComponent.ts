@@ -25,5 +25,10 @@ export class GameComponent {
         await this.game.start();
     }
 
-    destroy() {}
+    destroy() {
+        this.game?.destroy();
+
+        // Remove DOM elements
+        document.getElementById("game-container")?.remove();
+    }
 }

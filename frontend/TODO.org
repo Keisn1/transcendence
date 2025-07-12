@@ -23,7 +23,14 @@ this.ball = new Ball(canvas, config.ballConfig);
   - [ ] make a PaddleConfig
 
 * TODO Frontend
-- [ ] typify navbar
-- [ ] typify lightbox
+- [X] typify navbar
+- [X] typify lightbox
+- [ ] browser is still reloading pages, investigate
+- [ ] refresh view with new content from the server
+  - [ ]
 - [ ] re-check when you need to destroy views
   - [[file:~/workspace/transcendence/chats/component_based_architecture.org::*when do i destroy views?][when do i destroy views?]]
+
+- [ ] rather setup CORS with fastify and environment variables
+  - right now it is vite, with a proxy server making it possible during developement
+- [ ] setup nginx and setup production environment

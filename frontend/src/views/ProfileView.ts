@@ -14,9 +14,11 @@ export default class extends AbstractView {
         let profileContainer = document.createElement("div");
         profileContainer.id = "profile-container";
         profileContainer.innerHTML = "Hello World";
+
         fetch("/api/profile")
             .then((response) => response.text())
             .then((text) => console.log(text));
         document.body.appendChild(profileContainer);
     }
+    destroy() {}
 }

@@ -6,4 +6,5 @@ export default class {
     }
 
     render() {}
+    destroy() {}
 }

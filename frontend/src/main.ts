@@ -1,60 +1,16 @@
 import "./style.css";
 import "./components/navbar/navbar.ts"; // Add this line
 import "./components/adLightbox/adLightbox.ts"; // Add this line
-import DashboardView from "./views/DashboardView.ts";
-import GameView from "./views/GameView.ts";
-import ProfileView from "./views/ProfileView.ts";
+import Router from "./router.ts";
 
-const pathToRegex = (path: string) =>
-    new RegExp(
-        "^" +
-            path
-                .replace(
-                    /\//g,
-                    "\\/", // regular expression equivalent of / (\ needs to be escaped in the string)
-                )
-                .replace(
-                    /:\w+/g, // match colon and one or more word characters, globally
-                    "(.+)", // capturing group (anything one or more times)
-                ) +
-            "$",
-    );
+const router = new Router();
 
-const router = () => {
-    let routes = [
-        {
-            path: "/",
-            view: DashboardView,
-        },
-        {
-            path: "/game",
-            view: GameView,
-        },
-        {
-            path: "/profile",
-            view: ProfileView,
-        },
-    ];
-
-    let potentialMatches = routes.map((route) => {
-        return {
-            route: route,
-            result: location.pathname.match(pathToRegex(route.path)),
-        };
+document.addEventListener("DOMContentLoaded", () => {
+    document.body.addEventListener("click", (e: MouseEvent) => {
+        if ((e.target as HTMLElement)?.matches("[data-link]")) {
+            e.preventDefault();
+            router.navigateTo((e.target as HTMLAnchorElement).href);
+        }
     });
-
-    let match = potentialMatches.find((potentialMatch) => potentialMatch.result !== null);
-
-    if (!match) {
-        console.log("not found");
-        match = {
-            route: routes[0],
-            result: [location.pathname],
-        };
-    }
-
-    const view = new match.route.view();
-    view.render();
-};
-
-router();
+    router.navigateTo("/");
+});
