@@ -1,7 +1,7 @@
 import "./style.css";
 import "./components/navbar/navbar.ts"; // Add this line
 import "./components/adLightbox/adLightbox.ts"; // Add this line
-import Dashboard from "./views/Dashboard.ts";
+import DashboardView from "./views/DashboardView.ts";
 import GameView from "./views/GameView.ts";
 
 const pathToRegex = (path: string) =>
@@ -23,7 +23,7 @@ const router = () => {
     let routes = [
         {
             path: "/",
-            view: Dashboard,
+            view: DashboardView,
         },
         {
             path: "/game",
