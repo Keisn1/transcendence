@@ -1,6 +1,7 @@
 import { Ball, type BallConfig } from "./ball";
 import { Paddle } from "./paddle";
 import { InputManager } from "./inputManager";
+import { AiController } from "./aiController";
 
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
@@ -31,6 +32,7 @@ export class PongGame {
     private rightPaddle: Paddle;
     private scores = { player1: 0, player2: 0 };
     private matchCount: number = 0;
+	private aiController: AiController = new AiController();
 
     constructor(canvas: HTMLCanvasElement, config: GameConfig = {}) {
         const defaultControls: ControlsConfig = {
@@ -209,6 +211,15 @@ export class PongGame {
             lastTime = timestamp;
         }
         const elapsed = timestamp - lastTime;
+
+		this.aiController.prediction(this.ball, this.leftPaddle, this.canvas.height);
+
+		console.log(this.aiController.aiDir);
+		if (this.aiController.aiDir == "up") {
+			this.leftPaddle.moveUp(this.canvas);
+		} else if (this.aiController.aiDir == "down") {
+			this.leftPaddle.moveDown(this.canvas);
+		}
 
         this.inputManager.processInput();
         this.checkPaddleCollision(this.leftPaddle);

@@ -1,19 +1,21 @@
+import { type Direction, type Position } from "./ball" 
+
 // my initial approach
-export function predictYIntersection(posX:number, posY:number, vx:number, vy:number, windowHeight:number, targetX:number): number {
+export function predictYIntersection(pos: Position, dir: Direction, canvasHeight:number, intersectionX:number): number {
 	// find previous bounce
-	const initialBounceY = vy > 0 ? 0 : windowHeight;
-	const tSinceInitial = (posY - initialBounceY) / vy;
-	const initialBounceX = posX - vx * tSinceInitial;
+	const initialBounceY = dir.dy > 0 ? 0 : canvasHeight;
+	const stepsInDy = (pos.y - initialBounceY) / dir.dy;
+	const initialBounceX = pos.x - dir.dx * stepsInDy;
 
 	// find next bounce
-	const nextBounceY = vy > 0 ? windowHeight : 0;
+	const nextBounceY = canvasHeight - initialBounceY;
 
 	// calculate tha distance between bounces
-	const tLeg = windowHeight / Math.abs(vy);
-	const spanX = Math.abs(vx) * tLeg;
+	const tLeg = canvasHeight / Math.abs(dir.dy);
+	const spanX = Math.abs(dir.dx) * tLeg;
 
 	// calculate full spans between initial bounce and targetX
-	let dx = Math.abs(initialBounceX - targetX);
+	let dx = Math.abs(initialBounceX - intersectionX);
 	const k = Math.floor(dx / spanX);
 
 	// leftover of full spans
@@ -26,7 +28,7 @@ export function predictYIntersection(posX:number, posY:number, vx:number, vy:num
 
 	// if k is odd, inverse the intersection point
 	if (k % 2 === 1) {
-		yHit = windowHeight - yHit;
+		yHit = canvasHeight - yHit;
 	}
 
 	return yHit;
