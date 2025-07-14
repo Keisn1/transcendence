@@ -32,7 +32,7 @@ export class PongGame {
     private rightPaddle: Paddle;
     private scores = { player1: 0, player2: 0 };
     private matchCount: number = 0;
-	private aiController: AiController = new AiController();
+    private aiController: AiController = new AiController();
 
     constructor(canvas: HTMLCanvasElement, config: GameConfig = {}) {
         const defaultControls: ControlsConfig = {
@@ -163,6 +163,8 @@ export class PongGame {
 
     private resetBall() {
         let ball = this.ball;
+        this.ball.speed = this.config.ballConfig.speed;
+        this.nbrCollision = 0;
 
         const angleRange = (60 * Math.PI) / 180;
 
@@ -206,24 +208,33 @@ export class PongGame {
         return false;
     }
 
+    private nbrCollision: number = 0;
     private gameLoop(timestamp: number, lastTime: number) {
         if (lastTime === 0) {
             lastTime = timestamp;
         }
         const elapsed = timestamp - lastTime;
 
-		this.aiController.prediction(this.ball, this.leftPaddle, this.canvas.height);
+        this.aiController.prediction(this.ball, this.leftPaddle, this.canvas.height);
 
-		console.log(this.aiController.aiDir);
-		if (this.aiController.aiDir == "up") {
-			this.leftPaddle.moveUp(this.canvas);
-		} else if (this.aiController.aiDir == "down") {
-			this.leftPaddle.moveDown(this.canvas);
-		}
+        console.log(this.aiController.aiDir);
+        if (this.aiController.aiDir == "up") {
+            this.leftPaddle.moveUp(this.canvas);
+        } else if (this.aiController.aiDir == "down") {
+            this.leftPaddle.moveDown(this.canvas);
+        }
 
         this.inputManager.processInput();
         this.checkPaddleCollision(this.leftPaddle);
         this.checkPaddleCollision(this.rightPaddle);
+        if (this.leftPaddleCollision || this.rightPaddleCollision) {
+            this.nbrCollision++;
+        }
+        if (this.nbrCollision == 1) {
+            this.ball.speed *= 2;
+            this.nbrCollision++;
+        }
+
         this.checkGameFinished();
 
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); // clean previous drawings
