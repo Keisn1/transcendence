@@ -14,7 +14,7 @@ export class GameComponent {
 
         this.canvas = gameContainer.querySelector("#canvas")! as HTMLCanvasElement;
         this.container = gameContainer;
-        this.game = new PongGame(this.canvas, {});
+        this.game = new PongGame(this.canvas);
     }
 
     getContainer(): HTMLDivElement {

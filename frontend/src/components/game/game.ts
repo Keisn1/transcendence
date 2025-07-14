@@ -1,4 +1,4 @@
-import { Ball } from "./ball";
+import { Ball, type BallConfig, type Direction } from "./ball";
 import { Paddle } from "./paddle";
 import { InputManager } from "./inputManager";
 
@@ -8,19 +8,25 @@ interface ControlsConfig {
     player1: { up: string; down: string };
     player2: { up: string; down: string };
 }
+
 export interface GameConfig {
     winningScore?: number;
-    vx?: number;
-    vy?: number;
-    ballRadius?: number;
+    ballConfig?: BallConfig;
     paddleSpeed?: number;
     colors?: {
-        ball: string;
         paddle: string;
         background: string;
     };
 
     controls?: ControlsConfig;
+}
+
+function normalizeDirection(direction: Direction): Direction {
+    let norm = Math.hypot(direction.dx, direction.dy);
+    return {
+        dx: direction.dx / norm,
+        dy: direction.dy / norm,
+    };
 }
 
 export class PongGame {
@@ -34,27 +40,23 @@ export class PongGame {
     private scores = { player1: 0, player2: 0 };
     private matchCount: number = 0;
 
-    private setupControls() {
-        this.inputManager.bindKey(this.config.controls.player1.up, () => this.leftPaddle.moveUp(this.canvas));
-        this.inputManager.bindKey(this.config.controls.player1.down, () => this.leftPaddle.moveDown(this.canvas));
-        this.inputManager.bindKey(this.config.controls.player2.up, () => this.rightPaddle.moveUp(this.canvas));
-        this.inputManager.bindKey(this.config.controls.player2.down, () => this.rightPaddle.moveDown(this.canvas));
-    }
-
-    constructor(canvas: HTMLCanvasElement, config: GameConfig) {
+    constructor(canvas: HTMLCanvasElement, config: GameConfig = {}) {
         const defaultControls: ControlsConfig = {
             player1: { up: "w", down: "s" },
             player2: { up: "ArrowUp", down: "ArrowDown" },
         };
 
         this.config = {
+            ballConfig: {
+                initPos: { x: canvas.width / 2, y: canvas.height / 2 },
+                initDirection: normalizeDirection({ dx: canvas.width / 2, dy: canvas.height / 2 }),
+                radius: config.ballConfig?.radius ?? 10,
+                speed: config.ballConfig?.speed ?? 5,
+                color: config.ballConfig?.color ?? "#fff",
+            },
             winningScore: config.winningScore ?? 2,
-            vx: config.vx ?? 6,
-            vy: config.vy ?? 6,
-            ballRadius: config.ballRadius ?? 10,
             paddleSpeed: config.paddleSpeed ?? 7,
             colors: {
-                ball: config.colors?.ball ?? "#fff",
                 paddle: config.colors?.paddle ?? "#fff",
                 background: config.colors?.background ?? "#000",
             },
@@ -69,14 +71,7 @@ export class PongGame {
         canvas.height = window.innerHeight * 0.8;
         this.ctx = canvas.getContext("2d")!;
 
-        this.ball = new Ball({
-            posX: this.canvas.width / 2,
-            posY: this.canvas.height / 2,
-            radius: this.config.ballRadius,
-            vx: this.config.vx,
-            vy: this.config.vy,
-            color: this.config.colors.ball,
-        });
+        this.ball = new Ball(this.config.ballConfig);
 
         this.leftPaddle = new Paddle({
             posX: 20,
@@ -102,6 +97,13 @@ export class PongGame {
         this.gameLoop();
     }
 
+    private setupControls() {
+        this.inputManager.bindKey(this.config.controls.player1.up, () => this.leftPaddle.moveUp(this.canvas));
+        this.inputManager.bindKey(this.config.controls.player1.down, () => this.leftPaddle.moveDown(this.canvas));
+        this.inputManager.bindKey(this.config.controls.player2.up, () => this.rightPaddle.moveUp(this.canvas));
+        this.inputManager.bindKey(this.config.controls.player2.down, () => this.rightPaddle.moveDown(this.canvas));
+    }
+
     private drawCenterLine() {
         const segmentHeight = 20;
         const gap = 10;
@@ -115,10 +117,10 @@ export class PongGame {
     private rightPaddleCollision = false;
     private checkPaddleCollision(paddle: Paddle) {
         let ball = this.ball;
-        const ballLeft = ball.posX - ball.radius;
-        const ballRight = ball.posX + ball.radius;
-        const ballBottom = ball.posY + ball.radius;
-        const ballTop = ball.posY - ball.radius;
+        const ballLeft = ball.pos.x - ball.radius;
+        const ballRight = ball.pos.x + ball.radius;
+        const ballBottom = ball.pos.y + ball.radius;
+        const ballTop = ball.pos.y - ball.radius;
 
         const paddleRightSide = paddle.posX + paddle.width;
         const paddleLeftSide = paddle.posX;
@@ -145,16 +147,16 @@ export class PongGame {
             }
 
             const paddleCenterY = paddle.posY + paddle.height / 2;
-            const relativeIntersectY = (ball.posY - paddleCenterY) / (paddle.height / 2); // in range pf -1 to 1
+            const relativeIntersectY = (ball.pos.y - paddleCenterY) / (paddle.height / 2); // in range pf -1 to 1
 
             const maxAngle = (45 * Math.PI) / 180;
             const theta = maxAngle * relativeIntersectY;
 
-            const ballSpeed = Math.hypot(ball.vx, ball.vy);
-            const xDirection = ball.vx < 0 ? 1 : -1;
+            const ballSpeed = Math.hypot(ball.dir.dx, ball.dir.dy);
+            const xDirection = ball.dir.dx < 0 ? 1 : -1;
 
-            ball.vx = ballSpeed * Math.cos(theta) * xDirection;
-            ball.vy = ballSpeed * Math.sin(theta);
+            ball.dir.dx = ballSpeed * Math.cos(theta) * xDirection;
+            ball.dir.dy = ballSpeed * Math.sin(theta);
         } else {
             // Reset collision state when ball is no longer inside paddle
             if (isLeftPaddle) {
@@ -171,22 +173,22 @@ export class PongGame {
         const speedMagnitude = 10;
         const angleRange = (60 * Math.PI) / 180;
 
-        ball.posX = this.canvas.width / 2;
-        ball.posY = this.canvas.height / 2;
+        ball.pos.x = this.canvas.width / 2;
+        ball.pos.y = this.canvas.height / 2;
 
         const xDirection = this.matchCount % 2 === 0 ? 1 : -1;
 
         const theta = (Math.random() - 0.5) * angleRange;
 
-        ball.vx = speedMagnitude * Math.cos(theta) * xDirection;
-        ball.vy = speedMagnitude * Math.sin(theta);
+        ball.dir.dx = speedMagnitude * Math.cos(theta) * xDirection;
+        ball.dir.dy = speedMagnitude * Math.sin(theta);
     }
 
     private checkGameFinished() {
         let ball = this.ball;
         let scores = this.scores;
-        if (ball.posX < 0 || ball.posX > this.canvas.width) {
-            ball.posX < 0 ? scores.player2++ : scores.player1++;
+        if (ball.pos.x < 0 || ball.pos.x > this.canvas.width) {
+            ball.pos.x < 0 ? scores.player2++ : scores.player1++;
             this.matchCount++;
             this.resetBall();
         }
