@@ -8,6 +8,7 @@ export default class Router {
 
     constructor() {
         window.addEventListener("popstate", this.routing.bind(this));
+        this.routing();
     }
 
     navigateTo = (url: string) => {

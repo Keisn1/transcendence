@@ -12,5 +12,4 @@ document.addEventListener("DOMContentLoaded", () => {
             router.navigateTo((e.target as HTMLAnchorElement).href);
         }
     });
-    router.navigateTo("/");
 });
