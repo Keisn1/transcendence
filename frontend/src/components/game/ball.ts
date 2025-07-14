@@ -39,6 +39,13 @@ export class Ball {
         this.color = config.color;
     }
 
+    updateCollision(relativeIntersectY: number) {
+        const maxAngle = (45 * Math.PI) / 180;
+        const theta = maxAngle * relativeIntersectY;
+        this.dir.dx = this.dir.dx < 0 ? 1 : -1;
+        this.dir.dy = Math.sin(theta);
+    }
+
     update(canvas: HTMLCanvasElement, elapsed: number) {
         let dist = this.speed * elapsed;
 

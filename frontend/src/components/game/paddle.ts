@@ -1,3 +1,8 @@
+export interface Paddles {
+    left: Paddle;
+    right: Paddle;
+}
+
 interface PaddleConfig {
     posX: number;
     posY: number;

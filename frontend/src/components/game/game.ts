@@ -1,5 +1,5 @@
 import { Ball, type BallConfig } from "./ball";
-import { Paddle } from "./paddle";
+import { Paddle, type Paddles } from "./paddle";
 import { InputManager } from "./inputManager";
 import { AiController } from "./aiController";
 
@@ -20,11 +20,6 @@ export interface GameConfig {
     };
 
     controls?: ControlsConfig;
-}
-
-interface Paddles {
-    left: Paddle;
-    right: Paddle;
 }
 
 export class PongGame {
@@ -195,17 +190,11 @@ export class PongGame {
             // Set collision state
             if (isLeftPaddle) {
                 this.leftPaddleCollision = true;
+                return this.paddles.left;
             } else {
                 this.rightPaddleCollision = true;
+                return this.paddles.right;
             }
-
-            const paddleCenterY = paddle.posY + paddle.height / 2;
-            const relativeIntersectY = (ball.pos.y - paddleCenterY) / (paddle.height / 2); // in range pf -1 to 1
-
-            const maxAngle = (45 * Math.PI) / 180;
-            const theta = maxAngle * relativeIntersectY;
-            ball.dir.dx = ball.dir.dx < 0 ? 1 : -1;
-            ball.dir.dy = Math.sin(theta);
         } else {
             // Reset collision state when ball is no longer inside paddle
             if (isLeftPaddle) {
@@ -213,6 +202,7 @@ export class PongGame {
             } else {
                 this.rightPaddleCollision = false;
             }
+            return null;
         }
     }
 
@@ -226,17 +216,23 @@ export class PongGame {
         this.inputManager.processInput();
         this.checkAiMovement();
 
-        this.checkPaddleCollision(this.paddles.left);
-        this.checkPaddleCollision(this.paddles.right);
-        if (this.leftPaddleCollision || this.rightPaddleCollision) {
-            this.nbrCollision++;
+        let paddle = this.checkPaddleCollision(this.paddles.left);
+        if (!paddle) {
+            paddle = this.checkPaddleCollision(this.paddles.right);
         }
-        if (this.nbrCollision == 1) {
-            this.ball.speed *= 2;
+        if (paddle) {
             this.nbrCollision++;
+            if (this.nbrCollision == 1) {
+                this.ball.speed *= 2;
+            }
         }
 
         if (!this.isGameOver()) {
+            if (paddle) {
+                const paddleCenterY = paddle.posY + paddle.height / 2;
+                const relativeIntersectY = (this.ball.pos.y - paddleCenterY) / (paddle.height / 2); // in range pf -1 to 1
+                this.ball.updateCollision(relativeIntersectY);
+            }
             this.ball.update(this.canvas, elapsed);
         }
 
