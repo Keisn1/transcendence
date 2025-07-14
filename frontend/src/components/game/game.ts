@@ -42,15 +42,15 @@ export class PongGame {
         this.inputManager = new InputManager();
 
         canvas.width = window.innerWidth * 0.8;
-        canvas.height = window.innerHeight * 0.2;
+        canvas.height = window.innerHeight * 0.8;
         this.ctx = canvas.getContext("2d")!;
 
         this.config = {
             ballConfig: {
                 initPos: { x: canvas.width / 2, y: canvas.height / 2 },
                 initDirection: { dx: 1, dy: 1 },
-                radius: config.ballConfig?.radius ?? 30,
-                speed: config.ballConfig?.speed ?? 0.3,
+                radius: config.ballConfig?.radius ?? 10,
+                speed: config.ballConfig?.speed ?? canvas.width / 3000,
                 color: config.ballConfig?.color ?? "#fff",
             },
             winningScore: config.winningScore ?? 2,
@@ -209,7 +209,6 @@ export class PongGame {
             lastTime = timestamp;
         }
         const elapsed = timestamp - lastTime;
-        console.log(elapsed);
 
         this.inputManager.processInput();
         this.checkPaddleCollision(this.leftPaddle);

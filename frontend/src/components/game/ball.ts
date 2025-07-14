@@ -51,27 +51,16 @@ export class Ball {
         // }
 
         let bottom = canvas.height;
-        if (this.pos.y + this.radius >= bottom) {
-            this.pos.y = bottom - (this.pos.y + this.radius - bottom);
-            // bottom = 1000
-            // pos.y = 998
-            // I think we want pos.y = 996
-            // radius = 6
-            // 998 + 6 = 1004 >= 1000
-            // 1000 - (998 + 6 - 1000) = 996
+        if (this.pos.y + this.radius >= bottom && this.dir.dy > 0) {
+            this.pos.y -= this.pos.y + this.radius - bottom; //
             this.dir.dy *= -1; // bounce
         }
 
-        if (this.pos.y - this.radius <= 0) {
-            this.pos.y = -(this.pos.y - this.radius);
+        let top = 0;
+        if (this.pos.y - this.radius <= top && this.dir.dy < 0) {
+            this.pos.y += this.pos.y - this.radius + top;
             this.dir.dy *= -1; // bounce
         }
-
-        // // let top = 0;
-        // // if (this.pos.y + this.radius < bottom) {
-        // //     this.pos.y = bottom - (this.pos.y - bottom);
-        // //     this.dir.dy *= -1; // bounce
-        // // }
     }
     draw(ctx: CanvasRenderingContext2D) {
         ctx.beginPath();
