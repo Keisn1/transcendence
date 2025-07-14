@@ -22,14 +22,18 @@ export interface GameConfig {
     controls?: ControlsConfig;
 }
 
+interface Paddles {
+    left: Paddle;
+    right: Paddle;
+}
+
 export class PongGame {
     private inputManager: InputManager;
     private canvas: HTMLCanvasElement;
     private config: Required<GameConfig>;
     private ctx: CanvasRenderingContext2D;
     private ball: Ball;
-    private leftPaddle: Paddle;
-    private rightPaddle: Paddle;
+    private paddles: Paddles;
     private scores = { player1: 0, player2: 0 };
     private rallyCount: number = 0;
     private aiController: AiController = new AiController();
@@ -66,24 +70,24 @@ export class PongGame {
 
         this.setupControls();
         this.ball = new Ball(this.config.ballConfig);
-
-        this.leftPaddle = new Paddle({
-            posX: 20,
-            posY: (this.canvas.height - 100) / 2,
-            width: 10,
-            height: 100,
-            speed: 5,
-            color: this.config.colors.paddle,
-        });
-
-        this.rightPaddle = new Paddle({
-            posX: this.canvas.width - 20 - 10,
-            posY: (this.canvas.height - 100) / 2,
-            width: 10,
-            height: 100,
-            speed: 5,
-            color: this.config.colors.paddle,
-        });
+        this.paddles = {
+            left: new Paddle({
+                posX: 20,
+                posY: (this.canvas.height - 100) / 2,
+                width: 10,
+                height: 100,
+                speed: 5,
+                color: this.config.colors.paddle,
+            }),
+            right: new Paddle({
+                posX: this.canvas.width - 20 - 10,
+                posY: (this.canvas.height - 100) / 2,
+                width: 10,
+                height: 100,
+                speed: 5,
+                color: this.config.colors.paddle,
+            }),
+        };
     }
 
     async start() {
@@ -92,10 +96,10 @@ export class PongGame {
     }
 
     private setupControls() {
-        this.inputManager.bindKey(this.config.controls.player1.up, () => this.leftPaddle.moveUp(this.canvas));
-        this.inputManager.bindKey(this.config.controls.player1.down, () => this.leftPaddle.moveDown(this.canvas));
-        this.inputManager.bindKey(this.config.controls.player2.up, () => this.rightPaddle.moveUp(this.canvas));
-        this.inputManager.bindKey(this.config.controls.player2.down, () => this.rightPaddle.moveDown(this.canvas));
+        this.inputManager.bindKey(this.config.controls.player1.up, () => this.paddles.left.moveUp(this.canvas));
+        this.inputManager.bindKey(this.config.controls.player1.down, () => this.paddles.left.moveDown(this.canvas));
+        this.inputManager.bindKey(this.config.controls.player2.up, () => this.paddles.right.moveUp(this.canvas));
+        this.inputManager.bindKey(this.config.controls.player2.down, () => this.paddles.right.moveDown(this.canvas));
     }
 
     private drawCenterLine() {
@@ -153,19 +157,19 @@ export class PongGame {
     }
 
     private checkAiMovement() {
-        this.aiController.prediction(this.ball, this.leftPaddle, this.canvas.height);
+        this.aiController.prediction(this.ball, this.paddles.left, this.canvas.height);
         if (this.aiController.aiDir == "up") {
-            this.leftPaddle.moveUp(this.canvas);
+            this.paddles.left.moveUp(this.canvas);
         } else if (this.aiController.aiDir == "down") {
-            this.leftPaddle.moveDown(this.canvas);
+            this.paddles.left.moveDown(this.canvas);
         }
     }
 
     private drawNewState() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); // clean previous drawings
         this.drawCenterLine();
-        this.leftPaddle.draw(this.ctx);
-        this.rightPaddle.draw(this.ctx);
+        this.paddles.left.draw(this.ctx);
+        this.paddles.right.draw(this.ctx);
         if (!this.isGameOver()) {
             this.ball.draw(this.ctx);
         }
@@ -185,7 +189,7 @@ export class PongGame {
     private checkPaddleCollision(paddle: Paddle) {
         let ball = this.ball;
 
-        const isLeftPaddle = paddle === this.leftPaddle;
+        const isLeftPaddle = paddle === this.paddles.left;
         const hasCollided = isLeftPaddle ? this.leftPaddleCollision : this.rightPaddleCollision;
         if (isBallInsidePaddle(ball, paddle) && !hasCollided) {
             // Set collision state
@@ -219,11 +223,11 @@ export class PongGame {
         }
         const elapsed = timestamp - lastTime;
 
-        this.checkAiMovement();
         this.inputManager.processInput();
+        this.checkAiMovement();
 
-        this.checkPaddleCollision(this.leftPaddle);
-        this.checkPaddleCollision(this.rightPaddle);
+        this.checkPaddleCollision(this.paddles.left);
+        this.checkPaddleCollision(this.paddles.right);
         if (this.leftPaddleCollision || this.rightPaddleCollision) {
             this.nbrCollision++;
         }
