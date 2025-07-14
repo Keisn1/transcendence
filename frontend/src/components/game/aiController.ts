@@ -9,23 +9,26 @@ interface Intersection {
 
 export class AiController {
 	public aiDir:  "up" | "down" | "rest" = "rest";
+	private lastPredictionTime = 0;
+	private intersection: Intersection = {y: 0, x: 0};
 
 	constructor() {}
 
 	public prediction(ball: Ball, paddle: Paddle, canvasHeight: number) {
+		const now = performance.now();
 		const paddleCenter = paddle.posY + paddle.height / 2;
-		let intersection: Intersection = { x: paddle.posX + paddle.width, y: 0 };
-		intersection.y = predictYIntersection(ball.pos, ball.dir, canvasHeight, intersection.x);
 
-		console.log(intersection.y);
-		// if the intersection.y is outside of the paddle
-		if (Math.abs(intersection.y - paddleCenter) > paddle.height / 2) {
-			// if intersection.y is upper paddleCentre 
-			if (intersection.y < paddleCenter) {
+		if (now - this.lastPredictionTime >= 1000) {
+			this.lastPredictionTime = now;
+			this.intersection.x = (paddle.posX < ball.pos.x) ? paddle.posX + paddle.width : paddle.posX;
+			this.intersection.y = predictYIntersection(ball.pos, ball.dir, canvasHeight, this.intersection.x);
+		}
+
+		if (Math.abs(this.intersection.y - paddleCenter) > paddle.height / 2) {
+			if (this.intersection.y < paddleCenter) {
 				this.aiDir = "up";
 			}
-			// if intersection.y is lower paddleCentre 
-			if (intersection.y > paddleCenter) {
+			if (this.intersection.y > paddleCenter) {
 				this.aiDir = "down";
 			}
 		} else {

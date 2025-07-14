@@ -54,7 +54,7 @@ export class PongGame {
                 speed: config.ballConfig?.speed ?? canvas.width / 3000,
                 color: config.ballConfig?.color ?? "#fff",
             },
-            winningScore: config.winningScore ?? 2,
+            winningScore: config.winningScore ?? 5,
             paddleSpeed: config.paddleSpeed ?? 7,
             colors: {
                 paddle: config.colors?.paddle ?? "#fff",
