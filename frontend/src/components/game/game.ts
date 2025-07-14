@@ -1,4 +1,4 @@
-import { Ball, type BallConfig, type Direction } from "./ball";
+import { Ball, type BallConfig } from "./ball";
 import { Paddle } from "./paddle";
 import { InputManager } from "./inputManager";
 
@@ -21,14 +21,6 @@ export interface GameConfig {
     controls?: ControlsConfig;
 }
 
-function normalizeDirection(direction: Direction): Direction {
-    let norm = Math.hypot(direction.dx, direction.dy);
-    return {
-        dx: direction.dx / norm,
-        dy: direction.dy / norm,
-    };
-}
-
 export class PongGame {
     private inputManager: InputManager;
     private canvas: HTMLCanvasElement;
@@ -46,12 +38,19 @@ export class PongGame {
             player2: { up: "ArrowUp", down: "ArrowDown" },
         };
 
+        this.canvas = canvas;
+        this.inputManager = new InputManager();
+
+        canvas.width = window.innerWidth * 0.8;
+        canvas.height = window.innerHeight * 0.2;
+        this.ctx = canvas.getContext("2d")!;
+
         this.config = {
             ballConfig: {
                 initPos: { x: canvas.width / 2, y: canvas.height / 2 },
-                initDirection: normalizeDirection({ dx: canvas.width / 2, dy: canvas.height / 2 }),
-                radius: config.ballConfig?.radius ?? 10,
-                speed: config.ballConfig?.speed ?? 5,
+                initDirection: { dx: 1, dy: 1 },
+                radius: config.ballConfig?.radius ?? 30,
+                speed: config.ballConfig?.speed ?? 0.3,
                 color: config.ballConfig?.color ?? "#fff",
             },
             winningScore: config.winningScore ?? 2,
@@ -63,14 +62,7 @@ export class PongGame {
             controls: config.controls ?? defaultControls,
         };
 
-        this.canvas = canvas;
-        this.inputManager = new InputManager();
         this.setupControls();
-
-        canvas.width = window.innerWidth * 0.8;
-        canvas.height = window.innerHeight * 0.8;
-        this.ctx = canvas.getContext("2d")!;
-
         this.ball = new Ball(this.config.ballConfig);
 
         this.leftPaddle = new Paddle({
@@ -94,7 +86,7 @@ export class PongGame {
 
     async start() {
         await this.startTimer();
-        this.gameLoop();
+        requestAnimationFrame((t) => this.gameLoop(t, 0));
     }
 
     private setupControls() {
@@ -152,11 +144,11 @@ export class PongGame {
             const maxAngle = (45 * Math.PI) / 180;
             const theta = maxAngle * relativeIntersectY;
 
-            const ballSpeed = Math.hypot(ball.dir.dx, ball.dir.dy);
-            const xDirection = ball.dir.dx < 0 ? 1 : -1;
+            // const ballSpeed = Math.hypot(ball.dir.dx, ball.dir.dy);
+            ball.dir.dx = ball.dir.dx < 0 ? 1 : -1;
 
-            ball.dir.dx = ballSpeed * Math.cos(theta) * xDirection;
-            ball.dir.dy = ballSpeed * Math.sin(theta);
+            // ball.dir.dx = ballSpeed * Math.cos(theta) * xDirection;
+            ball.dir.dy = Math.sin(theta);
         } else {
             // Reset collision state when ball is no longer inside paddle
             if (isLeftPaddle) {
@@ -170,7 +162,6 @@ export class PongGame {
     private resetBall() {
         let ball = this.ball;
 
-        const speedMagnitude = 10;
         const angleRange = (60 * Math.PI) / 180;
 
         ball.pos.x = this.canvas.width / 2;
@@ -180,8 +171,8 @@ export class PongGame {
 
         const theta = (Math.random() - 0.5) * angleRange;
 
-        ball.dir.dx = speedMagnitude * Math.cos(theta) * xDirection;
-        ball.dir.dy = speedMagnitude * Math.sin(theta);
+        ball.dir.dx = xDirection;
+        ball.dir.dy = Math.sin(theta);
     }
 
     private checkGameFinished() {
@@ -213,7 +204,13 @@ export class PongGame {
         return false;
     }
 
-    private gameLoop() {
+    private gameLoop(timestamp: number, lastTime: number) {
+        if (lastTime === 0) {
+            lastTime = timestamp;
+        }
+        const elapsed = timestamp - lastTime;
+        console.log(elapsed);
+
         this.inputManager.processInput();
         this.checkPaddleCollision(this.leftPaddle);
         this.checkPaddleCollision(this.rightPaddle);
@@ -224,7 +221,7 @@ export class PongGame {
         this.leftPaddle.draw(this.ctx);
         this.rightPaddle.draw(this.ctx);
         if (!this.isGameOver()) {
-            this.ball.update(this.canvas);
+            this.ball.update(this.canvas, elapsed);
             this.ball.draw(this.ctx);
         }
 
@@ -236,7 +233,7 @@ export class PongGame {
             this.canvas.height / 10,
         );
 
-        requestAnimationFrame(() => this.gameLoop());
+        requestAnimationFrame((t) => this.gameLoop(t, timestamp));
     }
 
     destroy() {
