@@ -31,7 +31,7 @@ export class PongGame {
     private leftPaddle: Paddle;
     private rightPaddle: Paddle;
     private scores = { player1: 0, player2: 0 };
-    private matchCount: number = 0;
+    private rallyCount: number = 0;
     private aiController: AiController = new AiController();
 
     constructor(canvas: HTMLCanvasElement, config: GameConfig = {}) {
@@ -106,61 +106,6 @@ export class PongGame {
         }
     }
 
-    // Add these properties
-    private leftPaddleCollision = false;
-    private rightPaddleCollision = false;
-    private checkPaddleCollision(paddle: Paddle) {
-        let ball = this.ball;
-        const ballLeft = ball.pos.x - ball.radius;
-        const ballRight = ball.pos.x + ball.radius;
-        const ballBottom = ball.pos.y + ball.radius;
-        const ballTop = ball.pos.y - ball.radius;
-
-        const paddleRightSide = paddle.posX + paddle.width;
-        const paddleLeftSide = paddle.posX;
-        const paddleTop = paddle.posY;
-        const paddleBottom = paddle.posY + paddle.height;
-
-        const isBallInsidePaddle = () => {
-            return (
-                ballLeft < paddleRightSide &&
-                ballRight > paddleLeftSide &&
-                ballBottom > paddleTop &&
-                ballTop < paddleBottom
-            );
-        };
-
-        const isLeftPaddle = paddle === this.leftPaddle;
-        const hasCollided = isLeftPaddle ? this.leftPaddleCollision : this.rightPaddleCollision;
-        if (isBallInsidePaddle() && !hasCollided) {
-            // Set collision state
-            if (isLeftPaddle) {
-                this.leftPaddleCollision = true;
-            } else {
-                this.rightPaddleCollision = true;
-            }
-
-            const paddleCenterY = paddle.posY + paddle.height / 2;
-            const relativeIntersectY = (ball.pos.y - paddleCenterY) / (paddle.height / 2); // in range pf -1 to 1
-
-            const maxAngle = (45 * Math.PI) / 180;
-            const theta = maxAngle * relativeIntersectY;
-
-            // const ballSpeed = Math.hypot(ball.dir.dx, ball.dir.dy);
-            ball.dir.dx = ball.dir.dx < 0 ? 1 : -1;
-
-            // ball.dir.dx = ballSpeed * Math.cos(theta) * xDirection;
-            ball.dir.dy = Math.sin(theta);
-        } else {
-            // Reset collision state when ball is no longer inside paddle
-            if (isLeftPaddle) {
-                this.leftPaddleCollision = false;
-            } else {
-                this.rightPaddleCollision = false;
-            }
-        }
-    }
-
     private resetBall() {
         let ball = this.ball;
         this.ball.speed = this.config.ballConfig.speed;
@@ -171,7 +116,7 @@ export class PongGame {
         ball.pos.x = this.canvas.width / 2;
         ball.pos.y = this.canvas.height / 2;
 
-        const xDirection = this.matchCount % 2 === 0 ? 1 : -1;
+        const xDirection = this.rallyCount % 2 === 0 ? 1 : -1;
 
         const theta = (Math.random() - 0.5) * angleRange;
 
@@ -179,13 +124,12 @@ export class PongGame {
         ball.dir.dy = Math.sin(theta);
     }
 
-    private checkGameFinished() {
+    private isRallyFinished() {
         let ball = this.ball;
         let scores = this.scores;
         if (ball.pos.x < 0 || ball.pos.x > this.canvas.width) {
             ball.pos.x < 0 ? scores.player2++ : scores.player1++;
-            this.matchCount++;
-            this.resetBall();
+            return true;
         }
     }
 
@@ -208,41 +152,21 @@ export class PongGame {
         return false;
     }
 
-    private nbrCollision: number = 0;
-    private gameLoop(timestamp: number, lastTime: number) {
-        if (lastTime === 0) {
-            lastTime = timestamp;
-        }
-        const elapsed = timestamp - lastTime;
-
+    private checkAiMovement() {
         this.aiController.prediction(this.ball, this.leftPaddle, this.canvas.height);
-
-        console.log(this.aiController.aiDir);
         if (this.aiController.aiDir == "up") {
             this.leftPaddle.moveUp(this.canvas);
         } else if (this.aiController.aiDir == "down") {
             this.leftPaddle.moveDown(this.canvas);
         }
+    }
 
-        this.inputManager.processInput();
-        this.checkPaddleCollision(this.leftPaddle);
-        this.checkPaddleCollision(this.rightPaddle);
-        if (this.leftPaddleCollision || this.rightPaddleCollision) {
-            this.nbrCollision++;
-        }
-        if (this.nbrCollision == 1) {
-            this.ball.speed *= 2;
-            this.nbrCollision++;
-        }
-
-        this.checkGameFinished();
-
+    private drawNewState() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); // clean previous drawings
         this.drawCenterLine();
         this.leftPaddle.draw(this.ctx);
         this.rightPaddle.draw(this.ctx);
         if (!this.isGameOver()) {
-            this.ball.update(this.canvas, elapsed);
             this.ball.draw(this.ctx);
         }
 
@@ -253,6 +177,71 @@ export class PongGame {
             this.canvas.width / 2 + this.canvas.width / 4.2,
             this.canvas.height / 10,
         );
+    }
+
+    // Add these properties
+    private leftPaddleCollision = false;
+    private rightPaddleCollision = false;
+    private checkPaddleCollision(paddle: Paddle) {
+        let ball = this.ball;
+
+        const isLeftPaddle = paddle === this.leftPaddle;
+        const hasCollided = isLeftPaddle ? this.leftPaddleCollision : this.rightPaddleCollision;
+        if (isBallInsidePaddle(ball, paddle) && !hasCollided) {
+            // Set collision state
+            if (isLeftPaddle) {
+                this.leftPaddleCollision = true;
+            } else {
+                this.rightPaddleCollision = true;
+            }
+
+            const paddleCenterY = paddle.posY + paddle.height / 2;
+            const relativeIntersectY = (ball.pos.y - paddleCenterY) / (paddle.height / 2); // in range pf -1 to 1
+
+            const maxAngle = (45 * Math.PI) / 180;
+            const theta = maxAngle * relativeIntersectY;
+            ball.dir.dx = ball.dir.dx < 0 ? 1 : -1;
+            ball.dir.dy = Math.sin(theta);
+        } else {
+            // Reset collision state when ball is no longer inside paddle
+            if (isLeftPaddle) {
+                this.leftPaddleCollision = false;
+            } else {
+                this.rightPaddleCollision = false;
+            }
+        }
+    }
+
+    private nbrCollision: number = 0;
+    private gameLoop(timestamp: number, lastTime: number) {
+        if (lastTime === 0) {
+            lastTime = timestamp;
+        }
+        const elapsed = timestamp - lastTime;
+
+        this.checkAiMovement();
+        this.inputManager.processInput();
+
+        this.checkPaddleCollision(this.leftPaddle);
+        this.checkPaddleCollision(this.rightPaddle);
+        if (this.leftPaddleCollision || this.rightPaddleCollision) {
+            this.nbrCollision++;
+        }
+        if (this.nbrCollision == 1) {
+            this.ball.speed *= 2;
+            this.nbrCollision++;
+        }
+
+        if (!this.isGameOver()) {
+            this.ball.update(this.canvas, elapsed);
+        }
+
+        this.drawNewState();
+
+        if (this.isRallyFinished()) {
+            this.rallyCount++;
+            this.resetBall();
+        }
 
         requestAnimationFrame((t) => this.gameLoop(t, timestamp));
     }
@@ -260,4 +249,18 @@ export class PongGame {
     destroy() {
         this.inputManager.destroy();
     }
+}
+
+function isBallInsidePaddle(ball: Ball, paddle: Paddle) {
+    const ballLeft = ball.pos.x - ball.radius;
+    const ballRight = ball.pos.x + ball.radius;
+    const ballBottom = ball.pos.y + ball.radius;
+    const ballTop = ball.pos.y - ball.radius;
+
+    const paddleRightSide = paddle.posX + paddle.width;
+    const paddleLeftSide = paddle.posX;
+    const paddleTop = paddle.posY;
+    const paddleBottom = paddle.posY + paddle.height;
+
+    return ballLeft < paddleRightSide && ballRight > paddleLeftSide && ballBottom > paddleTop && ballTop < paddleBottom;
 }

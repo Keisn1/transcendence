@@ -46,10 +46,6 @@ export class Ball {
         this.pos.x += directionNormalized.dx * dist;
         this.pos.y += directionNormalized.dy * dist;
 
-        // if (this.pos.y - this.radius < 0 || this.pos.y + this.radius > canvas.height) {
-        //     this.dir.dy *= -1; // bounce
-        // }
-
         let bottom = canvas.height;
         if (this.pos.y + this.radius >= bottom && this.dir.dy > 0) {
             this.pos.y -= this.pos.y + this.radius - bottom; //
