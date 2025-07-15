@@ -74,6 +74,7 @@ export class PongGame {
                 height: 100,
                 speed: 5,
                 color: this.config.colors.paddle,
+				side: "left",
             }),
             right: new Paddle({
                 posX: this.canvas.width - 20 - 10,
@@ -82,6 +83,7 @@ export class PongGame {
                 height: 100,
                 speed: 5,
                 color: this.config.colors.paddle,
+				side: "right",
             }),
         };
 		this.leftAiController = new AiController(this.paddles.left, canvas);
@@ -156,17 +158,7 @@ export class PongGame {
 
     private checkAiMovement() {
         this.leftAiController.feedAi(this.ball);
-        if (this.leftAiController.aiDir == "up") {
-            this.paddles.left.moveUp(this.canvas);
-        } else if (this.leftAiController.aiDir == "down") {
-            this.paddles.left.moveDown(this.canvas);
-        }
 		this.rightAiController.feedAi(this.ball);
-        if (this.rightAiController.aiDir == "up") {
-            this.paddles.right.moveUp(this.canvas);
-        } else if (this.rightAiController.aiDir == "down") {
-            this.paddles.right.moveDown(this.canvas);
-        }
     }
 
     private drawNewState() {

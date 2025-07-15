@@ -10,6 +10,7 @@ interface PaddleConfig {
     height: number;
     speed: number;
     color: string;
+    side: string;
 }
 
 export class Paddle {
@@ -19,6 +20,7 @@ export class Paddle {
     public posX: number;
     public posY: number;
     public color: string;
+    public side: string;
 
     constructor(config: PaddleConfig) {
         this.posX = config.posX;
@@ -27,6 +29,7 @@ export class Paddle {
         this.height = config.height;
         this.speed = config.speed;
         this.color = config.color;
+        this.side = config.side;
     }
 
     moveUp(canvas: HTMLCanvasElement) {
