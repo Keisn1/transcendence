@@ -33,7 +33,10 @@ export class InputManager {
     processInput() {
         for (const [key, pressed] of this.keys) {
             if (pressed) {
-                this.keyBindings.get(key)?.();
+                const callback = this.keyBindings.get(key);
+                if (callback !== undefined) {
+                    callback();
+                }
             }
         }
     }

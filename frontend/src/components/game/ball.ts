@@ -1,52 +1,71 @@
-export interface Direction {
+import { Paddle } from "./paddle";
+
+export interface BallDirection {
     dx: number;
     dy: number;
 }
 
-export interface Position {
+export interface BallPosition {
     x: number;
     y: number;
 }
 
-function normalizeDirection(direction: Direction): Direction {
-    let norm = Math.hypot(direction.dx, direction.dy);
-    return {
-        dx: direction.dx / norm,
-        dy: direction.dy / norm,
-    };
-}
-
 export interface BallConfig {
-    initPos: Position;
-    initDirection: Direction; // was vx and vy
+    initPos: BallPosition;
+    initDirection: BallDirection; // was vx and vy
     speed: number;
     radius: number;
     color: string;
 }
 
 export class Ball {
-    public pos: Position;
-    public dir: Direction;
+    private config: BallConfig;
+    public pos: BallPosition;
+    public dir: BallDirection;
     public radius: number;
     public speed: number;
     public color: string;
+    public nbrCollision: number = 0;
 
     constructor(config: BallConfig) {
-        this.pos = config.initPos;
-        this.dir = config.initDirection;
+        this.config = config;
+        this.pos = { ...config.initPos };
+        this.dir = { ...config.initDirection };
         this.speed = config.speed;
         this.radius = config.radius;
         this.color = config.color;
     }
 
-    updateCollision(relativeIntersectY: number) {
+    reset(rallyCount: number) {
+        this.speed = this.config.speed;
+        this.nbrCollision = 0;
+
+        this.pos = { ...this.config.initPos };
+
+        const angleRange = (60 * Math.PI) / 180;
+        const xDirection = rallyCount % 2 === 0 ? 1 : -1;
+        const theta = (Math.random() - 0.5) * angleRange;
+
+        this.dir.dx = xDirection;
+        this.dir.dy = Math.sin(theta);
+    }
+
+    updateCollision(paddle: Paddle) {
+        const paddleCenterY = paddle.posY + paddle.height / 2;
+        const relativeIntersectY = (this.pos.y - paddleCenterY) / (paddle.height / 2); // in range pf -1 to 1
         const maxAngle = (45 * Math.PI) / 180;
         const theta = maxAngle * relativeIntersectY;
         this.dir.dx = this.dir.dx < 0 ? 1 : -1;
         this.dir.dy = Math.sin(theta);
+        this.nbrCollision++;
+        if (this.nbrCollision == 1) {
+            this.speed *= 2;
+        }
     }
 
-    update(canvas: HTMLCanvasElement, elapsed: number) {
+    update(canvas: HTMLCanvasElement, collisionPaddle: Paddle | null, elapsed: number) {
+        if (collisionPaddle) this.updateCollision(collisionPaddle);
+
         let dist = this.speed * elapsed;
 
         let directionNormalized = normalizeDirection(this.dir);
@@ -65,10 +84,19 @@ export class Ball {
             this.dir.dy *= -1; // bounce
         }
     }
+
     draw(ctx: CanvasRenderingContext2D) {
         ctx.beginPath();
         ctx.fillStyle = this.color;
         ctx.arc(this.pos.x, this.pos.y, this.radius, 0, Math.PI * 2);
         ctx.fill();
     }
+}
+
+function normalizeDirection(direction: BallDirection): BallDirection {
+    let norm = Math.hypot(direction.dx, direction.dy);
+    return {
+        dx: direction.dx / norm,
+        dy: direction.dy / norm,
+    };
 }

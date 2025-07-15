@@ -1,4 +1,4 @@
-import { Ball, type Direction, type Position } from "./ball";
+import { Ball, type BallDirection, type BallPosition } from "./ball";
 import { Paddle } from "./paddle";
 
 interface Intersection {
@@ -40,7 +40,6 @@ export class AiController {
     private paddle: Paddle;
     private canvas: HTMLCanvasElement;
     public aiDir: "up" | "down" | "rest" = "rest";
-    private lastPredictionTime = 0;
     private intersection: Intersection = { y: 0, x: 0 };
 
     constructor(paddle: Paddle, canvas: HTMLCanvasElement) {
@@ -48,7 +47,12 @@ export class AiController {
         this.canvas = canvas;
     }
 
-    private predictYIntersection(pos: Position, dir: Direction, canvasHeight: number, intersectionX: number): number {
+    private predictYIntersection(
+        pos: BallPosition,
+        dir: BallDirection,
+        canvasHeight: number,
+        intersectionX: number,
+    ): number {
         const initialBounceY = dir.dy > 0 ? 0 : canvasHeight;
         const stepsInDy = (pos.y - initialBounceY) / dir.dy;
         const initialBounceX = pos.x - dir.dx * stepsInDy;
