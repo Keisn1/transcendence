@@ -31,8 +31,8 @@ export class PongGame {
     private paddles: Paddles;
     private scores = { player1: 0, player2: 0 };
     private rallyCount: number = 0;
-    private leftAiController: AiController = new AiController();
-    private rightAiController: AiController = new AiController();
+    private leftAiController: AiController;
+    private rightAiController: AiController;
 
     constructor(canvas: HTMLCanvasElement, config: GameConfig = {}) {
         const defaultControls: ControlsConfig = {
@@ -84,6 +84,8 @@ export class PongGame {
                 color: this.config.colors.paddle,
             }),
         };
+		this.leftAiController = new AiController(this.paddles.left, canvas);
+		this.rightAiController = new AiController(this.paddles.right, canvas);
     }
 
     async start() {
@@ -153,13 +155,13 @@ export class PongGame {
     }
 
     private checkAiMovement() {
-        this.leftAiController.prediction(this.ball, this.paddles.left, this.canvas);
+        this.leftAiController.feedAi(this.ball);
         if (this.leftAiController.aiDir == "up") {
             this.paddles.left.moveUp(this.canvas);
         } else if (this.leftAiController.aiDir == "down") {
             this.paddles.left.moveDown(this.canvas);
         }
-		this.rightAiController.prediction(this.ball, this.paddles.right, this.canvas);
+		this.rightAiController.feedAi(this.ball);
         if (this.rightAiController.aiDir == "up") {
             this.paddles.right.moveUp(this.canvas);
         } else if (this.rightAiController.aiDir == "down") {
