@@ -32,6 +32,7 @@ export class PongGame {
     private rallyCount: number = 0;
     private leftAiController: AiController;
     private rightAiController: AiController;
+	private aiFeedFrameCount: number = 0;
 
     constructor(canvas: HTMLCanvasElement, config: GameConfig = {}) {
         const defaultControls: ControlsConfig = {
@@ -124,8 +125,12 @@ export class PongGame {
     }
 
     private feedAi() {
-        this.leftAiController.feedAi(this.ball);
-        this.rightAiController.feedAi(this.ball);
+		this.aiFeedFrameCount++;
+		if (this.aiFeedFrameCount >= 60) {
+			this.aiFeedFrameCount = 0;
+			this.leftAiController.feedAi(this.ball);
+			this.rightAiController.feedAi(this.ball);
+		}
     }
 
     private drawNewState() {
