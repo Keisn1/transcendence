@@ -35,6 +35,7 @@ export class Paddle {
     moveUp(canvas: HTMLCanvasElement) {
         this.posY = Math.max(0, Math.min(canvas.height - this.height, this.posY - this.speed));
     }
+
     moveDown(canvas: HTMLCanvasElement) {
         this.posY = Math.max(0, Math.min(canvas.height - this.height, this.posY + this.speed));
     }

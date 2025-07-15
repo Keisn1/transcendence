@@ -50,7 +50,7 @@ export class PongGame {
         this.config = {
             ballConfig: {
                 initPos: { x: canvas.width / 2, y: canvas.height / 2 },
-                initDirection: { dx: 1, dy: 1 },
+                initDirection: { dx: 1, dy: -0.5 },
                 radius: config.ballConfig?.radius ?? 10,
                 speed: config.ballConfig?.speed ?? canvas.width / 3000,
                 color: config.ballConfig?.color ?? "#fff",
@@ -74,7 +74,7 @@ export class PongGame {
                 height: 100,
                 speed: 5,
                 color: this.config.colors.paddle,
-				side: "left",
+                side: "left",
             }),
             right: new Paddle({
                 posX: this.canvas.width - 20 - 10,
@@ -83,11 +83,11 @@ export class PongGame {
                 height: 100,
                 speed: 5,
                 color: this.config.colors.paddle,
-				side: "right",
+                side: "right",
             }),
         };
-		this.leftAiController = new AiController(this.paddles.left, canvas);
-		this.rightAiController = new AiController(this.paddles.right, canvas);
+        this.leftAiController = new AiController(this.paddles.left, canvas);
+        this.rightAiController = new AiController(this.paddles.right, canvas);
     }
 
     async start() {
@@ -158,7 +158,7 @@ export class PongGame {
 
     private checkAiMovement() {
         this.leftAiController.feedAi(this.ball);
-		this.rightAiController.feedAi(this.ball);
+        this.rightAiController.feedAi(this.ball);
     }
 
     private drawNewState() {
