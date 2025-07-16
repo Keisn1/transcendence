@@ -2,6 +2,7 @@ import AbstractView from "./views/AbstractView";
 import DashboardView from "./views/DashboardView.ts";
 import GameView from "./views/GameView.ts";
 import ProfileView from "./views/ProfileView.ts";
+import { AuthService } from "./services/auth/auth.ts";
 
 export default class Router {
     private currentView: AbstractView | null = null;
@@ -17,9 +18,6 @@ export default class Router {
     };
 
     private routing() {
-        if (this.currentView && typeof this.currentView.destroy === "function") {
-            this.currentView.destroy();
-        }
         let routes = [
             {
                 path: "/",
@@ -32,6 +30,14 @@ export default class Router {
             {
                 path: "/profile",
                 view: ProfileView,
+            },
+            {
+                path: "/login",
+                view: DashboardView,
+            },
+            {
+                path: "/signout",
+                view: DashboardView,
             },
         ];
 
@@ -52,6 +58,33 @@ export default class Router {
             };
         }
 
+        console.log("Inside router: ", match.route.path);
+        if (match.route.path === "/login") {
+            const authService = AuthService.getInstance();
+            authService.login({
+                id: "123",
+                username: "john_doe",
+                email: "john@example.com",
+                avatar: "https://example.com/avatar.jpg",
+            });
+            return;
+        }
+
+        if (match.route.path === "/signout") {
+            console.log("authService.logout");
+            const authService = AuthService.getInstance();
+            authService.logout();
+            return;
+        }
+
+        console.log("currentView", this.currentView);
+        console.log("typeof this.currentView.destroy: ", typeof this.currentView?.destroy);
+        if (this.currentView && typeof this.currentView.destroy === "function") {
+            console.log("destroying a view", this.currentView);
+            this.currentView.destroy();
+        }
+
+        console.log("creating new view");
         this.currentView = new match.route.view();
         this.currentView.render();
     }

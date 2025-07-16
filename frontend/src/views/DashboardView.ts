@@ -12,15 +12,15 @@ export default class extends AbstractView {
     }
 
     render() {
-        let navbar = new Navbar();
-        document.body.appendChild(navbar.getContainer());
+        this.navbar = new Navbar();
+        document.body.appendChild(this.navbar.getContainer());
 
-        let adLightBox = new AdLightBox();
-        document.body.appendChild(adLightBox.getContainer());
+        this.adLightBox = new AdLightBox();
+        document.body.appendChild(this.adLightBox.getContainer());
     }
 
     destroy() {
-        console.log("hello");
+        console.log("destroying dashboard View");
         // Clean up components
         this.navbar?.destroy();
         this.adLightBox?.destroy();

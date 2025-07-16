@@ -20,7 +20,6 @@ export class AdLightBox {
     }
 
     setupEvents() {
-        console.log("setup events for lightbox");
         const showAd = () => this.container.classList.remove("hidden");
         const hideAd = () => this.container.classList.add("hidden");
 

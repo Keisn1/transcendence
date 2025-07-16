@@ -12,26 +12,37 @@
   - solved: prevent default browser behavior on ArrowUp and ArrowDown
 - [X] refactor input handling
 
-- [ ] adjust the paddle dimensions to the canvas (still need to have a look)
-  - [ ] adjust all the dimensions to the canvas dimensions
-- [ ] lot of "this" usage in game.ts. How can we improve that?
-- [ ] change layout of GameConfig interface
-  - [ ] make a BallConfig
+- [X] adjust the paddle dimensions to the canvas (still need to have a look)
+  - [X] adjust all the dimensions to the canvas dimensions
+- [X] lot of "this" usage in game.ts. How can we improve that?
+- [X] change layout of GameConfig interface
+  - [X] make a BallConfig
     #+begin_src js
 this.ball = new Ball(canvas, config.ballConfig);
     #+end_src
-  - [ ] make a PaddleConfig
+  - [X] make a PaddleConfig
+- [ ] game setup by the player(s)
+  - [ ] who is playing against who
+  - [ ] playing the Ai Opponent
+  - [ ] start button and drop down menus for selecting AIOpponent and sides
+- [ ] how do we toggle/untoggle AIOpponents
+- [ ] game over screen
 
 * TODO Frontend
 - [X] typify navbar
 - [X] typify lightbox
-- [ ] browser is still reloading pages, investigate
-- [ ] refresh view with new content from the server
-  - [ ]
-- [ ] re-check when you need to destroy views
+- [X] browser is still reloading pages, investigate
+- [X] re-check when you need to destroy views
   - [[file:~/workspace/transcendence/chats/component_based_architecture.org::*when do i destroy views?][when do i destroy views?]]
+- [X] refresh view with new content from the server
+
+- [ ] why does adlightbox does not show up when you return to the dashboard
+  - there is a reason for this [[file:src/components/adLightbox/adLightbox.ts::window.removeEventListener("load", showAdAfterTimeout); // only initially page load]]
+  - it's only when the page is loaded ("load" event)
 
 - [ ] rather setup CORS with fastify and environment variables
   - right now it is vite, with a proxy server making it possible during developement
+
 - [ ] setup nginx and setup production environment
-- [ ] why does adlightbox does not show up when you return to the dashboard
+- [ ] clean up navbar html
+  - [ ] set all the links and important attributes (everything that is not tailwind inside the component itsel)

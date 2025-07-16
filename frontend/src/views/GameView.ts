@@ -21,6 +21,8 @@ export default class extends AbstractView {
     }
 
     destroy() {
+        console.log("destroying dashboard View");
+
         this.navbar?.destroy();
         this.gameComponent?.destroy();
 
