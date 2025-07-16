@@ -74,3 +74,5 @@ export class AuthService {
         this.listeners.forEach((listener) => listener(this.currentUser));
     }
 }
+
+let request = { params: { user: "john doe" } };
