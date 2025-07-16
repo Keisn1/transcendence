@@ -32,7 +32,7 @@ export class PongGame {
     private rallyCount: number = 0;
     private leftAiController: AiController;
     private rightAiController: AiController;
-	private aiFeedFrameCount: number = 0;
+	private timePassed: number = 1000;
 
     constructor(canvas: HTMLCanvasElement, config: GameConfig = {}) {
         const defaultControls: ControlsConfig = {
@@ -125,12 +125,8 @@ export class PongGame {
     }
 
     private feedAi() {
-		this.aiFeedFrameCount++;
-		if (this.aiFeedFrameCount >= 60) {
-			this.aiFeedFrameCount = 0;
-			this.leftAiController.feedAi(this.ball);
-			this.rightAiController.feedAi(this.ball);
-		}
+		this.leftAiController.feedAi(this.ball);
+		this.rightAiController.feedAi(this.ball);
     }
 
     private drawNewState() {
@@ -164,7 +160,12 @@ export class PongGame {
         const elapsed = timestamp - lastTime;
 
         this.inputManager.processInput();
-        this.feedAi();
+		
+		this.timePassed += elapsed;
+		if (this.timePassed >= 1000) {
+			this.timePassed -= 1000;
+			this.feedAi();
+		}
 
         let collisionPaddle = this.checkCollision();
         if (!this.isGameOver()) {

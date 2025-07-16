@@ -53,6 +53,7 @@ export class AiController {
             pos: { ...ball.pos },
             dir: { ...ball.dir }
         };
+        this.prediction(this.ballData);
     }
 
 	private startAiLoop() {
@@ -60,11 +61,7 @@ export class AiController {
         
         const aiTick = () => {
             if (!this.isRunning) return;
-            
-            if (this.ballData) {
-                this.prediction(this.ballData);
-                this.updateDirection();
-            }
+            if (this.ballData) this.updateDirection();
             
             this.pressKey();
             this.actionLoop = requestAnimationFrame(aiTick);
