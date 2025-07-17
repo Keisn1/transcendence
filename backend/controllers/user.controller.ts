@@ -1,4 +1,4 @@
-import { FastifyRequest, FastifyReply, RouteHandler } from "fastify";
+import { FastifyRequest, FastifyReply } from "fastify";
 import { User } from "../models/User";
 import {} from "fastify";
 
@@ -43,9 +43,6 @@ export async function createUser(
             return reply.code(400).send({ error: "Username is already being used" });
         }
     }
-    // if (newUserData.username in userDb) {
-    //     return reply.code(400).send({ error: "Username is already being used" });
-    // }
 
     const keys = Object.keys(userDb);
     const lastKey = keys[keys.length - 1];

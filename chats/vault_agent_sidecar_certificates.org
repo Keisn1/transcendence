@@ -1,0 +1,1100 @@
+:PROPERTIES:
+:GPTEL_MODEL: claude-sonnet-4-20250514
+:GPTEL_BACKEND: Claude
+:GPTEL_SYSTEM: You are a large language model living in Emacs and a helpful assistant. Avoid long answers.
+:GPTEL_BOUNDS: ((response (580 1775) (1824 3814) (4046 5533) (5673 11442) (11489 13197) (13271 15104) (15181 17161) (17363 18490) (18578 21033) (21069 22660) (22742 24110) (24159 24277) (24281 26554) (26634 27984) (28151 28518) (28534 30352)))
+:END:
+
+*** in an production environment using microservices, how do i get necessary tsl-certificates on the individual servers being launched (scaled)?
+
+Here are the main approaches for TLS certificates in microservices:
+
+**** 1. *Service Mesh* (Recommended)
+- *Istio/Linkerd*: Automatic mTLS with certificate rotation
+- *Consul Connect*: Built-in certificate management
+- Handles cert distribution and rotation automatically
+
+**** 2. *Certificate Management Tools*
+- *cert-manager* (Kubernetes): Automates Let's Encrypt/internal CA certs
+- *Vault*: Centralized PKI with dynamic certificate generation
+- *AWS Certificate Manager*: For AWS environments
+
+**** 3. *Init Containers/Sidecars*
+#+begin_src yaml
+# Example K8s init container
+initContainers:
+- name: cert-fetcher
+  image: cert-fetcher:latest
+  command: ["/fetch-certs.sh"]
+  volumeMounts:
+  - name: certs
+    mountPath: /certs
+#+end_src
+
+**** 4. *Container Image Baking*
+- Include certificates in base images
+- Use multi-stage builds to inject certs at build time
+- Less flexible but simpler for static environments
+
+**** 5. *External Certificate Providers*
+- *Let's Encrypt* with ACME clients
+- *HashiCorp Vault* agent
+- Cloud provider certificate services
+
+*Best practice*: Use a service mesh or cert-manager for automatic certificate lifecycle management rather than manual distribution.
+
+***** How do i use HashiCorpVault to do this?
+
+Here's how to use HashiCorp Vault for TLS certificate management in microservices:
+
+****** 1. *Enable PKI Secrets Engine*
+#+begin_src bash
+# Enable PKI engine
+vault secrets enable pki
+
+# Set max lease TTL
+vault secrets tune -max-lease-ttl=8760h pki
+
+# Generate root CA
+vault write pki/root/generate/internal \
+    common_name="mycompany.com" \
+    ttl=8760h
+#+end_src
+
+****** 2. *Configure PKI*
+#+begin_src bash
+# Set issuing URLs
+vault write pki/config/urls \
+    issuing_certificates="http://vault:8200/v1/pki/ca" \
+    crl_distribution_points="http://vault:8200/v1/pki/crl"
+
+# Create role for microservices
+vault write pki/roles/microservice \
+    allowed_domains="mycompany.com" \
+    allow_subdomains=true \
+    max_ttl=72h
+#+end_src
+
+****** 3. *Vault Agent Sidecar* (Recommended)
+#+begin_src yaml
+# vault-agent-config.hcl
+pid_file = "/tmp/pidfile"
+vault {
+  address = "https://vault:8200"
+}
+
+auth {
+  method "kubernetes" {
+    mount_path = "auth/kubernetes"
+    config = {
+      role = "microservice"
+    }
+  }
+}
+
+template {
+  source = "/vault/secrets/cert.tpl"
+  destination = "/certs/tls.crt"
+  command = "service nginx reload"
+}
+#+end_src
+
+****** 4. *Dynamic Certificate Generation*
+#+begin_src bash
+# Generate cert for specific service
+vault write pki/issue/microservice \
+    common_name="api.mycompany.com" \
+    ttl=24h
+#+end_src
+
+****** 5. *Init Container Approach*
+#+begin_src yaml
+initContainers:
+- name: vault-init
+  image: vault:latest
+  command: ["/bin/sh", "-c"]
+  args:
+  - |
+    vault auth -method=kubernetes
+    vault write -field=certificate pki/issue/microservice \
+        common_name=$SERVICE_NAME.mycompany.com > /certs/tls.crt
+    vault write -field=private_key pki/issue/microservice \
+        common_name=$SERVICE_NAME.mycompany.com > /certs/tls.key
+#+end_src
+
+****** 6. *Automatic Renewal*
+Use Vault Agent or a cron job to renew certificates before expiry.
+
+*Key benefits*: Automatic rotation, centralized management, short-lived certificates, audit logging.
+
+*****
+*** We are using HashiCorpVault with Nginx. Now hashicorp is providing self-signed certificates for the nginx proxy-server (is this correct?). After that there is a proxypass to the backend via http. Shouldn't it be https?
+
+You're absolutely right to question this! Here's the breakdown:
+
+**** /Current Setup Analysis/
+- *Vault → Nginx*: Self-signed certs (✓ correct for internal CA)
+- *Nginx → Backend*: HTTP (❌ security gap)
+
+***** /The Problem/
+Using HTTP between Nginx and backend creates:
+- *Unencrypted internal traffic*
+- *Man-in-the-middle vulnerabilities*
+- *Compliance issues* (PCI, SOX, etc.)
+- *Data exposure* within your network
+
+**** /Better Architecture/
+
+***** /Option 1: Full mTLS (Recommended)/
+#+begin_src nginx
+upstream backend {
+    server backend:8443;
+}
+
+server {
+    listen 443 ssl;
+    ssl_certificate /certs/tls.crt;
+    ssl_certificate_key /certs/tls.key;
+
+    location / {
+        proxy_pass https://backend;
+        proxy_ssl_certificate /certs/client.crt;
+        proxy_ssl_certificate_key /certs/client.key;
+        proxy_ssl_verify on;
+        proxy_ssl_trusted_certificate /certs/ca.crt;
+    }
+}
+#+end_src
+
+***** /Option 2: Service Mesh/
+- *Istio/Linkerd*: Automatic mTLS between all services
+- *Consul Connect*: Built-in service-to-service encryption
+
+***** /Option 3: Network Segmentation/
+- If backends are in isolated network segments
+- Still not ideal for zero-trust security
+
+****** /Vault PKI for Backend Services/
+#+begin_src bash
+# Issue certs for backend services too
+vault write pki/issue/microservice \
+    common_name="backend.internal" \
+    ttl=24h
+#+end_src
+
+*Yes, you should use HTTPS* for the full chain unless you have strong network isolation justifications.
+
+******
+*** Can you guide me through setting up mTLS with nginx, hashicorp vault and 2 backend services that may also talk to each other?
+
+Here's a complete mTLS setup with Nginx, Vault, and 2 backend services:
+
+**** 1. /Vault PKI Setup/
+#+begin_src bash
+# Enable PKI engine
+vault secrets enable pki
+vault secrets tune -max-lease-ttl=8760h pki
+
+# Generate root CA
+vault write pki/root/generate/internal \
+    common_name="internal.company.com" \
+    ttl=8760h
+
+# Configure URLs
+vault write pki/config/urls \
+    issuing_certificates="https://vault:8200/v1/pki/ca" \
+    crl_distribution_points="https://vault:8200/v1/pki/crl"
+
+# Create roles
+vault write pki/roles/nginx \
+    allowed_domains="internal.company.com" \
+    allow_subdomains=true \
+    client_flag=true \
+    server_flag=true \
+    max_ttl=72h
+
+vault write pki/roles/backend \
+    allowed_domains="internal.company.com" \
+    allow_subdomains=true \
+    client_flag=true \
+    server_flag=true \
+    max_ttl=72h
+#+end_src
+
+**** 2. /Certificate Generation Script/
+#+begin_src bash
+#!/bin/bash
+# gen-certs.sh
+SERVICE_NAME=$1
+VAULT_ADDR="https://vault:8200"
+
+# Authenticate with Vault
+vault auth -method=kubernetes
+
+# Generate certificates
+vault write -format=json pki/issue/backend \
+    common_name="${SERVICE_NAME}.internal.company.com" \
+    ttl=24h > /tmp/cert.json
+
+# Extract components
+jq -r '.data.certificate' /tmp/cert.json > /certs/tls.crt
+jq -r '.data.private_key' /tmp/cert.json > /certs/tls.key
+jq -r '.data.issuing_ca' /tmp/cert.json > /certs/ca.crt
+
+# Set permissions
+chmod 600 /certs/tls.key
+chmod 644 /certs/tls.crt /certs/ca.crt
+#+end_src
+
+**** 3. /Nginx Configuration/
+#+begin_src nginx
+# nginx.conf
+upstream service1 {
+    server service1:8443;
+}
+
+upstream service2 {
+    server service2:8443;
+}
+
+server {
+    listen 443 ssl;
+    server_name gateway.internal.company.com;
+
+    # Server certificates
+    ssl_certificate /certs/tls.crt;
+    ssl_certificate_key /certs/tls.key;
+
+    # Client certificate verification
+    ssl_client_certificate /certs/ca.crt;
+    ssl_verify_client optional;
+
+    # Proxy to service1
+    location /api/v1/service1 {
+        proxy_pass https://service1;
+        proxy_ssl_certificate /certs/tls.crt;
+        proxy_ssl_certificate_key /certs/tls.key;
+        proxy_ssl_verify on;
+        proxy_ssl_trusted_certificate /certs/ca.crt;
+        proxy_ssl_server_name on;
+    }
+
+    # Proxy to service2
+    location /api/v1/service2 {
+        proxy_pass https://service2;
+        proxy_ssl_certificate /certs/tls.crt;
+        proxy_ssl_certificate_key /certs/tls.key;
+        proxy_ssl_verify on;
+        proxy_ssl_trusted_certificate /certs/ca.crt;
+        proxy_ssl_server_name on;
+    }
+}
+#+end_src
+
+**** 4. /Backend Service Configuration/
+#+begin_src yaml
+# service1-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service1
+spec:
+  template:
+    spec:
+      initContainers:
+      - name: cert-init
+        image: vault:latest
+        command: ["/bin/sh", "/scripts/gen-certs.sh", "service1"]
+        volumeMounts:
+        - name: certs
+          mountPath: /certs
+        - name: scripts
+          mountPath: /scripts
+      containers:
+      - name: service1
+        image: service1:latest
+        ports:
+        - containerPort: 8443
+        env:
+        - name: TLS_CERT_FILE
+          value: "/certs/tls.crt"
+        - name: TLS_KEY_FILE
+          value: "/certs/tls.key"
+        - name: CA_CERT_FILE
+          value: "/certs/ca.crt"
+        volumeMounts:
+        - name: certs
+          mountPath: /certs
+          readOnly: true
+      volumes:
+      - name: certs
+        emptyDir: {}
+      - name: scripts
+        configMap:
+          name: cert-scripts
+#+end_src
+
+**** 5. /Service-to-Service Communication/
+#+begin_src go
+// service1 calling service2
+package main
+
+import (
+    "crypto/tls"
+    "crypto/x509"
+    "io/ioutil"
+    "net/http"
+)
+
+func callService2() {
+    // Load client certificate
+    cert, err := tls.LoadX509KeyPair("/certs/tls.crt", "/certs/tls.key")
+    if err != nil {
+        panic(err)
+    }
+
+    // Load CA certificate
+    caCert, err := ioutil.ReadFile("/certs/ca.crt")
+    if err != nil {
+        panic(err)
+    }
+
+    caCertPool := x509.NewCertPool()
+    caCertPool.AppendCertsFromPEM(caCert)
+
+    // Configure TLS
+    tlsConfig := &tls.Config{
+        Certificates: []tls.Certificate{cert},
+        RootCAs:      caCertPool,
+        ServerName:   "service2.internal.company.com",
+    }
+
+    client := &http.Client{
+        Transport: &http.Transport{
+            TLSClientConfig: tlsConfig,
+        },
+    }
+
+    resp, err := client.Get("https://service2.internal.company.com:8443/api/data")
+    // Handle response...
+}
+#+end_src
+
+**** 6. /Certificate Rotation/
+#+begin_src bash
+#!/bin/bash
+# cert-rotation.sh - Run as cron job
+while true; do
+    # Check certificate expiry
+    if openssl x509 -checkend 86400 -noout -in /certs/tls.crt; then
+        echo "Certificate still valid"
+    else
+        echo "Certificate expiring, renewing..."
+        /scripts/gen-certs.sh $SERVICE_NAME
+        # Reload service
+        pkill -HUP nginx
+    fi
+    sleep 3600  # Check every hour
+done
+#+end_src
+
+**** 7. /Docker Compose Example/
+#+begin_src yaml
+version: '3.8'
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "443:443"
+    volumes:
+      - nginx-certs:/certs
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - cert-init-nginx
+
+  service1:
+    image: service1:latest
+    ports:
+      - "8443"
+    volumes:
+      - service1-certs:/certs
+    depends_on:
+      - cert-init-service1
+
+  service2:
+    image: service2:latest
+    ports:
+      - "8443"
+    volumes:
+      - service2-certs:/certs
+    depends_on:
+      - cert-init-service2
+#+end_src
+
+This setup provides:
+- /Full mTLS/ between all components
+- /Automatic certificate management/ via Vault
+- /Service-to-service authentication/
+- /Certificate rotation/ capability
+
+*** when are self-signed certificates used?
+
+Self-signed certificates are used in several scenarios:
+
+**** /Internal/Development Use Cases/
+- /Development environments/ - Quick setup without CA overhead
+- /Internal microservices/ - Services communicating within private networks
+- /Testing/staging/ - Where trust validation isn't critical
+- /Local development/ - localhost, docker containers
+
+**** /Infrastructure Components/
+- /Database connections/ - MySQL, PostgreSQL internal replication
+- /Message queues/ - RabbitMQ, Kafka cluster communication
+- /Container orchestration/ - Kubernetes API server, etcd
+- /Monitoring systems/ - Prometheus, Grafana internal metrics
+
+**** /Private Networks/
+- /Corporate intranets/ - Where you control all clients
+- /IoT devices/ - Embedded systems with limited CA access
+- /VPN endpoints/ - Internal company VPN servers
+- /Service mesh/ - Istio, Linkerd generate self-signed certs
+
+**** /Cost/Complexity Avoidance/
+- /Small organizations/ - Can't justify CA infrastructure costs
+- /Temporary services/ - Short-lived environments
+- /Air-gapped systems/ - No internet access for Let's Encrypt
+
+**** /When NOT to Use Self-Signed/
+- /Public-facing websites/ - Browsers show security warnings
+- /Third-party integrations/ - External services won't trust them
+- /Mobile applications/ - App stores often reject self-signed certs
+- /Production APIs/ - Client validation failures
+
+**** /Best Practices/
+#+begin_src bash
+# Generate proper self-signed cert
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem \
+    -days 365 -nodes -subj "/CN=myservice.internal"
+#+end_src
+
+*Key point*: Self-signed = you are your own Certificate Authority. Use when you control both client and server, avoid for public services.
+
+*** so they are also used then microservices are talking to eachother?
+
+**Yes, absolutely!* Self-signed certificates are commonly used for microservice-to-microservice communication:
+
+**** /Why Self-Signed for Microservices?/
+- /Internal traffic only/ - No external clients to worry about
+- /You control both ends/ - Can distribute CA cert to all services
+- /Performance/ - No external CA validation overhead
+- /Cost effective/ - No commercial CA fees for internal certs
+
+**** /Common Patterns/
+
+**/ /1. Internal CA (Recommended)/
+#+begin_src bash
+# Create internal CA
+openssl genrsa -out ca.key 4096
+openssl req -new -x509 -key ca.key -out ca.crt -days 365 \
+    -subj "/CN=Internal CA"
+
+# Sign service certificates with internal CA
+openssl genrsa -out service1.key 2048
+openssl req -new -key service1.key -out service1.csr \
+    -subj "/CN=service1.internal"
+openssl x509 -req -in service1.csr -CA ca.crt -CAkey ca.key \
+    -out service1.crt -days 30
+#+end_src
+
+**/ /2. Service Mesh Auto-Generation/
+- /Istio/: Automatically generates self-signed certs
+- /Linkerd/: Built-in certificate rotation
+- /Consul Connect/: Self-signed with automatic rotation
+
+**/ /3. HashiCorp Vault PKI/
+#+begin_src bash
+# Vault acts as internal CA, generates "self-signed" certs
+vault write pki/issue/microservice \
+    common_name="service1.internal" \
+    ttl=24h
+#+end_src
+
+**** /Trust Distribution/
+All services need the CA certificate:
+#+begin_src yaml
+# Each service container
+volumeMounts:
+- name: ca-cert
+  mountPath: /etc/ssl/certs/ca.crt
+  readOnly: true
+#+end_src
+
+**** /Benefits for Microservices/
+- ✅ /Encryption/ in transit
+- ✅ /Authentication/ between services
+- ✅ /Short-lived/ certificates (better security)
+- ✅ /Automated/ certificate management
+- ✅ /No external dependencies/
+
+*Bottom line*: Self-signed certs are perfect for internal microservice communication when you manage the entire infrastructure.
+
+*****
+*** when i use hashicorp vault, do i have a vault per microservice?
+
+**No, you typically use ONE centralized Vault cluster* for all microservices. Here's why:
+
+**** /Standard Architecture/
+#+begin_src
+[Vault Cluster] ← All microservices connect here
+     ↓
+[Service1] [Service2] [Service3] [Service4]
+#+end_src
+
+**** /Why One Vault Cluster?/
+- /Centralized secret management/ - Single source of truth
+- /Shared PKI/ - All services trust same internal CA
+- /Cost effective/ - No need for multiple Vault licenses
+- /Easier maintenance/ - One cluster to manage/update
+- /Cross-service access/ - Services can access shared secrets
+
+**** /Vault Configuration/
+#+begin_src bash
+# Single Vault cluster serves all services
+vault secrets enable -path=pki pki
+vault secrets enable -path=database database
+vault secrets enable -path=kv kv-v2
+
+# Different roles for different services
+vault write pki/roles/service1 allowed_domains="service1.internal"
+vault write pki/roles/service2 allowed_domains="service2.internal"
+vault write pki/roles/nginx allowed_domains="nginx.internal"
+#+end_src
+
+**** /Access Control per Service/
+#+begin_src bash
+# Service-specific policies
+vault policy write service1-policy - <<EOF
+path "pki/issue/service1" { capabilities = ["create", "update"] }
+path "kv/data/service1/*" { capabilities = ["read"] }
+EOF
+
+vault policy write service2-policy - <<EOF
+path "pki/issue/service2" { capabilities = ["create", "update"] }
+path "kv/data/service2/*" { capabilities = ["read"] }
+EOF
+#+end_src
+
+**** /Authentication Methods/
+- /Kubernetes auth/ - Service accounts authenticate to Vault
+- /JWT/OIDC/ - Token-based authentication
+- /AppRole/ - Service-specific credentials
+
+**** /High Availability Setup/
+#+begin_src yaml
+# 3-node Vault cluster
+vault-0: leader
+vault-1: follower
+vault-2: follower
+#+end_src
+
+**** /When Multiple Vaults?/
+- /Different environments/ (dev/staging/prod)
+- /Regulatory compliance/ (separate data centers)
+- /Different security zones/ (DMZ vs internal)
+
+*One Vault cluster = simpler, more secure, easier to manage.*
+
+*****
+*** how is the certificate being transfered from the vault  cluster to the microservice (be a little bit more brief, I don't need to see things immediately, I need to understand how it works)
+
+
+There are 3 main patterns for certificate transfer:
+
+**** /1. Pull Model (Most Common)/
+- Microservice authenticates to Vault
+- Requests certificate via API call
+- Vault generates cert and returns it
+- Service saves cert to filesystem/memory
+
+**** /2. Push Model (Vault Agent)/
+- Vault Agent runs as sidecar container
+- Agent authenticates and fetches certificates
+- Writes certificates to shared volume
+- Main service reads certs from volume
+
+**** /3. Init Container/
+- Init container runs before main service
+- Fetches certificates during pod startup
+- Saves to shared volume
+- Main container starts with certificates ready
+
+**** /Authentication Flow/
+1. Service proves identity (K8s service account, JWT, etc.)
+2. Vault validates identity against policy
+3. If authorized, Vault generates certificate
+4. Certificate returned via HTTPS API
+
+**** /Certificate Lifecycle/
+- Certificates are typically short-lived (hours/days)
+- Services periodically renew before expiry
+- Vault tracks issued certificates for revocation
+
+The key is that *services actively fetch* their certificates from Vault rather than Vault pushing them out.
+
+*****
+***
+*** i would like to see how the Push Model looks like. (sidecar container)
+
+Here's how the Push Model with Vault Agent sidecar works:
+
+**** /Vault Agent Configuration/
+#+begin_src hcl
+# vault-agent-config.hcl
+pid_file = "/tmp/pidfile"
+
+vault {
+  address = "https://vault:8200"
+}
+
+auth {
+  method "kubernetes" {
+    mount_path = "auth/kubernetes"
+    config = {
+      role = "service1"
+    }
+  }
+}
+
+template {
+  source = "/vault/templates/cert.tpl"
+  destination = "/shared/certs/tls.crt"
+  command = "pkill -HUP service1"
+}
+
+template {
+  source = "/vault/templates/key.tpl"
+  destination = "/shared/certs/tls.key"
+  command = "pkill -HUP service1"
+}
+#+end_src
+
+**** /Certificate Templates/
+#+begin_src
+{{// cert.tpl //}}
+{{- with secret "pki/issue/service1" "common_name=service1.internal" "ttl=24h" -}}
+{{ .Data.certificate }}
+{{- end -}}
+
+{{// key.tpl //}}
+{{- with secret "pki/issue/service1" "common_name=service1.internal" "ttl=24h" -}}
+{{ .Data.private_key }}
+{{- end -}}
+#+end_src
+
+**** /Kubernetes Deployment/
+#+begin_src yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service1
+spec:
+  template:
+    spec:
+      containers:
+      # Main application container
+      - name: service1
+        image: service1:latest
+        ports:
+        - containerPort: 8443
+        volumeMounts:
+        - name: shared-certs
+          mountPath: /certs
+          readOnly: true
+
+      # Vault Agent sidecar
+      - name: vault-agent
+        image: vault:latest
+        command: ["vault", "agent", "-config=/vault/config/agent.hcl"]
+        volumeMounts:
+        - name: vault-config
+          mountPath: /vault/config
+        - name: vault-templates
+          mountPath: /vault/templates
+        - name: shared-certs
+          mountPath: /shared/certs
+
+      volumes:
+      - name: shared-certs
+        emptyDir: {}
+      - name: vault-config
+        configMap:
+          name: vault-agent-config
+      - name: vault-templates
+        configMap:
+          name: vault-templates
+#+end_src
+
+**** /How It Works/
+1. /Vault Agent starts/ with main container
+2. /Authenticates/ using Kubernetes service account
+3. /Fetches certificate/ from Vault PKI
+4. /Writes certificates/ to shared volume
+5. /Signals main app/ to reload certificates
+6. /Automatically renews/ before expiry
+
+**** /Benefits/
+- Main service doesn't need Vault client
+- Automatic certificate rotation
+- Zero downtime certificate updates
+- Vault Agent handles authentication complexity
+
+The sidecar pattern keeps certificate management separate from business logic.
+
+*** do i need to use kubernetes?
+
+**No, you don't need Kubernetes!* The sidecar pattern works in other environments too:
+
+**** /Docker Compose/
+#+begin_src yaml
+version: '3.8'
+services:
+  service1:
+    image: service1:latest
+    volumes:
+      - shared-certs:/certs
+    depends_on:
+      - vault-agent
+
+  vault-agent:
+    image: vault:latest
+    command: ["vault", "agent", "-config=/vault/config/agent.hcl"]
+    volumes:
+      - shared-certs:/shared/certs
+      - ./vault-config:/vault/config
+    environment:
+      - VAULT_ADDR=https://vault:8200
+
+volumes:
+  shared-certs:
+#+end_src
+
+**** /Systemd Services/
+#+begin_src ini
+# /etc/systemd/system/vault-agent.service
+[Unit]
+Description=Vault Agent
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/vault agent -config=/etc/vault/agent.hcl
+Restart=always
+User=vault
+
+[Install]
+WantedBy=multi-user.target
+#+end_src
+
+**** /VM/Bare Metal/
+- Run Vault Agent as daemon process
+- Use shared filesystem for certificates
+- Signal main process via Unix signals
+
+**** /Authentication Without Kubernetes/
+#+begin_src hcl
+# Use AppRole instead of Kubernetes auth
+auth {
+  method "approle" {
+    mount_path = "auth/approle"
+    config = {
+      role_id_file_path = "/etc/vault/role-id"
+      secret_id_file_path = "/etc/vault/secret-id"
+    }
+  }
+}
+#+end_src
+
+**** /Simple Script Alternative/
+#+begin_src bash
+#!/bin/bash
+# cert-fetcher.sh - Run as cron job
+vault auth -method=approle
+vault write -field=certificate pki/issue/service1 \
+    common_name=service1.internal > /certs/tls.crt
+#+end_src
+
+Kubernetes just makes orchestration easier, but the core concepts work everywhere.
+
+*****
+*** how is the vault agent able to speek to the vault on 8200 via https?
+
+Good question! The Vault Agent needs to trust the Vault server's TLS certificate. Here are the main approaches:
+
+**** /1. Vault Server with Valid Certificate/
+#+begin_src hcl
+# vault-agent-config.hcl
+vault {
+  address = "https://vault:8200"
+  # If Vault has cert signed by known CA, works automatically
+}
+#+end_src
+
+**** /2. Custom CA Certificate/
+#+begin_src hcl
+vault {
+  address = "https://vault:8200"
+  ca_cert = "/etc/ssl/certs/vault-ca.crt"
+  # Or use ca_path for directory of CA certs
+}
+#+end_src
+
+**** /3. Environment Variables/
+#+begin_src bash
+export VAULT_ADDR="https://vault:8200"
+export VAULT_CACERT="/etc/ssl/certs/vault-ca.crt"
+# Or disable verification (NOT recommended for production)
+export VAULT_SKIP_VERIFY=true
+#+end_src
+
+**** /4. In Container/
+#+begin_src yaml
+containers:
+- name: vault-agent
+  image: vault:latest
+  volumeMounts:
+  - name: vault-ca
+    mountPath: /etc/ssl/certs/vault-ca.crt
+    readOnly: true
+  env:
+  - name: VAULT_CACERT
+    value: "/etc/ssl/certs/vault-ca.crt"
+
+volumes:
+- name: vault-ca
+  secret:
+    secretName: vault-ca-cert
+#+end_src
+
+**** /5. TLS Skip Verify (Development Only)/
+#+begin_src hcl
+vault {
+  address = "https://vault:8200"
+  tls_skip_verify = true  # DON'T use in production
+}
+#+end_src
+
+/Most common/: Vault server uses certificate signed by internal CA, and agents have that CA cert in their trust store.
+
+***  I would like to see how this looks like:
+"/Most common/: Vault server uses certificate signed by internal CA, and agents have that CA cert in their trust store."
+
+
+Here's how the internal CA setup looks:
+
+**** /1. Create Internal CA/
+#+begin_src bash
+# Generate CA private key
+openssl genrsa -out ca.key 4096
+
+# Create CA certificate
+openssl req -new -x509 -key ca.key -out ca.crt -days 3650 \
+    -subj "/CN=Internal CA/O=MyCompany"
+#+end_src
+
+**** /2. Generate Vault Server Certificate/
+#+begin_src bash
+# Generate Vault server private key
+openssl genrsa -out vault.key 2048
+
+# Create certificate signing request
+openssl req -new -key vault.key -out vault.csr \
+    -subj "/CN=vault.internal/O=MyCompany"
+
+# Sign with internal CA
+openssl x509 -req -in vault.csr -CA ca.crt -CAkey ca.key \
+    -out vault.crt -days 365 -CAcreateserial
+#+end_src
+
+**** /3. Vault Server Configuration/
+#+begin_src hcl
+# vault.hcl
+listener "tcp" {
+  address     = "0.0.0.0:8200"
+  tls_cert_file = "/vault/certs/vault.crt"
+  tls_key_file  = "/vault/certs/vault.key"
+}
+
+storage "consul" {
+  address = "127.0.0.1:8500"
+  path    = "vault/"
+}
+
+ui = true
+#+end_src
+
+**** /4. Vault Agent Configuration/
+#+begin_src hcl
+# vault-agent-config.hcl
+vault {
+  address = "https://vault.internal:8200"
+  ca_cert = "/etc/ssl/certs/ca.crt"  # Internal CA cert
+}
+
+auth {
+  method "approle" {
+    mount_path = "auth/approle"
+    config = {
+      role_id_file_path = "/etc/vault/role-id"
+      secret_id_file_path = "/etc/vault/secret-id"
+    }
+  }
+}
+#+end_src
+
+**** /5. Docker Setup/
+#+begin_src yaml
+# docker-compose.yml
+version: '3.8'
+services:
+  vault:
+    image: vault:latest
+    ports:
+      - "8200:8200"
+    volumes:
+      - ./vault.hcl:/vault/config/vault.hcl
+      - ./vault.crt:/vault/certs/vault.crt
+      - ./vault.key:/vault/certs/vault.key
+    command: ["vault", "server", "-config=/vault/config/vault.hcl"]
+
+  vault-agent:
+    image: vault:latest
+    volumes:
+      - ./ca.crt:/etc/ssl/certs/ca.crt  # Internal CA
+      - ./vault-agent-config.hcl:/vault/config/agent.hcl
+      - shared-certs:/shared/certs
+    command: ["vault", "agent", "-config=/vault/config/agent.hcl"]
+    depends_on:
+      - vault
+#+end_src
+
+**** /6. Trust Store Distribution/
+The =ca.crt= file must be available to all Vault agents so they can verify the Vault server's certificate.
+
+This creates a complete trust chain: Internal CA → Vault Server Cert → Vault Agent trusts via CA cert.
+
+*** how do these certificates work in general? I have problems following you
+
+Let me explain certificates from the ground up:
+
+**** /What is a Certificate?/
+A certificate is like a digital ID card that says:
+- "I am server X"
+- "Here's my public key"
+- "Someone trustworthy vouched for me"
+
+**** /The Trust Chain/
+#+begin_src
+Certificate Authority (CA)
+    ↓ (signs/vouches for)
+Server Certificate
+    ↓ (presented to)
+Client
+#+end_src
+
+**** /Real World Analogy/
+- /CA/ = Government (issues driver's licenses)
+- /Server Certificate/ = Driver's license
+- /Client/ = Bouncer checking your ID
+
+**** /How It Works/
+1. /CA creates/ a "root certificate" (like government's official seal)
+2. /Server asks CA/ to sign its certificate
+3. /CA signs/ server's certificate with CA's private key
+4. /Client has/ CA's public certificate (trusts the "government")
+5. /When connecting/, server shows its certificate
+6. /Client verifies/ the signature using CA's public key
+
+**** /In Our Vault Example/
+#+begin_src
+Internal CA (we created)
+    ↓ signs
+Vault Server Certificate
+    ↓ presented to
+Vault Agent (has CA cert, so trusts Vault)
+#+end_src
+
+**** /The Files/
+- =ca.crt= = The "government seal" (public)
+- =vault.crt= = Vault's "driver's license" (public)
+- =vault.key= = Vault's private key (secret)
+
+/Key point/: Client needs the CA certificate to verify server certificates signed by that CA.
+
+Does this help clarify the basics?
+
+*****
+*** Can you take this flow and explain it to me with regards to the vault engine and the vault agent, deployed as a sidecar in a microservice?
+#+begin_example
+**** /How It Works/
+1. /CA creates/ a "root certificate" (like government's official seal)
+2. /Server asks CA/ to sign its certificate
+3. /CA signs/ server's certificate with CA's private key
+4. /Client has/ CA's public certificate (trusts the "government")
+5. /When connecting/, server shows its certificate
+6. /Client verifies/ the signature using CA's public key
+#+end_example
+
+
+Here's how the certificate flow works with Vault and the sidecar agent:
+
+**** /1. CA Creates Root Certificate/
+*Vault PKI Engine* acts as the Certificate Authority:
+#+begin_src bash
+# Vault PKI becomes the "government"
+vault write pki/root/generate/internal \
+    common_name="Internal CA" \
+    ttl=8760h
+#+end_src
+
+**** /2. Server Asks CA to Sign Certificate/
+*Vault Agent* (sidecar) requests a certificate:
+#+begin_src bash
+# Agent asks Vault PKI: "Please give me a certificate for my service"
+vault write pki/issue/microservice \
+    common_name="service1.internal" \
+    ttl=24h
+#+end_src
+
+**** /3. CA Signs Server Certificate/
+*Vault PKI* generates and signs the certificate:
+- Uses Vault's internal CA private key
+- Creates certificate for "service1.internal"
+- Returns: certificate + private key + CA certificate
+
+**** /4. Client Has CA's Public Certificate/
+*Other services* have Vault's CA certificate:
+#+begin_src yaml
+# All services get the CA cert to trust Vault-issued certificates
+volumeMounts:
+- name: vault-ca
+  mountPath: /etc/ssl/certs/vault-ca.crt
+#+end_src
+
+**** /5. When Connecting, Server Shows Certificate/
+*Service1* presents its Vault-issued certificate:
+- Client connects to =https://service1.internal:8443=
+- Service1 shows certificate signed by Vault PKI
+
+**** /6. Client Verifies Signature/
+*Client service* validates the certificate:
+- Checks signature using Vault's CA public key
+- Confirms "service1.internal" identity
+- Establishes trusted connection
+
+**** /The Flow in Practice/
+#+begin_src
+Vault PKI (CA) → Issues cert → Vault Agent (sidecar) → Writes to shared volume → Main service uses cert → Other services verify using Vault CA cert
+#+end_src
+
+*Key*: Vault PKI is the "government", Vault Agent gets the "ID card", other services trust because they know the "government's seal".
+
+***

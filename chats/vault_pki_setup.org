@@ -1,0 +1,2711 @@
+:PROPERTIES:
+:GPTEL_MODEL: claude-sonnet-4-20250514
+:GPTEL_BACKEND: Claude
+:GPTEL_SYSTEM: You are a large language model living in Emacs and a helpful assistant. Avoid long answers.
+:GPTEL_BOUNDS: ((response (646 1210) (1211 2162) (2315 3508) (3509 6226) (6227 6472) (6474 6923) (7268 7467) (11354 14135) (14276 23218) (23400 33780) (33782 35202) (35203 36704) (36715 46715) (46720 46725) (46726 62649) (62685 69454)))
+:END:
+
+*** When I write a backend with a microservice architecture (in fastify) (i.e. authService, userService etc.), using nginx as a proxy server and hashiCorp Vault. How do i ensure encrypted traffic between all parties?
+
+
+Here's how to ensure encrypted traffic in your microservice setup:
+
+**** 1. *TLS/SSL Certificates*
+- Use proper SSL certificates for all services
+- Consider using Let's Encrypt for public-facing services
+- For internal services, use a private CA or self-signed certificates managed by Vault
+
+**** 2. *Nginx Configuration*
+#+begin_src nginx
+server {
+    listen 443 ssl;
+    ssl_certificate /path/to/cert.pem;
+    ssl_certificate_key /path/to/key.pem;
+
+    location /auth {
+        proxy_pass https://auth-service:3001;
+        proxy_ssl_verify on;
+    }
+}
+#+end_src
+**** 3. *Fastify Services*
+#+begin_src javascript
+const fastify = require('fastify')({
+    https: {
+        key: fs.readFileSync('/path/to/key.pem'),
+        cert: fs.readFileSync('/path/to/cert.pem')
+    }
+});
+#+end_src
+
+**** 4. *HashiCorp Vault Integration*
+- Use Vault's *PKI secrets engine* to generate and manage certificates
+- Implement certificate rotation
+- Store service-to-service authentication tokens in Vault
+
+**** 5. *Service-to-Service Communication*
+- Use *mTLS* (mutual TLS) for service authentication
+- Implement API keys or JWT tokens for additional security
+- Consider using *Consul Connect* for service mesh with automatic encryption
+
+**** 6. *Key Points*
+- All HTTP traffic should be HTTPS
+- Validate certificates on both client and server sides
+- Use Vault's dynamic secrets for rotating credentials
+- Implement proper certificate lifecycle management
+
+This ensures end-to-end encryption between nginx, your services, and Vault.
+
+*****
+*** how do I integrate hashiCorp Vault integration. Please go slow and explain a little bit for dummies. I don't know HashiCorpVault very well.
+
+I'll explain HashiCorp Vault integration step by step for beginners.
+
+**** *What is HashiCorp Vault?*
+Think of Vault as a *secure digital safe* for your applications. Instead of hardcoding passwords, API keys, and certificates in your code, Vault stores them securely and gives them to your services when needed.
+
+**** *Step 1: Install and Start Vault*
+
+#+begin_src bash
+# Download and install Vault
+wget https://releases.hashicorp.com/vault/1.15.0/vault_1.15.0_linux_amd64.zip
+unzip vault_1.15.0_linux_amd64.zip
+sudo mv vault /usr/local/bin/
+
+# Start Vault in development mode (for learning)
+vault server -dev
+#+end_src
+
+**** *Step 2: Basic Vault Setup*
+
+#+begin_src bash
+# Set environment variables (from the dev server output)
+export VAULT_ADDR='http://127.0.0.1:8200'
+export VAULT_TOKEN='your-root-token-here'
+
+# Check if Vault is running
+vault status
+#+end_src
+
+**** *Step 3: Enable PKI (Certificate Management)*
+
+#+begin_src bash
+# Enable PKI secrets engine
+vault secrets enable pki
+
+# Set max lease time
+vault secrets tune -max-lease-ttl=87600h pki
+
+# Create a root certificate
+vault write pki/root/generate/internal \
+    common_name="my-microservices.local" \
+    ttl=87600h
+#+end_src
+***** /Command 1: =vault secrets enable pki=/
+
+*What it does:*
+- Enables the PKI (Public Key Infrastructure) secrets engine in Vault
+- PKI is like a "certificate factory" that can create and manage SSL certificates
+
+*Think of it like:*
+- Installing a "certificate printing machine" inside Vault
+- Before this, Vault could only store static secrets (passwords, API keys)
+- After this, Vault can /generate/ certificates on-demand
+
+*What happens internally:*
+- Vault creates a new endpoint at =/pki/=
+- This endpoint can now handle certificate-related operations
+
+***** /Command 2: =vault secrets tune -max-lease-ttl=87600h pki=/
+
+*What it does:*
+- Sets the maximum "lease time" for certificates to 87600 hours (10 years)
+- A "lease" is how long a certificate can be valid
+
+*Think of it like:*
+- Setting the maximum expiration time for any certificate this "factory" can make
+- 87600h = 10 years (very long for learning purposes)
+- In production, you'd use shorter times like 720h (30 days)
+
+*Why this matters:*
+- Prevents accidentally creating certificates that last forever
+- Gives you control over security policy
+
+***** /Command 3: =vault write pki/root/generate/internal=/
+
+*What it does:*
+- Creates a "root certificate" - the master certificate that signs all others
+- =internal= means Vault generates and stores the private key internally
+
+*The parameters:*
+- =common_name="my-microservices.local"= - The name of your certificate authority
+- =ttl=87600h= - This specific root certificate expires in 10 years
+
+*Think of it like:*
+- Creating the "master key" that can sign other certificates
+- Like getting a license to print official certificates
+- All future certificates will be "signed by" this root certificate
+
+*What happens:*
+#+begin_src bash
+# Vault creates:
+# 1. A root certificate (public part)
+# 2. A root private key (secret part - stays in Vault)
+# 3. Sets up the certificate authority
+#+end_src
+
+***** /The Big Picture:/
+
+#+begin_src
+Before these commands:
+Vault: [Empty box]
+
+After Command 1:
+Vault: [Certificate Factory - OFF]
+
+After Command 2:
+Vault: [Certificate Factory - Max 10 years]
+
+After Command 3:
+Vault: [Certificate Factory - Ready to sign certificates]
+       [Root Certificate: "my-microservices.local"]
+#+end_src
+
+***** /What you can do now:/
+- Generate certificates for your services
+- All certificates will be signed by "my-microservices.local"
+- Services can trust each other because they're all signed by the same root
+- Certificates will automatically expire (forcing rotation)
+
+***** /In simple terms:/
+You've just set up Vault to be your own private certificate authority, like a mini version of what companies like DigiCert or Let's Encrypt do, but just for your microservices!
+
+**** *Step 4: Configure Certificate Authority*
+
+#+begin_src bash
+# Create a role for your services
+vault write pki/roles/microservice-role \
+    allowed_domains="my-microservices.local" \
+    allow_subdomains=true \
+    max_ttl="720h"
+#+end_src
+
+This step creates a "role" - think of it as a /template/ or /policy/ that defines what kinds of certificates Vault can create.
+
+***** /What is a Role?/
+A role is like a /rulebook/ that tells Vault:
+- What domain names are allowed for certificates
+- How long certificates can be valid
+- What restrictions apply
+
+/Think of it like:/ If Vault is a certificate factory, the role is the instruction manual for what certificates it's allowed to produce.
+
+***** /What Happens After This Command:/
+
+#+begin_src
+Before:
+Vault PKI: [Root Certificate] - Can create certificates, but no rules
+
+After:
+Vault PKI: [Root Certificate] + [Role: microservice-role]
+           Rules: - Only *.my-microservices.local domains
+                 - Max 30 days lifetime
+                 - Subdomains allowed
+#+end_src
+
+***** /Breaking Down the Command:/
+
+#+begin_src bash
+vault write pki/roles/microservice-role \
+    allowed_domains="my-microservices.local" \
+    allow_subdomains=true \
+    max_ttl="720h"
+#+end_src
+
+***** /Part 1: =vault write pki/roles/microservice-role=/
+
+/What it does:/
+- Creates a new role called "microservice-role"
+- Stores it in the PKI engine at path =/pki/roles/microservice-role=
+
+/Think of it like:/
+- Creating a new "certificate template" named "microservice-role"
+- You could create multiple roles for different purposes (e.g., "web-role", "api-role")
+
+***** /Part 2: =allowed_domains="my-microservices.local"=/
+
+/What it does:/
+- Only allows certificates for domains ending in "my-microservices.local"
+- This is a security restriction
+
+/Examples of what this allows:/
+- ✅ =auth-service.my-microservices.local=
+- ✅ =user-service.my-microservices.local=
+- ✅ =payment-service.my-microservices.local=
+
+/Examples of what this blocks:/
+- ❌ =evil-service.hacker.com=
+- ❌ =auth-service.google.com=
+- ❌ =something.example.com=
+
+/Think of it like:/
+- Setting a boundary: "Only create certificates for MY services"
+- Prevents accidental or malicious certificate creation for other domains
+
+***** /Part 3: =allow_subdomains=true=/
+
+/What it does:/
+- Allows certificates for subdomains of the allowed domains
+- Without this, you could only get certificates for the exact domain
+
+/With =allow_subdomains=true=:/
+- ✅ =auth-service.my-microservices.local=
+- ✅ =api.auth-service.my-microservices.local=
+- ✅ =v1.api.auth-service.my-microservices.local=
+
+/With =allow_subdomains=false=:/
+- ✅ =my-microservices.local= (exact match only)
+- ❌ =auth-service.my-microservices.local= (subdomain blocked)
+
+/Think of it like:/
+- Giving permission to create certificates for "any service under my domain"
+- Essential for microservices where each service has its own subdomain
+
+***** /Part 4: =max_ttl="720h"=/
+
+/What it does:/
+- Sets maximum certificate lifetime to 720 hours (30 days)
+- TTL = "Time To Live"
+
+/Why 720h (30 days)?/
+- Long enough that services don't break frequently
+- Short enough for good security (forces regular rotation)
+- Industry standard for internal certificates
+
+/Think of it like:/
+- Setting an expiration date limit
+- Even if someone requests a 1-year certificate, Vault will only give them 30 days max
+
+***** /Real-World Example:/
+
+Now when your auth service asks for a certificate:
+
+#+begin_src javascript
+// This will work:
+const result = await vault.write('pki/issue/microservice-role', {
+    common_name: 'auth-service.my-microservices.local',
+    ttl: '24h'  // Less than max_ttl, so allowed
+});
+
+// This will fail:
+const result = await vault.write('pki/issue/microservice-role', {
+    common_name: 'auth-service.google.com',  // Wrong domain!
+    ttl: '24h'
+});
+
+// This will fail:
+const result = await vault.write('pki/issue/microservice-role', {
+    common_name: 'auth-service.my-microservices.local',
+    ttl: '1000h'  // Exceeds max_ttl of 720h!
+});
+#+end_src
+
+***** /Multiple Roles Example:/
+
+You could create different roles for different purposes:
+
+#+begin_src bash
+# Role for web services (longer TTL)
+vault write pki/roles/web-role \
+    allowed_domains="my-microservices.local" \
+    allow_subdomains=true \
+    max_ttl="2160h"  # 90 days
+
+# Role for internal APIs (shorter TTL)
+vault write pki/roles/api-role \
+    allowed_domains="internal.my-microservices.local" \
+    allow_subdomains=true \
+    max_ttl="168h"   # 7 days
+
+# Role for development (very short TTL)
+vault write pki/roles/dev-role \
+    allowed_domains="dev.my-microservices.local" \
+    allow_subdomains=true \
+    max_ttl="24h"    # 1 day
+#+end_src
+
+***** /In Simple Terms:/
+
+This step is like setting up /security rules/ for your certificate factory:
+
+1. *"Only make certificates for MY services"* (=allowed_domains=)
+2. *"Allow any service name under my domain"* (=allow_subdomains=)
+3. *"Don't make certificates that last longer than 30 days"* (=max_ttl=)
+
+Without this role, Vault could create certificates for any domain with any expiration time, which would be a security risk!
+
+**** *Step 5: Integrate with Your Fastify Service*
+
+Install the Vault client:
+#+begin_src bash
+npm install node-vault
+#+end_src
+
+Create a Vault helper module:
+#+begin_src javascript
+// vault-helper.js
+const vault = require('node-vault')({
+    apiVersion: 'v1',
+    endpoint: 'http://127.0.0.1:8200',
+    token: process.env.VAULT_TOKEN
+});
+
+async function getCertificate(serviceName) {
+    try {
+        const result = await vault.write('pki/issue/microservice-role', {
+            common_name: `${serviceName}.my-microservices.local`,
+            ttl: '24h'
+        });
+
+        return {
+            certificate: result.data.certificate,
+            private_key: result.data.private_key,
+            ca_chain: result.data.ca_chain
+        };
+    } catch (error) {
+        console.error('Error getting certificate:', error);
+        throw error;
+    }
+}
+
+module.exports = { getCertificate };
+#+end_src
+
+**** *Step 6: Use in Your Fastify Service*
+
+#+begin_src javascript
+// auth-service.js
+const fastify = require('fastify');
+const fs = require('fs');
+const { getCertificate } = require('./vault-helper');
+
+async function startServer() {
+    // Get certificate from Vault
+    const certs = await getCertificate('auth-service');
+
+    // Write certificates to temporary files
+    fs.writeFileSync('/tmp/cert.pem', certs.certificate);
+    fs.writeFileSync('/tmp/key.pem', certs.private_key);
+
+    // Create HTTPS server
+    const app = fastify({
+        https: {
+            key: fs.readFileSync('/tmp/key.pem'),
+            cert: fs.readFileSync('/tmp/cert.pem')
+        }
+    });
+
+    app.get('/health', async (request, reply) => {
+        return { status: 'healthy' };
+    });
+
+    await app.listen({ port: 3001, host: '0.0.0.0' });
+    console.log('Auth service running on https://localhost:3001');
+}
+
+startServer();
+#+end_src
+
+**** *Step 7: Store Other Secrets*
+
+#+begin_src bash
+# Store database credentials
+vault kv put secret/database username=dbuser password=secretpass
+
+# Store API keys
+vault kv put secret/api-keys stripe=sk_test_123 sendgrid=SG.abc123
+#+end_src
+
+Access secrets in your code:
+#+begin_src javascript
+// Get database credentials
+const dbCreds = await vault.read('secret/data/database');
+const username = dbCreds.data.data.username;
+const password = dbCreds.data.data.password;
+#+end_src
+
+**** *Key Benefits:*
+- *No hardcoded secrets* in your code
+- *Automatic certificate rotation*
+- *Centralized secret management*
+- *Audit logs* of who accessed what
+- *Encrypted storage* of all secrets
+
+**** *Next Steps:*
+1. Set up proper authentication (not root token)
+2. Configure policies for different services
+3. Implement certificate rotation
+4. Use Vault in production mode (not dev)
+
+This gives you a foundation for secure secret management in your microservices!
+*** We are using vault in fastify here. I would like a setup where we use vault-agent in docker-compose as a sidecar. Please go slow again
+
+I'll explain how to set up Vault Agent as a sidecar in Docker Compose. This is a much better approach for production!
+
+**** /What is Vault Agent?/
+
+**/ /The Problem with Direct Vault Access:/
+In our previous example, each Fastify service had to:
+- Know Vault's address and token
+- Handle authentication with Vault
+- Make API calls to get secrets
+- Handle errors and retries
+
+**/ /What Vault Agent Does:/
+Vault Agent is a /helper process/ that:
+- Handles authentication with Vault server
+- Fetches secrets and certificates automatically
+- Writes them to files that your app can read
+- Handles token renewal and rotation
+- Acts as a "middleman" between your app and Vault
+
+**/ /Think of it like:/
+- Your app: "I need a database password"
+- Vault Agent: "Don't worry, I'll get it and put it in a file for you"
+- Your app: Just reads the file (much simpler!)
+
+**** /Step 1: Create Vault Agent Configuration/
+
+Create =vault-agent.hcl=:
+#+begin_src hcl
+# vault-agent.hcl
+vault {
+  address = "http://vault:8200"
+}
+
+# Auto-auth configuration
+auto_auth {
+  method "approle" {
+    mount_path = "auth/approle"
+    config = {
+      role_id_file_path = "/vault/config/role-id"
+      secret_id_file_path = "/vault/config/secret-id"
+    }
+  }
+
+  sink "file" {
+    config = {
+      path = "/vault/token"
+    }
+  }
+}
+
+# Template for database credentials
+template {
+  source      = "/vault/templates/database.tpl"
+  destination = "/vault/secrets/database.json"
+}
+
+# Template for SSL certificate
+template {
+  source      = "/vault/templates/ssl-cert.tpl"
+  destination = "/vault/secrets/cert.pem"
+}
+
+# Template for SSL private key
+template {
+  source      = "/vault/templates/ssl-key.tpl"
+  destination = "/vault/secrets/key.pem"
+}
+#+end_src
+
+**/ /Let me explain each part:/
+
+**/ /Part 1: =vault { address = "http://vault:8200" }=/
+- Tells Vault Agent where to find the Vault server
+- =vault= is the Docker service name (we'll define this later)
+
+**/ /Part 2: =auto_auth=/
+- Handles automatic authentication with Vault
+- Uses "AppRole" method (like username/password for services)
+- Stores the authentication token in =/vault/token=
+
+**/ /Part 3: =template= blocks/
+- Tells Vault Agent to fetch secrets and write them to files
+- Uses template files to format the output
+- Your Fastify app will read these generated files
+
+**** /Step 2: Create Template Files/
+
+Create =templates/database.tpl=:
+#+begin_src json
+{{- with secret "secret/database" -}}
+{
+  "username": "{{ .Data.data.username }}",
+  "password": "{{ .Data.data.password }}",
+  "host": "{{ .Data.data.host }}",
+  "port": {{ .Data.data.port }}
+}
+{{- end -}}
+#+end_src
+
+Create =templates/ssl-cert.tpl`:
+#+begin_src
+{{- with secret "pki/issue/microservice-role" "common_name=auth-service.my-microservices.local" "ttl=24h" -}}
+{{ .Data.certificate }}
+{{- end -}}
+#+end_src
+
+Create `templates/ssl-key.tpl`:
+#+begin_src
+{{- with secret "pki/issue/microservice-role" "common_name=auth-service.my-microservices.local" "ttl=24h" -}}
+{{ .Data.private_key }}
+{{- end -}}
+#+end_src
+
+***** *What these templates do:*
+- *database.tpl*: Fetches database credentials and formats them as JSON
+- *ssl-cert.tpl*: Requests a new SSL certificate from Vault's PKI
+- *ssl-key.tpl*: Gets the private key for the SSL certificate
+
+**** *Step 3: Set Up AppRole Authentication*
+
+First, configure Vault to use AppRole:
+#+begin_src bash
+# Enable AppRole authentication
+vault auth enable approle
+
+# Create a policy for your service
+vault policy write auth-service-policy - <<EOF
+path "secret/data/database" {
+  capabilities = ["read"]
+}
+
+path "pki/issue/microservice-role" {
+  capabilities = ["create", "update"]
+}
+EOF
+
+# Create an AppRole
+vault write auth/approle/role/auth-service \
+    token_policies="auth-service-policy" \
+    token_ttl=1h \
+    token_max_ttl=4h
+
+# Get the role ID and secret ID
+vault read auth/approle/role/auth-service/role-id
+vault write -f auth/approle/role/auth-service/secret-id
+#+end_src
+
+Save the role-id and secret-id values - you'll need them for Docker Compose.
+
+**** *Step 4: Create Docker Compose Configuration*
+
+Create `docker-compose.yml`:
+#+begin_src yaml
+version: '3.8'
+
+services:
+  vault:
+    image: vault:1.15.0
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: myroot
+      VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
+    command: vault server -dev
+    networks:
+      - microservices
+
+  vault-agent:
+    image: vault:1.15.0
+    depends_on:
+      - vault
+    volumes:
+      - ./vault-agent.hcl:/vault/config/vault-agent.hcl
+      - ./templates:/vault/templates
+      - vault-secrets:/vault/secrets
+      - vault-config:/vault/config
+    environment:
+      VAULT_ADDR: http://vault:8200
+    command: |
+      sh -c "
+        echo 'YOUR_ROLE_ID_HERE' > /vault/config/role-id &&
+        echo 'YOUR_SECRET_ID_HERE' > /vault/config/secret-id &&
+        vault agent -config=/vault/config/vault-agent.hcl
+      "
+    networks:
+      - microservices
+
+  auth-service:
+    build: .
+    depends_on:
+      - vault-agent
+    volumes:
+      - vault-secrets:/app/secrets
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: production
+    networks:
+      - microservices
+
+volumes:
+  vault-secrets:
+  vault-config:
+
+networks:
+  microservices:
+    driver: bridge
+#+end_src
+
+***** *Key points about this setup:*
+
+1. **Vault Agent as Sidecar**:
+   - Runs alongside your auth-service
+   - Shares the `vault-secrets` volume
+   - Handles all Vault communication
+
+2. **Shared Volume**:
+   - `vault-secrets` volume is mounted in both vault-agent and auth-service
+   - Vault Agent writes secrets here
+   - Your app reads secrets from here
+
+3. **No Direct Vault Access**:
+   - Your auth-service never talks to Vault directly
+   - It just reads files that Vault Agent provides
+
+**** *Step 5: Update Your Fastify Service*
+
+Create `app.js`:
+#+begin_src javascript
+const fastify = require('fastify');
+const fs = require('fs');
+const path = require('path');
+
+// Simple function to read secrets from files
+function readSecretFile(filename) {
+    const filepath = path.join('/app/secrets', filename);
+
+    // Wait for file to exist (Vault Agent might still be writing it)
+    while (!fs.existsSync(filepath)) {
+        console.log(`Waiting for ${filename}...`);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+
+    return fs.readFileSync(filepath, 'utf8');
+}
+
+async function startServer() {
+    try {
+        // Read database credentials
+        const dbConfigRaw = readSecretFile('database.json');
+        const dbConfig = JSON.parse(dbConfigRaw);
+        console.log('Database config loaded:', {
+            username: dbConfig.username,
+            host: dbConfig.host
+        });
+
+        // Read SSL certificates
+        const cert = readSecretFile('cert.pem');
+        const key = readSecretFile('key.pem');
+        console.log('SSL certificates loaded');
+
+        // Create HTTPS Fastify server
+        const app = fastify({
+            https: {
+                key: key,
+                cert: cert
+            }
+        });
+
+        // Add routes
+        app.get('/health', async (request, reply) => {
+            return {
+                status: 'healthy',
+                database: {
+                    host: dbConfig.host,
+                    username: dbConfig.username
+                }
+            };
+        });
+
+        await app.listen({ port: 3001, host: '0.0.0.0' });
+        console.log('Auth service running on https://localhost:3001');
+
+    } catch (error) {
+        console.error('Failed to start server:', error);
+        process.exit(1);
+    }
+}
+
+startServer();
+#+end_src
+
+**** *Step 6: Create Dockerfile*
+
+Create `Dockerfile`:
+#+begin_src dockerfile
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+# Create secrets directory
+RUN mkdir -p /app/secrets
+
+EXPOSE 3001
+
+CMD ["node", "app.js"]
+#+end_src
+
+**** *Step 7: Start Everything*
+
+#+begin_src bash
+# Replace with your actual role-id and secret-id in docker-compose.yml
+# Then start the services
+docker-compose up -d
+
+# Check logs
+docker-compose logs vault-agent
+docker-compose logs auth-service
+#+end_src
+
+**** *Benefits of This Approach:*
+
+1. **Separation of Concerns**:
+   - Your app focuses on business logic
+   - Vault Agent handles secret management
+
+2. **Better Security**:
+   - App never sees Vault tokens
+   - Credentials are rotated automatically
+
+3. **Easier Development**:
+   - No Vault SDK in your application code
+   - Just read files (much simpler!)
+
+4. **Automatic Rotation**:
+   - Vault Agent can refresh certificates before they expire
+   - Your app automatically gets new secrets
+
+**** *What Happens:*
+
+1. Docker Compose starts Vault server
+2. Vault Agent authenticates with AppRole
+3. Vault Agent fetches secrets and writes them to files
+4. Your Fastify app reads the files and starts with HTTPS
+5. Vault Agent keeps refreshing secrets in the background
+
+This is much more production-ready than having your app talk to Vault directly!
+
+*****
+*** I need you to write with me a whole repo that will serve as an exemplary setup. I will use nginx as a proxy. I'm going to use docker-compose. Let's start with the vault
+
+Perfect! Let's build a complete exemplary repo step by step. We'll start with Vault and build up to a full microservices setup with nginx proxy.
+
+**** /Step 1: Create the Repository Structure/
+
+First, let's create the directory structure:
+
+#+begin_src bash
+mkdir microservices-vault-example
+cd microservices-vault-example
+
+# Create directory structure
+mkdir -p {vault/{config,policies,scripts},nginx,services/{auth,user},docker/vault-agent}
+mkdir -p vault/templates
+
+# Create the basic files we'll need
+touch docker-compose.yml
+touch .env
+touch .gitignore
+touch README.md
+#+end_src
+
+Your structure should look like this:
+#+begin_src
+microservices-vault-example/
+├── docker-compose.yml
+├── .env
+├── .gitignore
+├── README.md
+├── vault/
+│   ├── config/
+│   ├── policies/
+│   ├── scripts/
+│   └── templates/
+├── nginx/
+├── services/
+│   ├── auth/
+│   └── user/
+└── docker/
+    └── vault-agent/
+#+end_src
+
+**** /Step 2: Create .gitignore/
+
+Create =.gitignore=:
+#+begin_src gitignore
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Vault data
+vault/data/
+vault/logs/
+vault/file/
+
+# Node modules
+node_modules/
+npm-debug.log*
+
+# SSL certificates and keys
+*.pem
+*.key
+*.crt
+
+# Vault tokens and secrets
+vault-token
+.vault-token
+role-id
+secret-id
+
+# Docker volumes
+docker-volumes/
+
+# Logs
+*.log
+logs/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+#+end_src
+
+**** /Step 3: Create Environment Configuration/
+
+Create =.env=:
+#+begin_src bash
+# Vault Configuration
+VAULT_ADDR=http://vault:8200
+VAULT_DEV_ROOT_TOKEN_ID=dev-root-token-change-me
+VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:8200
+
+# Network Configuration
+DOCKER_NETWORK=microservices-network
+
+# Domain Configuration
+DOMAIN=my-microservices.local
+SSL_DOMAIN=*.my-microservices.local
+
+# Service Ports
+AUTH_SERVICE_PORT=3001
+USER_SERVICE_PORT=3002
+NGINX_HTTP_PORT=80
+NGINX_HTTPS_PORT=443
+
+# Database Configuration (for examples)
+DB_HOST=postgres
+DB_PORT=5432
+DB_NAME=microservices
+DB_USER=postgres
+DB_PASSWORD=postgres123
+#+end_src
+
+**** /Step 4: Create Vault Configuration/
+
+Create =vault/config/vault.hcl=:
+#+begin_src hcl
+# Vault server configuration
+storage "file" {
+  path = "/vault/data"
+}
+
+listener "tcp" {
+  address     = "0.0.0.0:8200"
+  tls_disable = 1
+}
+
+# API address that Vault will bind to
+api_addr = "http://0.0.0.0:8200"
+
+# Cluster address (for HA, not used in this example)
+cluster_addr = "http://0.0.0.0:8201"
+
+# UI configuration
+ui = true
+
+# Disable mlock (for Docker - not recommended for production)
+disable_mlock = true
+
+# Log level
+log_level = "Info"
+
+# Default lease time
+default_lease_ttl = "168h"    # 7 days
+max_lease_ttl = "720h"        # 30 days
+#+end_src
+
+**** /Step 5: Create Vault Policies/
+
+Create =vault/policies/auth-service-policy.hcl=:
+#+begin_src hcl
+# Policy for auth service
+# Allow reading database credentials
+path "secret/data/database" {
+  capabilities = ["read"]
+}
+
+# Allow reading auth service specific secrets
+path "secret/data/auth-service/*" {
+  capabilities = ["read"]
+}
+
+# Allow creating certificates for auth service
+path "pki/issue/microservice-role" {
+  capabilities = ["create", "update"]
+}
+
+# Allow reading CA certificate
+path "pki/ca/pem" {
+  capabilities = ["read"]
+}
+
+# Allow token renewal
+path "auth/token/renew-self" {
+  capabilities = ["update"]
+}
+
+# Allow looking up own token
+path "auth/token/lookup-self" {
+  capabilities = ["read"]
+}
+#+end_src
+
+Create =vault/policies/user-service-policy.hcl=:
+#+begin_src hcl
+# Policy for user service
+# Allow reading database credentials
+path "secret/data/database" {
+  capabilities = ["read"]
+}
+
+# Allow reading user service specific secrets
+path "secret/data/user-service/*" {
+  capabilities = ["read"]
+}
+
+# Allow creating certificates for user service
+path "pki/issue/microservice-role" {
+  capabilities = ["create", "update"]
+}
+
+# Allow reading CA certificate
+path "pki/ca/pem" {
+  capabilities = ["read"]
+}
+
+# Allow token renewal
+path "auth/token/renew-self" {
+  capabilities = ["update"]
+}
+
+# Allow looking up own token
+path "auth/token/lookup-self" {
+  capabilities = ["read"]
+}
+#+end_src
+
+**** /Step 6: Create Vault Initialization Script/
+
+Create =vault/scripts/init-vault.sh=:
+#+begin_src bash
+#!/bin/bash
+
+# Wait for Vault to be ready
+echo "Waiting for Vault to be ready..."
+until curl -s http://vault:8200/v1/sys/health > /dev/null 2>&1; do
+    echo "Vault not ready yet, sleeping..."
+    sleep 2
+done
+
+echo "Vault is ready, starting initialization..."
+
+# Set Vault address
+export VAULT_ADDR=http://vault:8200
+export VAULT_TOKEN=${VAULT_DEV_ROOT_TOKEN_ID}
+
+# Enable secret engines
+echo "Enabling secret engines..."
+vault secrets enable -path=secret kv-v2
+vault secrets enable pki
+
+# Configure PKI
+echo "Configuring PKI..."
+vault secrets tune -max-lease-ttl=87600h pki
+
+# Generate root CA
+echo "Generating root CA..."
+vault write pki/root/generate/internal \
+    common_name="Internal Root CA" \
+    ttl=87600h
+
+# Create intermediate CA
+echo "Creating intermediate CA..."
+vault secrets enable -path=pki_int pki
+vault secrets tune -max-lease-ttl=43800h pki_int
+
+vault write -format=json pki_int/intermediate/generate/internal \
+    common_name="Internal Intermediate CA" \
+    | jq -r '.data.csr' > /tmp/pki_intermediate.csr
+
+vault write -format=json pki/root/sign-intermediate \
+    csr=@/tmp/pki_intermediate.csr \
+    format=pem_bundle \
+    ttl="43800h" \
+    | jq -r '.data.certificate' > /tmp/intermediate.cert.pem
+
+vault write pki_int/intermediate/set-signed \
+    certificate=@/tmp/intermediate.cert.pem
+
+# Create role for microservices
+echo "Creating PKI role for microservices..."
+vault write pki_int/roles/microservice-role \
+    allowed_domains="my-microservices.local" \
+    allow_subdomains=true \
+    max_ttl="720h" \
+    generate_lease=true
+
+# Set up AppRole authentication
+echo "Setting up AppRole authentication..."
+vault auth enable approle
+
+# Create policies
+echo "Creating policies..."
+vault policy write auth-service-policy /vault/policies/auth-service-policy.hcl
+vault policy write user-service-policy /vault/policies/user-service-policy.hcl
+
+# Create AppRoles
+echo "Creating AppRoles..."
+vault write auth/approle/role/auth-service \
+    token_policies="auth-service-policy" \
+    token_ttl=1h \
+    token_max_ttl=4h \
+    bind_secret_id=true
+
+vault write auth/approle/role/user-service \
+    token_policies="user-service-policy" \
+    token_ttl=1h \
+    token_max_ttl=4h \
+    bind_secret_id=true
+
+# Store sample secrets
+echo "Storing sample secrets..."
+vault kv put secret/database \
+    username="postgres" \
+    password="postgres123" \
+    host="postgres" \
+    port="5432" \
+    database="microservices"
+
+vault kv put secret/auth-service/config \
+    jwt_secret="super-secret-jwt-key" \
+    session_secret="super-secret-session-key"
+
+vault kv put secret/user-service/config \
+    encryption_key="super-secret-encryption-key" \
+    api_key="user-service-api-key"
+
+# Generate role-id and secret-id for services
+echo "Generating AppRole credentials..."
+vault read -format=json auth/approle/role/auth-service/role-id | jq -r '.data.role_id' > /vault/config/auth-service-role-id
+vault write -format=json -f auth/approle/role/auth-service/secret-id | jq -r '.data.secret_id' > /vault/config/auth-service-secret-id
+
+vault read -format=json auth/approle/role/user-service/role-id | jq -r '.data.role_id' > /vault/config/user-service-role-id
+vault write -format=json -f auth/approle/role/user-service/secret-id | jq -r '.data.secret_id' > /vault/config/user-service-secret-id
+
+echo "Vault initialization complete!"
+echo "Auth Service Role ID: $(cat /vault/config/auth-service-role-id)"
+echo "User Service Role ID: $(cat /vault/config/user-service-role-id)"
+#+end_src
+
+Make it executable:
+#+begin_src bash
+chmod +x vault/scripts/init-vault.sh
+#+end_src
+
+**** /Step 7: Create Docker Compose for Vault/
+
+Create =docker-compose.yml=:
+#+begin_src yaml
+version: '3.8'
+
+services:
+  vault:
+    image: vault:1.15.0
+    container_name: vault
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: ${VAULT_DEV_ROOT_TOKEN_ID}
+      VAULT_DEV_LISTEN_ADDRESS: ${VAULT_DEV_LISTEN_ADDRESS}
+      VAULT_ADDR: ${VAULT_ADDR}
+    volumes:
+      - vault-data:/vault/data
+      - vault-logs:/vault/logs
+      - ./vault/config:/vault/config:ro
+      - ./vault/policies:/vault/policies:ro
+    cap_add:
+      - IPC_LOCK
+    command: |
+      sh -c "
+        if [ \"$$VAULT_DEV_ROOT_TOKEN_ID\" != \"\" ]; then
+          echo 'Starting Vault in development mode...'
+          vault server -dev -dev-root-token-id=$$VAULT_DEV_ROOT_TOKEN_ID -dev-listen-address=$$VAULT_DEV_LISTEN_ADDRESS
+        else
+          echo 'Starting Vault in production mode...'
+          vault server -config=/vault/config/vault.hcl
+        fi
+      "
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8200/v1/sys/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - microservices
+
+  vault-init:
+    image: vault:1.15.0
+    container_name: vault-init
+    depends_on:
+      vault:
+        condition: service_healthy
+    environment:
+      VAULT_ADDR: ${VAULT_ADDR}
+      VAULT_DEV_ROOT_TOKEN_ID: ${VAULT_DEV_ROOT_TOKEN_ID}
+    volumes:
+      - vault-config:/vault/config
+      - ./vault/scripts:/vault/scripts:ro
+      - ./vault/policies:/vault/policies:ro
+    command: |
+      sh -c "
+        apk add --no-cache curl jq
+        /vault/scripts/init-vault.sh
+      "
+    networks:
+      - microservices
+
+volumes:
+  vault-data:
+  vault-logs:
+  vault-config:
+
+networks:
+  microservices:
+    driver: bridge
+#+end_src
+
+**** /Step 8: Create README/
+
+Create =README.md=:
+#+begin_src markdown
+# Microservices with HashiCorp Vault Example
+
+This repository demonstrates a complete microservices setup using:
+- **HashiCorp Vault** for secret management and PKI
+- **Nginx** as a reverse proxy
+- **Docker Compose** for orchestration
+- **Vault Agent** as sidecars for secret injection
+- **Fastify** microservices with HTTPS
+
+## Architecture
+
+```
+Internet -> Nginx (HTTPS) -> Microservices (HTTPS)
+                            ↓
+                        Vault Agent (sidecar)
+                            ↓
+                        Vault Server
+```
+
+## Quick Start
+
+1. **Clone and setup**:
+   ```bash
+   git clone <repo-url>
+   cd microservices-vault-example
+   ```
+
+2. **Start Vault**:
+   ```bash
+   docker
+
+-compose up vault vault-init
+   #+begin_src
+
+3. **Verify Vault is working**:
+   #+end_srcbash
+   -compose up vault vault-init
+   ```
+
+3. **Verify Vault is working**:
+   ```bash
+   # Check Vault status
+   curl -s http://localhost:8200/v1/sys/health | jq
+
+   # Access Vault UI
+   open http://localhost:8200
+   # Token: dev-root-token-change-me
+   ```
+
+## What's Included
+
+- **Vault Server**: Configured with PKI and KV secrets engines
+- **Vault Agent**: Sidecar containers for secret injection
+- **Policies**: Least-privilege access for each service
+- **AppRole Auth**: Secure service-to-service authentication
+- **SSL/TLS**: Automatic certificate generation and rotation
+
+## Next Steps
+
+- Add microservices (auth, user)
+- Add nginx reverse proxy
+- Add database
+- Add monitoring
+
+## Development
+
+See individual service README files for development instructions.
+#+end_src
+
+**** /Step 9: Test the Vault Setup/
+
+Let's test our Vault setup:
+
+#+begin_src bash
+# Start Vault and initialization
+docker-compose up vault vault-init
+
+# In another terminal, test Vault
+export VAULT_ADDR=http://localhost:8200
+export VAULT_TOKEN=dev-root-token-change-me
+
+# Check status
+vault status
+
+# List secrets
+vault kv list secret
+
+# Get database credentials
+vault kv get secret/database
+
+# Test certificate generation
+vault write pki_int/issue/microservice-role \
+    common_name="auth-service.my-microservices.local" \
+    ttl="24h"
+#+end_src
+***** /Let's Test Our Setup with Docker/
+
+#+begin_src bash
+# Start the services
+docker-compose up -d vault vault-init
+
+# Wait a moment for initialization to complete
+sleep 10
+
+# Check if Vault is healthy
+docker-compose ps
+
+# Test Vault status
+docker-compose exec vault sh -c 'export VAULT_TOKEN=dev-root-token-change-me && vault status'
+
+# List secrets that were created
+docker-compose exec vault sh -c 'export VAULT_TOKEN=dev-root-token-change-me && vault kv list secret'
+
+# Get database credentials
+docker-compose exec vault sh -c 'export VAULT_TOKEN=dev-root-token-change-me && vault kv get secret/database'
+
+# Test certificate generation
+docker-compose exec vault sh -c 'export VAULT_TOKEN=dev-root-token-change-me && vault write pki_int/issue/microservice-role common_name="auth-service.my-microservices.local" ttl="24h"'
+#+end_src
+
+**** /What We've Built So Far:/
+
+1. *Complete Vault Setup*:
+   - Development mode for easy testing
+   - PKI engine with intermediate CA
+   - KV secrets engine
+   - AppRole authentication
+   - Service-specific policies
+
+2. *Automated Initialization*:
+   - Script that sets up everything
+   - Generates role-ids and secret-ids
+   - Stores sample secrets
+
+3. *Production-Ready Structure*:
+   - Proper directory organization
+   - Environment configuration
+   - Health checks
+   - Volume management
+
+*Next, we'll add:*
+- Vault Agent configurations
+- Fastify microservices
+- Nginx reverse proxy
+- Full docker-compose orchestration
+
+Ready to continue with the next part?
+*** Debug
+**** /Issue 1: Unhealthy Status/
+
+First, let's check what's happening with the health check:
+
+#+begin_src bash
+# Check container logs
+docker-compose logs vault
+docker-compose logs vault-init
+
+# Check if Vault is actually running
+docker-compose ps
+#+end_src
+
+**** /Issue 2: PKI Route Not Found/
+
+The error suggests that the PKI intermediate engine (=pki_int=) wasn't created properly. Let's fix the initialization script.
+
+**** /Step 1: Fix the Vault Initialization Script/
+
+The issue is likely in our initialization script. Let's create a more robust version:
+
+Update =vault/scripts/init-vault.sh=:
+#+begin_src bash
+#!/bin/bash
+set -e
+
+# Wait for Vault to be ready
+echo "Waiting for Vault to be ready..."
+max_attempts=30
+attempt=0
+
+while [ $attempt -lt $max_attempts ]; do
+    if curl -s http://vault:8200/v1/sys/health > /dev/null 2>&1; then
+        echo "Vault is ready!"
+        break
+    fi
+    echo "Vault not ready yet, attempt $((attempt + 1))/$max_attempts"
+    sleep 5
+    attempt=$((attempt + 1))
+done
+
+if [ $attempt -eq $max_attempts ]; then
+    echo "Vault failed to become ready after $max_attempts attempts"
+    exit 1
+fi
+
+# Set Vault address and token
+export VAULT_ADDR=http://vault:8200
+export VAULT_TOKEN=${VAULT_DEV_ROOT_TOKEN_ID}
+
+echo "Vault Token: $VAULT_TOKEN"
+
+# Verify we can connect
+echo "Testing Vault connection..."
+if ! vault status; then
+    echo "Failed to connect to Vault"
+    exit 1
+fi
+
+# Enable secret engines
+echo "Enabling secret engines..."
+vault secrets enable -path=secret kv-v2 || echo "kv-v2 already enabled"
+vault secrets enable pki || echo "pki already enabled"
+
+# Configure PKI
+echo "Configuring PKI..."
+vault secrets tune -max-lease-ttl=87600h pki
+
+# Generate root CA
+echo "Generating root CA..."
+vault write pki/root/generate/internal \
+    common_name="Internal Root CA" \
+    ttl=87600h
+
+# Create intermediate CA
+echo "Creating intermediate CA..."
+vault secrets enable -path=pki_int pki || echo "pki_int already enabled"
+vault secrets tune -max-lease-ttl=43800h pki_int
+
+# Generate intermediate CSR
+echo "Generating intermediate CSR..."
+vault write -format=json pki_int/intermediate/generate/internal \
+    common_name="Internal Intermediate CA" \
+    | jq -r '.data.csr' > /tmp/pki_intermediate.csr
+
+# Sign intermediate certificate
+echo "Signing intermediate certificate..."
+vault write -format=json pki/root/sign-intermediate \
+    csr=@/tmp/pki_intermediate.csr \
+    format=pem_bundle \
+    ttl="43800h" \
+    | jq -r '.data.certificate' > /tmp/intermediate.cert.pem
+
+# Set signed certificate
+echo "Setting signed certificate..."
+vault write pki_int/intermediate/set-signed \
+    certificate=@/tmp/intermediate.cert.pem
+
+# Create role for microservices
+echo "Creating PKI role for microservices..."
+vault write pki_int/roles/microservice-role \
+    allowed_domains="my-microservices.local" \
+    allow_subdomains=true \
+    max_ttl="720h" \
+    generate_lease=true
+
+# Test the PKI role
+echo "Testing PKI role..."
+vault write pki_int/issue/microservice-role \
+    common_name="test.my-microservices.local" \
+    ttl="1h" > /tmp/test-cert.json
+
+if [ $? -eq 0 ]; then
+    echo "PKI role test successful!"
+else
+    echo "PKI role test failed!"
+    exit 1
+fi
+
+# Set up AppRole authentication
+echo "Setting up AppRole authentication..."
+vault auth enable approle || echo "approle already enabled"
+
+# Create policies
+echo "Creating policies..."
+vault policy write auth-service-policy /vault/policies/auth-service-policy.hcl
+vault policy write user-service-policy /vault/policies/user-service-policy.hcl
+
+# Create AppRoles
+echo "Creating AppRoles..."
+vault write auth/approle/role/auth-service \
+    token_policies="auth-service-policy" \
+    token_ttl=1h \
+    token_max_ttl=4h \
+    bind_secret_id=true
+
+vault write auth/approle/role/user-service \
+    token_policies="user-service-policy" \
+    token_ttl=1h \
+    token_max_ttl=4h \
+    bind_secret_id=true
+
+# Store sample secrets
+echo "Storing sample secrets..."
+vault kv put secret/database \
+    username="postgres" \
+    password="postgres123" \
+    host="postgres" \
+    port="5432" \
+    database="microservices"
+
+vault kv put secret/auth-service/config \
+    jwt_secret="super-secret-jwt-key" \
+    session_secret="super-secret-session-key"
+
+vault kv put secret/user-service/config \
+    encryption_key="super-secret-encryption-key" \
+    api_key="user-service-api-key"
+
+# Create directory for role IDs and secret IDs
+mkdir -p /vault/config
+
+# Generate role-id and secret-id for services
+echo "Generating AppRole credentials..."
+vault read -format=json auth/approle/role/auth-service/role-id | jq -r '.data.role_id' > /vault/config/auth-service-role-id
+vault write -format=json -f auth/approle/role/auth-service/secret-id | jq -r '.data.secret_id' > /vault/config/auth-service-secret-id
+
+vault read -format=json auth/approle/role/user-service/role-id | jq -r '.data.role_id' > /vault/config/user-service-role-id
+vault write -format=json -f auth/approle/role/user-service/secret-id | jq -r '.data.secret_id' > /vault/config/user-service-secret-id
+
+echo "Vault initialization complete!"
+echo "Auth Service Role ID: $(cat /vault/config/auth-service-role-id)"
+echo "User Service Role ID: $(cat /vault/config/user-service-role-id)"
+
+# Test final setup
+echo "Testing final setup..."
+vault kv get secret/database
+vault write pki_int/issue/microservice-role \
+    common_name="auth-service.my-microservices.local" \
+    ttl="24h" \
+    -format=json | jq -r '.data.certificate' | head -5
+
+echo "All tests passed! Vault is ready."
+#+end_src
+
+**** /Step 2: Fix the Health Check/
+
+The health check might be too aggressive. Let's update the docker-compose.yml:
+
+Update =docker-compose.yml=:
+#+begin_src yaml
+version: '3.8'
+
+services:
+  vault:
+    image: vault:1.15.0
+    container_name: vault
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: ${VAULT_DEV_ROOT_TOKEN_ID}
+      VAULT_DEV_LISTEN_ADDRESS: ${VAULT_DEV_LISTEN_ADDRESS}
+      VAULT_ADDR: ${VAULT_ADDR}
+    volumes:
+      - vault-data:/vault/data
+      - vault-logs:/vault/logs
+      - ./vault/config:/vault/config:ro
+      - ./vault/policies:/vault/policies:ro
+    cap_add:
+      - IPC_LOCK
+    command: |
+      sh -c "
+        echo 'Starting Vault in development mode...'
+        vault server -dev -dev-root-token-id=$$VAULT_DEV_ROOT_TOKEN_ID -dev-listen-address=$$VAULT_DEV_LISTEN_ADDRESS
+      "
+    healthcheck:
+      test: ["CMD", "sh", "-c", "vault status || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - microservices
+
+  vault-init:
+    image: vault:1.15.0
+    container_name: vault-init
+    depends_on:
+      vault:
+        condition: service_healthy
+    environment:
+      VAULT_ADDR: ${VAULT_ADDR}
+      VAULT_DEV_ROOT_TOKEN_ID: ${VAULT_DEV_ROOT_TOKEN_ID}
+    volumes:
+      - vault-config:/vault/config
+      - ./vault/scripts:/vault/scripts:ro
+      - ./vault/policies:/vault/policies:ro
+    command: |
+      sh -c "
+        apk add --no-cache curl jq
+        chmod +x /vault/scripts/init-vault.sh
+        /vault/scripts/init-vault.sh
+      "
+    networks:
+      - microservices
+
+volumes:
+  vault-data:
+  vault-logs:
+  vault-config:
+
+networks:
+  microservices:
+    driver: bridge
+#+end_src
+
+**** /Step 3: Fix the Policies/
+
+The policies need to reference the correct PKI path (=pki_int= instead of =pki=):
+
+Update =vault/policies/auth-service-policy.hcl=:
+#+begin_src hcl
+# Policy for auth service
+# Allow reading database credentials
+path "secret/data/database" {
+  capabilities = ["read"]
+}
+
+# Allow reading auth service specific secrets
+path "secret/data/auth-service/*" {
+  capabilities = ["read"]
+}
+
+# Allow creating certificates for auth service
+path "pki_int/issue/microservice-role" {
+  capabilities = ["create", "update"]
+}
+
+# Allow reading CA certificate
+path "pki_int/ca/pem" {
+  capabilities = ["read"]
+}
+
+# Allow reading root CA certificate
+path "pki/ca/pem" {
+  capabilities = ["read"]
+}
+
+# Allow token renewal
+path "auth/token/renew-self" {
+  capabilities = ["update"]
+}
+
+# Allow looking up own token
+path "auth/token/lookup-self" {
+  capabilities = ["read"]
+}
+#+end_src
+
+Update =vault/policies/user-service-policy.hcl=:
+#+begin_src hcl
+# Policy for user service
+# Allow reading database credentials
+path "secret/data/database" {
+  capabilities = ["read"]
+}
+
+# Allow reading user service specific secrets
+path "secret/data/user-service/*" {
+  capabilities = ["read"]
+}
+
+# Allow creating certificates for user service
+path "pki_int/issue/microservice-role" {
+  capabilities = ["create", "update"]
+}
+
+# Allow reading CA certificate
+path "pki_int/ca/pem" {
+  capabilities = ["read"]
+}
+
+# Allow reading root CA certificate
+path "pki/ca/pem" {
+  capabilities = ["read"]
+}
+
+# Allow token renewal
+path "auth/token/renew-self" {
+  capabilities = ["update"]
+}
+
+# Allow looking up own token
+path "auth/token/lookup-self" {
+  capabilities = ["read"]
+}
+#+end_src
+
+**** /Step 4: Test the Fixed Setup/
+
+#+begin_src bash
+# Clean up existing containers
+docker-compose down -v
+
+# Start fresh
+docker-compose up -d vault
+
+# Wait a moment for Vault to start
+sleep 10
+
+# Check Vault status
+docker-compose logs vault
+
+# Start initialization
+docker-compose up vault-init
+
+# Check if initialization was successful
+docker-compose logs vault-init
+#+end_src
+
+**** /Step 5: Test the Certificate Generation/
+
+Once everything is running:
+
+#+begin_src bash
+# Test with the correct path
+docker-compose exec vault sh -c 'export VAULT_TOKEN=dev-root-token-change-me && vault write pki_int/issue/microservice-role common_name="auth-service.my-microservices.local" ttl="24h"'
+
+# Test other operations
+docker-compose exec vault sh -c 'export VAULT_TOKEN=dev-root-token-change-me && vault kv get secret/database'
+
+# List all secrets
+docker-compose exec vault sh -c 'export VAULT_TOKEN=dev-root-token-change-me && vault kv list secret'
+
+# Check PKI endpoints
+docker-compose exec vault sh -c 'export VAULT_TOKEN=dev-root-token-change-me && vault secrets list'
+#+end_src
+*** next
+
+**** /Step 10: Create Vault Agent Templates/
+
+Create =vault/templates/database.tpl=:
+#+begin_src json
+{{- with secret "secret/database" -}}
+{
+  "username": "{{ .Data.data.username }}",
+  "password": "{{ .Data.data.password }}",
+  "host": "{{ .Data.data.host }}",
+  "port": {{ .Data.data.port }},
+  "database": "{{ .Data.data.database }}"
+}
+{{- end -}}
+#+end_src
+
+Create =vault/templates/auth-service-config.tpl=:
+#+begin_src json
+{{- with secret "secret/auth-service/config" -}}
+{
+  "jwt_secret": "{{ .Data.data.jwt_secret }}",
+  "session_secret": "{{ .Data.data.session_secret }}"
+}
+{{- end -}}
+#+end_src
+
+Create =vault/templates/user-service-config.tpl=:
+#+begin_src json
+{{- with secret "secret/user-service/config" -}}
+{
+  "encryption_key": "{{ .Data.data.encryption_key }}",
+  "api_key": "{{ .Data.data.api_key }}"
+}
+{{- end -}}
+#+end_src
+
+Create =vault/templates/ssl-cert.tpl=:
+#+begin_src
+{{- with secret "pki_int/issue/microservice-role" (printf "common_name=%s.my-microservices.local" (env "SERVICE_NAME")) "ttl=24h" -}}
+{{ .Data.certificate }}
+{{- end -}}
+#+end_src
+
+Create =vault/templates/ssl-key.tpl=:
+#+begin_src
+{{- with secret "pki_int/issue/microservice-role" (printf "common_name=%s.my-microservices.local" (env "SERVICE_NAME")) "ttl=24h" -}}
+{{ .Data.private_key }}
+{{- end -}}
+#+end_src
+
+Create =vault/templates/ca-cert.tpl=:
+#+begin_src
+{{- with secret "pki_int/ca/pem" -}}
+{{ .Data.certificate }}
+{{- end -}}
+#+end_src
+
+**** /Step 11: Create Vault Agent Configurations/
+
+Create =docker/vault-agent/auth-service.hcl=:
+#+begin_src hcl
+vault {
+  address = "http://vault:8200"
+  retry {
+    num_retries = 5
+  }
+}
+
+auto_auth {
+  method "approle" {
+    mount_path = "auth/approle"
+    config = {
+      role_id_file_path = "/vault/config/role-id"
+      secret_id_file_path = "/vault/config/secret-id"
+    }
+  }
+
+  sink "file" {
+    config = {
+      path = "/vault/token"
+    }
+  }
+}
+
+template {
+  source      = "/vault/templates/database.tpl"
+  destination = "/vault/secrets/database.json"
+  perms       = 0644
+  wait {
+    min = "2s"
+    max = "10s"
+  }
+}
+
+template {
+  source      = "/vault/templates/auth-service-config.tpl"
+  destination = "/vault/secrets/auth-config.json"
+  perms       = 0644
+  wait {
+    min = "2s"
+    max = "10s"
+  }
+}
+
+template {
+  source      = "/vault/templates/ssl-cert.tpl"
+  destination = "/vault/secrets/cert.pem"
+  perms       = 0644
+  wait {
+    min = "2s"
+    max = "10s"
+  }
+}
+
+template {
+  source      = "/vault/templates/ssl-key.tpl"
+  destination = "/vault/secrets/key.pem"
+  perms       = 0600
+  wait {
+    min = "2s"
+    max = "10s"
+  }
+}
+
+template {
+  source      = "/vault/templates/ca-cert.tpl"
+  destination = "/vault/secrets/ca.pem"
+  perms       = 0644
+  wait {
+    min = "2s"
+    max = "10s"
+  }
+}
+#+end_src
+
+Create =docker/vault-agent/user-service.hcl=:
+#+begin_src hcl
+vault {
+  address = "http://vault:8200"
+  retry {
+    num_retries = 5
+  }
+}
+
+auto_auth {
+  method "approle" {
+    mount_path = "auth/approle"
+    config = {
+      role_id_file_path = "/vault/config/role-id"
+      secret_id_file_path = "/vault/config/secret-id"
+    }
+  }
+
+  sink "file" {
+    config = {
+      path = "/vault/token"
+    }
+  }
+}
+
+template {
+  source      = "/vault/templates/database.tpl"
+  destination = "/vault/secrets/database.json"
+  perms       = 0644
+  wait {
+    min = "2s"
+    max = "10s"
+  }
+}
+
+template {
+  source      = "/vault/templates/user-service-config.tpl"
+  destination = "/vault/secrets/user-config.json"
+  perms       = 0644
+  wait {
+    min = "2s"
+    max = "10s"
+  }
+}
+
+template {
+  source      = "/vault/templates/ssl-cert.tpl"
+  destination = "/vault/secrets/cert.pem"
+  perms       = 0644
+  wait {
+    min = "2s"
+    max = "10s"
+  }
+}
+
+template {
+  source      = "/vault/templates/ssl-key.tpl"
+  destination = "/vault/secrets/key.pem"
+  perms       = 0600
+  wait {
+    min = "2s"
+    max = "10s"
+  }
+}
+
+template {
+  source      = "/vault/templates/ca-cert.tpl"
+  destination = "/vault/secrets/ca.pem"
+  perms       = 0644
+  wait {
+    min = "2s"
+    max = "10s"
+  }
+}
+#+end_src
+
+**** /Step 12: Create Auth Service/
+
+Create =services/auth/package.json=:
+#+begin_src json
+{
+  "name": "auth-service",
+  "version": "1.0.0",
+  "description": "Authentication microservice",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "dependencies": {
+    "fastify": "^4.24.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "@fastify/cors": "^8.4.0",
+    "@fastify/helmet": "^11.1.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
+#+end_src
+
+Create =services/auth/app.js=:
+#+begin_src javascript
+const fastify = require('fastify');
+const fs = require('fs');
+const path = require('path');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
+// Wait for file to exist with timeout
+async function waitForFile(filepath, timeout = 30000) {
+  const start = Date.now();
+  while (!fs.existsSync(filepath)) {
+    if (Date.now() - start > timeout) {
+      throw new Error(`Timeout waiting for file: ${filepath}`);
+    }
+    console.log(`Waiting for ${filepath}...`);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  }
+}
+
+// Read secret file
+async function readSecretFile(filename) {
+  const filepath = path.join('/vault/secrets', filename);
+  await waitForFile(filepath);
+  return fs.readFileSync(filepath, 'utf8');
+}
+
+// Read JSON secret file
+async function readSecretJSON(filename) {
+  const content = await readSecretFile(filename);
+  return JSON.parse(content);
+}
+
+// Mock users database (in real app, this would be a database)
+const users = [
+  {
+    id: 1,
+    username: 'admin',
+    password: bcrypt.hashSync('admin123', 10),
+    email: 'admin@example.com'
+  },
+  {
+    id: 2,
+    username: 'user',
+    password: bcrypt.hashSync('user123', 10),
+    email: 'user@example.com'
+  }
+];
+
+async function startServer() {
+  try {
+    console.log('Starting auth service...');
+
+    // Read configuration from Vault
+    const dbConfig = await readSecretJSON('database.json');
+    const authConfig = await readSecretJSON('auth-config.json');
+
+    // Read SSL certificates
+    const cert = await readSecretFile('cert.pem');
+    const key = await readSecretFile('key.pem');
+    const ca = await readSecretFile('ca.pem');
+
+    console.log('✓ Configuration loaded from Vault');
+    console.log('✓ SSL certificates loaded');
+    console.log('✓ Database config:', { host: dbConfig.host, username: dbConfig.username });
+
+    // Create HTTPS Fastify server
+    const app = fastify({
+      https: {
+        key: key,
+        cert: cert,
+        ca: ca
+      },
+      logger: {
+        level: 'info'
+      }
+    });
+
+    // Register plugins
+    await app.register(require('@fastify/cors'), {
+      origin: true,
+      credentials: true
+    });
+
+    await app.register(require('@fastify/helmet'));
+
+    // Health check endpoint
+    app.get('/health', async (request, reply) => {
+      return {
+        status: 'healthy',
+        service: 'auth-service',
+        timestamp: new Date().toISOString(),
+        database: {
+          host: dbConfig.host,
+          port: dbConfig.port,
+          database: dbConfig.database
+        }
+      };
+    });
+
+    // Login endpoint
+    app.post('/login', async (request, reply) => {
+      const { username, password } = request.body;
+
+      if (!username || !password) {
+        return reply.code(400).send({
+          error: 'Username and password are required'
+        });
+      }
+
+      const user = users.find(u => u.username === username);
+      if (!user || !bcrypt.compareSync(password, user.password)) {
+        return reply.code(401).send({
+          error: 'Invalid credentials'
+        });
+      }
+
+      const token = jwt.sign(
+        { id: user.id, username: user.username },
+        authConfig.jwt_secret,
+        { expiresIn: '24h' }
+      );
+
+      return {
+        token,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email
+        }
+      };
+    });
+
+    // Verify token endpoint
+    app.post('/verify', async (request, reply) => {
+      const { token } = request.body;
+
+      if (!token) {
+        return reply.code(400).send({
+          error: 'Token is required'
+        });
+      }
+
+      try {
+        const decoded = jwt.verify(token, authConfig.jwt_secret);
+        const user = users.find(u => u.id === decoded.id);
+
+        if (!user) {
+          return reply.code(401).send({
+            error: 'User not found'
+          });
+        }
+
+        return {
+          valid: true,
+          user: {
+            id: user.id,
+            username: user.username,
+            email: user.email
+          }
+        };
+      } catch (error) {
+        return reply.code(401).send({
+          error: 'Invalid token'
+        });
+      }
+    });
+
+    // Register endpoint
+    app.post('/register', async (request, reply) => {
+      const { username, password, email } = request.body;
+
+      if (!username || !password || !email) {
+        return reply.code(400).send({
+          error: 'Username, password, and email are required'
+        });
+      }
+
+      if (users.find(u => u.username === username)) {
+        return reply.code(409).send({
+          error: 'Username already exists'
+        });
+      }
+
+      const newUser = {
+        id: users.length + 1,
+        username,
+        password: bcrypt.hashSync(password, 10),
+        email
+      };
+
+      users.push(newUser);
+
+      const token = jwt.sign(
+        { id: newUser.id, username: newUser.username },
+        authConfig.jwt_secret,
+        { expiresIn: '24h' }
+      );
+
+      return {
+        token,
+        user: {
+          id: newUser.id,
+          username: newUser.username,
+          email: newUser.email
+        }
+      };
+    });
+
+    // Start server
+    await app.listen({ port: 3001, host: '0.0.0.0' });
+    console.log('✓ Auth service running on https://0.0.0.0:3001');
+
+  } catch (error) {
+    console.error('Failed to start auth service:', error);
+    process.exit(1);
+  }
+}
+
+// Handle graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('Received SIGTERM, shutting down gracefully');
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  console.log('Received SIGINT, shutting down gracefully');
+  process.exit(0);
+});
+
+startServer();
+#+end_src
+
+Create =services/auth/Dockerfile=:
+#+begin_src dockerfile
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install dependencies
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copy application code
+COPY . .
+
+# Create directory for Vault secrets
+RUN mkdir -p /vault/secrets
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nodejs -u 1001
+
+# Change ownership of app directory
+RUN chown -R nodejs:nodejs /app
+
+USER nodejs
+
+EXPOSE 3001
+
+CMD ["node", "app.js"]
+#+end_src
+
+**** /Step 13: Test the Auth Service Setup/
+
+Let's test our setup so far:
+
+#+begin_src bash
+# Build the auth service
+cd services/auth
+npm install
+cd ../..
+
+# Update docker-compose.yml to include auth service
+#+end_src
+
+Add to =docker-compose.yml= (after the vault-init service):
+
+
+#+begin_src yaml
+  auth-vault-agent:
+    image: vault:1.15.0
+    container_name: auth-vault-agent
+    depends_on:
+      vault-init:
+        condition: service_completed_successfully
+    environment:
+      VAULT_ADDR: ${VAULT_ADDR}
+      SERVICE_NAME: auth-service
+    volumes:
+      - vault-config:/vault/config:ro
+      - ./vault/templates:/vault/templates:ro
+      - ./docker/vault-agent:/vault/agent-config:ro
+      - auth-secrets:/vault/secrets
+    command: |
+      sh -c "
+        cp /vault/config/auth-service-role-id /vault/config/role-id
+        cp /vault/config/auth-service-secret-id /vault/config/secret-id
+        vault agent -config=/vault/agent-config/auth-service.hcl
+      "
+    networks:
+      - microservices
+
+  auth-service:
+    build: ./services/auth
+    container_name: auth-service
+    depends_on:
+      - auth-vault-agent
+    volumes:
+      - auth-secrets:/vault/secrets:ro
+    ports:
+      - "${AUTH_SERVICE_PORT}:3001"
+    environment:
+      NODE_ENV: production
+    networks:
+      - microservices
+    healthcheck:
+      test: ["CMD", "wget", "--no-check-certificate", "--quiet", "--tries=1", "--spider", "https://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+#+end_src
+
+And add to the volumes section:
+
+#+begin_src yaml
+volumes:
+  vault-data:
+  vault-logs:
+  vault-config:
+  auth-secrets:
+#+end_src
+
+**** /Complete Updated docker-compose.yml/
+
+Here's the full =docker-compose.yml= with everything so far:
+
+#+begin_src yaml
+version: '3.8'
+
+services:
+  vault:
+    image: vault:1.15.0
+    container_name: vault
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: ${VAULT_DEV_ROOT_TOKEN_ID}
+      VAULT_DEV_LISTEN_ADDRESS: ${VAULT_DEV_LISTEN_ADDRESS}
+      VAULT_ADDR: ${VAULT_ADDR}
+    volumes:
+      - vault-data:/vault/data
+      - vault-logs:/vault/logs
+      - ./vault/config:/vault/config:ro
+      - ./vault/policies:/vault/policies:ro
+    cap_add:
+      - IPC_LOCK
+    command: |
+      sh -c "
+        echo 'Starting Vault in development mode...'
+        vault server -dev -dev-root-token-id=$$VAULT_DEV_ROOT_TOKEN_ID -dev-listen-address=$$VAULT_DEV_LISTEN_ADDRESS
+      "
+    healthcheck:
+      test: ["CMD", "sh", "-c", "vault status || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - microservices
+
+  vault-init:
+    image: vault:1.15.0
+    container_name: vault-init
+    depends_on:
+      vault:
+        condition: service_healthy
+    environment:
+      VAULT_ADDR: ${VAULT_ADDR}
+      VAULT_DEV_ROOT_TOKEN_ID: ${VAULT_DEV_ROOT_TOKEN_ID}
+    volumes:
+      - vault-config:/vault/config
+      - ./vault/scripts:/vault/scripts:ro
+      - ./vault/policies:/vault/policies:ro
+    command: |
+      sh -c "
+        apk add --no-cache curl jq
+        chmod +x /vault/scripts/init-vault.sh
+        /vault/scripts/init-vault.sh
+      "
+    networks:
+      - microservices
+
+  auth-vault-agent:
+    image: vault:1.15.0
+    container_name: auth-vault-agent
+    depends_on:
+      vault-init:
+        condition: service_completed_successfully
+    environment:
+      VAULT_ADDR: ${VAULT_ADDR}
+      SERVICE_NAME: auth-service
+    volumes:
+      - vault-config:/vault/config:ro
+      - ./vault/templates:/vault/templates:ro
+      - ./docker/vault-agent:/vault/agent-config:ro
+      - auth-secrets:/vault/secrets
+    command: |
+      sh -c "
+        cp /vault/config/auth-service-role-id /vault/config/role-id
+        cp /vault/config/auth-service-secret-id /vault/config/secret-id
+        vault agent -config=/vault/agent-config/auth-service.hcl
+      "
+    networks:
+      - microservices
+
+  auth-service:
+    build: ./services/auth
+    container_name: auth-service
+    depends_on:
+      - auth-vault-agent
+    volumes:
+      - auth-secrets:/vault/secrets:ro
+    ports:
+      - "${AUTH_SERVICE_PORT}:3001"
+    environment:
+      NODE_ENV: production
+    networks:
+      - microservices
+    healthcheck:
+      test: ["CMD", "wget", "--no-check-certificate", "--quiet", "--tries=1", "--spider", "https://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  vault-data:
+  vault-logs:
+  vault-config:
+  auth-secrets:
+
+networks:
+  microservices:
+    driver: bridge
+#+end_src
+
+**** /Step 14: Test the Auth Service/
+
+#+begin_src bash
+# Build and start everything
+docker-compose up -d
+
+# Check if all services are running
+docker-compose ps
+
+# Check auth service logs
+docker-compose logs auth-service
+
+# Check vault agent logs
+docker-compose logs auth-vault-agent
+
+# Test the auth service
+curl -k https://localhost:3001/health | jq
+
+# Test login
+curl -k -X POST https://localhost:3001/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin", "password": "admin123"}' | jq
+#+end_src
+
+Ready to continue with the user service and nginx proxy?
+*** Why is the vault not https ?
+
+
+Great question! You're absolutely right - in a production setup, Vault should definitely be using HTTPS. Let me explain why it's currently HTTP and how to fix it.
+
+** /Why Vault is Currently HTTP/
+
+1. *Development Mode*: We're running Vault in =-dev= mode, which defaults to HTTP for simplicity
+2. *Internal Communication*: The services are communicating internally within Docker network
+3. *Certificate Chicken-and-Egg*: Vault generates the certificates, so it needs to be running first
+
+** /The Problem with HTTP Vault/
+
+- *Security Risk*: All communication with Vault (tokens, secrets, certificates) is unencrypted
+- *Production Unsuitable*: Never acceptable for production
+- *Best Practice*: Even internal services should use HTTPS
+
+** /Solution: Enable HTTPS for Vault/
+
+Let's fix this step by step:
+
+** /Step 1: Create Vault's Own SSL Certificate/
+
+Since Vault generates certificates for others, we need to bootstrap it with its own certificate.
+
+Create =vault/ssl/generate-vault-cert.sh=:
+#+begin_src bash
+#!/bin/bash
+
+# Create directory for Vault SSL certificates
+mkdir -p vault/ssl
+
+# Generate private key for Vault
+openssl genrsa -out vault/ssl/vault-key.pem 2048
+
+# Generate certificate signing request
+openssl req -new -key vault/ssl/vault-key.pem -out vault/ssl/vault-csr.pem -subj "/CN=vault/O=Vault Server"
+
+# Generate self-signed certificate
+openssl x509 -req -in vault/ssl/vault-csr.pem -signkey vault/ssl/vault-key.pem -out vault/ssl/vault-cert.pem -days 365 -extensions v3_req -extfile <(
+cat <<EOF
+[v3_req]
+keyUsage = keyEncipherment, dataEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = @alt_names
+[alt_names]
+DNS.1 = vault
+DNS.2 = localhost
+DNS.3 = vault.my-microservices.local
+IP.1 = 127.0.0.1
+EOF
+)
+
+# Clean up CSR
+rm vault/ssl/vault-csr.pem
+
+echo "Vault SSL certificate generated!"
+#+end_src
+
+Make it executable and run it:
+#+begin_src bash
+chmod +x vault/ssl/generate-vault-cert.sh
+./vault/ssl/generate-vault-cert.sh
+#+end_src
+
+** /Step 2: Update Vault Configuration for HTTPS/
+
+Update =vault/config/vault.hcl=:
+#+begin_src hcl
+# Vault server configuration
+storage "file" {
+  path = "/vault/data"
+}
+
+listener "tcp" {
+  address     = "0.0.0.0:8200"
+  tls_disable = 0
+  tls_cert_file = "/vault/ssl/vault-cert.pem"
+  tls_key_file = "/vault/ssl/vault-key.pem"
+  tls_min_version = "tls12"
+}
+
+# API address that Vault will bind to
+api_addr = "https://vault:8200"
+
+# Cluster address (for HA, not used in this example)
+cluster_addr = "https://vault:8201"
+
+# UI configuration
+ui = true
+
+# Disable mlock (for Docker - not recommended for production)
+disable_mlock = true
+
+# Log level
+log_level = "Info"
+
+# Default lease time
+default_lease_ttl = "168h"    # 7 days
+max_lease_ttl = "720h"        # 30 days
+#+end_src
+
+** /Step 3: Update Environment Variables/
+
+Update =.env=:
+#+begin_src bash
+# Vault Configuration
+VAULT_ADDR=https://vault:8200
+VAULT_DEV_ROOT_TOKEN_ID=dev-root-token-change-me
+VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:8200
+
+# For development - skip TLS verification (NOT for production)
+VAULT_SKIP_VERIFY=true
+
+# Network Configuration
+DOCKER_NETWORK=microservices-network
+
+# Domain Configuration
+DOMAIN=my-microservices.local
+SSL_DOMAIN=*.my-microservices.local
+
+# Service Ports
+AUTH_SERVICE_PORT=3001
+USER_SERVICE_PORT=3002
+NGINX_HTTP_PORT=80
+NGINX_HTTPS_PORT=443
+
+# Database Configuration (for examples)
+DB_HOST=postgres
+DB_PORT=5432
+DB_NAME=microservices
+DB_USER=postgres
+DB_PASSWORD=postgres123
+#+end_src
+
+** /Step 4: Update Docker Compose for HTTPS Vault/
+
+Update =docker-compose.yml= (vault service section):
+#+begin_src yaml
+  vault:
+    image: vault:1.15.0
+    container_name: vault
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: ${VAULT_DEV_ROOT_TOKEN_ID}
+      VAULT_DEV_LISTEN_ADDRESS: ${VAULT_DEV_LISTEN_ADDRESS}
+      VAULT_ADDR: ${VAULT_ADDR}
+      VAULT_SKIP_VERIFY: ${VAULT_SKIP_VERIFY}
+    volumes:
+      - vault-data:/vault/data
+      - vault-logs:/vault/logs
+      - ./vault/config:/vault/config:ro
+      - ./vault/policies:/vault/policies:ro
+      - ./vault/ssl:/vault/ssl:ro
+    cap_add:
+      - IPC_LOCK
+    command: |
+      sh -c "
+        # Check if we have SSL certificates
+        if [ -f /vault/ssl/vault-cert.pem ] && [ -f /vault/ssl/vault-key.pem ]; then
+          echo 'Starting Vault with HTTPS...'
+          vault server -config=/vault/config/vault.hcl
+        else
+          echo 'SSL certificates not found, starting in development mode...'
+          vault server -dev -dev-root-token-id=$$VAULT_DEV_ROOT_TOKEN_ID -dev-listen-address=$$VAULT_DEV_LISTEN_ADDRESS
+        fi
+      "
+    healthcheck:
+      test: ["CMD", "sh", "-c", "VAULT_SKIP_VERIFY=true vault status || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - microservices
+#+end_src
+
+** /Step 5: Update Vault Initialization Script/
+
+Update =vault/scripts/init-vault.sh= to handle HTTPS:
+#+begin_src bash
+#!/bin/bash
+set -e
+
+# Wait for Vault to be ready
+echo "Waiting for Vault to be ready..."
+max_attempts=30
+attempt=0
+
+while [ $attempt -lt $max_attempts ]; do
+    if curl -k -s https://vault:8200/v1/sys/health > /dev/null 2>&1; then
+        echo "Vault is ready!"
+        break
+    fi
+    echo "Vault not ready yet, attempt $((attempt + 1))/$max_attempts"
+    sleep 5
+    attempt=$((attempt + 1))
+done
+
+if [ $attempt -eq $max_attempts ]; then
+    echo "Vault failed to become ready after $max_attempts attempts"
+    exit 1
+fi
+
+# Set Vault address and token
+export VAULT_ADDR=https://vault:8200
+export VAULT_SKIP_VERIFY=true  # For development with self-signed cert
+export VAULT_TOKEN=${VAULT_DEV_ROOT_TOKEN_ID}
+
+echo "Vault Address: $VAULT_ADDR"
+echo "Vault Token: $VAULT_TOKEN"
+
+# Check if Vault is already initialized
+if vault status | grep -q "Initialized.*true"; then
+    echo "Vault is already initialized"
+else
+    echo "Initializing Vault..."
+    vault operator init -key-shares=1 -key-threshold=1 > /tmp/vault-init.txt
+
+    # Extract unseal key and root token
+    UNSEAL_KEY=$(grep 'Unseal Key 1:' /tmp/vault-init.txt | awk '{print $4}')
+    ROOT_TOKEN=$(grep 'Initial Root Token:' /tmp/vault-init.txt | awk '{print $4}')
+
+    # Unseal vault
+    vault operator unseal $UNSEAL_KEY
+
+    # Use the root token
+    export VAULT_TOKEN=$ROOT_TOKEN
+
+    echo "Vault initialized and unsealed"
+fi
+
+# Verify we can connect
+echo "Testing Vault connection..."
+if ! vault status; then
+    echo "Failed to connect to Vault"
+    exit 1
+fi
+
+# Continue with the rest of the initialization...
+# (rest of the script remains the same)
+#+end_src
+
+** /Step 6: Update Vault Agent Configurations/
+
+Update =docker/vault-agent/auth-service.hcl=:
+#+begin_src hcl
+vault {
+  address = "https://vault:8200"
+  tls_skip_verify = true  # For development only
