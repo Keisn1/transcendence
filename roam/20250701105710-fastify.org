@@ -18,3 +18,4 @@ npm uninstall fastify
 #+begin_src bash
 npm prune
 #+end_src
+* [[id:a42c88c3-6557-4cb6-801b-9801b74b46f4][fastify request]]

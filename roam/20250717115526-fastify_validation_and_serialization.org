@@ -1,0 +1,6 @@
+:PROPERTIES:
+:ID:       31f40b6b-eb3b-4660-9f7e-9a43fb113c8e
+:END:
+#+title: fastify validation and serialization
+#+date: [2025-07-17 Do 11:55]
+#+startup: overview

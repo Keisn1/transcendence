@@ -1,0 +1,23 @@
+:PROPERTIES:
+:ID:       a42c88c3-6557-4cb6-801b-9801b74b46f4
+:END:
+#+title: fastify request
+#+date: [2025-07-17 Do 10:21]
+#+startup: overview
+
+* query parameter
+#+begin_src javascript
+// Route definition
+fastify.get('/api/user', async (request, reply) => {
+  const id = request.query.id // "4"
+})
+#+end_src
+
+* path parameter
+- part of the URL path structure
+#+begin_src javascript
+// Route definition
+fastify.get('/api/user/:id', async (request, reply) => {
+  const id = request.params.id // "4"
+})
+#+end_src
