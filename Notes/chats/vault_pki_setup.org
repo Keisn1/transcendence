@@ -2458,8 +2458,6 @@ curl -k -X POST https://localhost:3001/login \
 
 Ready to continue with the user service and nginx proxy?
 *** Why is the vault not https ?
-
-
 Great question! You're absolutely right - in a production setup, Vault should definitely be using HTTPS. Let me explain why it's currently HTTP and how to fix it.
 
 **** /Why Vault is Currently HTTP/
@@ -2708,6 +2706,9 @@ Update =docker/vault-agent/auth-service.hcl=:
 vault {
   address = "https://vault:8200"
   tls_skip_verify = true  # For development only
+
+  ...
+#+end_src
 *** Inside the auth-service we're reading the environment variables directly from the filesystem where they have put by the vault-agent, if I'm not mistaken. Wouldn't it be more convenient or better to read them by calling the vault by i.e. using node-vault?
 
 
