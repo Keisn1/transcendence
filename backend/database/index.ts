@@ -1,33 +1,37 @@
 import sqlite3 from 'sqlite3';
 import path from 'path';
 
-const dbFile = path.resolve(__dirname, '../../dev.db');
-export const db = new sqlite3.Database(dbFile, (err) => {
-	if (err) {
-		console.error('Failed to connect to SQLite:', err);
-		return;
-	}
-	console.log('Connected to SQLite:', dbFile);
-
-	db.exec(`
-		-- not very nice solution, but fine for now
-		DROP TABLE IF EXISTS users;
-		
-		CREATE TABLE IF NOT EXISTS users (
-		id       INTEGER PRIMARY KEY AUTOINCREMENT,
-		username TEXT    UNIQUE NOT NULL,
-		email    TEXT    UNIQUE NOT NULL,
-		avatar   TEXT
-		);
-
-		INSERT INTO users (id, username, email, avatar) VALUES
-		(123, 'john_doe', 'john@example.com', 'https://example.com/avatar.jpg'),
-		(124, 'jane_doe', 'jane@example.com', 'https://example.com/avatar.jpg');
-	`, (err) => {
-		if (err) {
-		console.error('Failed to initialize schema:', err);
-		} else {
-		console.log('Database schema created & seeded.');
-		}
-	});
+const dbFile = path.resolve(__dirname, '../../users.db');
+const rawDb = new sqlite3.Database(dbFile, err => {
+	if (err) console.error('SQLite connect error:', err);
 });
+
+// wrapper
+export const db = {
+	// imperative api methods
+	run(sql: string, params: any[] = []): Promise<sqlite3.RunResult> {
+		return new Promise((resolve, reject) => {
+			rawDb.run(sql, params, function (this: sqlite3.RunResult, err) {
+			if (err) return reject(err);
+			resolve(this);
+			});
+		});
+	},
+	// generic type <T>
+	get<T>(sql: string, params: any[] = []): Promise<T | undefined> {
+		return new Promise((resolve, reject) => {
+			rawDb.get(sql, params, (err, row) => {
+			if (err) return reject(err);
+			resolve(row as T | undefined);
+			});
+		});
+	},
+	exec(sql: string): Promise<void> {
+		return new Promise((resolve, reject) => {
+			rawDb.exec(sql, err => {
+			if (err) return reject(err);
+			resolve();
+			});
+		});
+	}
+};
