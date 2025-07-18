@@ -52,3 +52,23 @@ export async function createUser(
         return reply.code(500).send({ error: 'Internal server error' });
     }
 }
+
+export async function deleteUser(
+    request: FastifyRequest<{ Params: { id: number } }>,
+    reply: FastifyReply
+    ) {
+    const id = request.params.id;
+
+    if (Number.isNaN(id)) return reply.code(400).send({ error: 'Invalid user id' });
+
+    try {
+        const user = await userRepo.deleteUser(id);
+        return reply.code(200).send(user);
+    } catch (err: any) {
+        if (err.message.includes('not found')) {
+            return reply.code(404).send({ error: err.message });
+        }
+        request.log.error(err);
+        return reply.code(500).send({ error: 'Internal server error' });
+    }
+}

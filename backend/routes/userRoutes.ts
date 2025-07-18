@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { getUser, createUser } from "../controllers/user.controller";
+import { getUser, createUser, deleteUser } from "../controllers/user.controller";
 
 const createUserSchema = {
     body: {
@@ -30,6 +30,6 @@ export async function userRoutes(app: FastifyInstance) {
     app.get("/:id", getUser); // GET /api/user/24 - public
     app.post("/", { schema: createUserSchema }, createUser); // test for username present or not - needs to private
     // app.update("/:id", { schema: updateUserSchema }, updateUser ); // only be done with JWT authentication - public
-    // app.delete("/:id", deleteUser); // only be done with JWT authentication - public
+    app.delete("/:id", deleteUser); // only be done with JWT authentication - public
     app.log.info("user routes registered");
 }
