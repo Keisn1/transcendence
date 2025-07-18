@@ -1,4 +1,5 @@
 import Fastify, { FastifyRequest } from "fastify";
+import './database'; 
 import { routes } from "./routes/routes";
 import { FastifyJwtVerifyOptions } from "@fastify/jwt";
 import { userRoutes } from "./routes/userRoutes";

@@ -1,21 +1,8 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { User } from "../models/User";
 import {} from "fastify";
-
-var userDb: Record<number, User> = {
-    123: {
-        id: 123,
-        username: "john_doe",
-        email: "john@example.com",
-        avatar: "https://example.com/avatar.jpg",
-    },
-    124: {
-        id: 124,
-        username: "jane_doe",
-        email: "jane@example.com",
-        avatar: "https://example.com/avatar.jpg",
-    },
-};
+import { db } from '../database';
+import sqlite3 , { RunResult } from 'sqlite3';
 
 export interface CreateUserBody {
     username: string;
@@ -32,40 +19,84 @@ export interface CreateUserResponse {
 
 export async function createUser(
     request: FastifyRequest<{ Body: CreateUserBody }>,
-    reply: FastifyReply,
-): Promise<CreateUserResponse> {
-    let newUserData = request.body;
+    reply: FastifyReply) {
+    const { username, email, avatar } = request.body;
 
-    console.log(newUserData.username);
+    const selectStmt = db.prepare('SELECT * FROM users WHERE username = ?');
+    selectStmt.get(
+        username,
+        (err: Error | null, existingUserRow?: CreateUserResponse) => {
 
-    for (const user of Object.values(userDb)) {
-        if (user.username === newUserData.username) {
-            return reply.code(400).send({ error: "Username is already being used" });
+            if (err) {
+                request.log.error(err);
+                return reply.code(500).send({ error: 'Database error on SELECT' });
+            }
+
+            if (existingUserRow) {
+                return reply.code(400).send({ message: 'Username is already in use.'});
+            }
+
+            const insertStmt = db.prepare(
+                'INSERT INTO users (username, email, avatar) VALUES (?, ?, ?)'
+            );
+
+            insertStmt.run(
+                username,
+                email,
+                avatar,
+                function (this: RunResult, err: Error | null) {
+                    if (err) {
+                        if (err.message.includes('INIQUE constraint failed')) {
+                            return reply.code(400).send({ message: 'Username or email already in use.'});
+                        }
+                        request.log.error(err);
+                        return reply.code(500).send({ error: 'Database error on INSERT' });
+                    }
+
+                    const newId = this.lastID as number;
+
+                    const fetchStmt = db.prepare('SELECT * FROM users WHERE id = ?');
+                    fetchStmt.get(
+                        newId,
+                        (err: Error | null, newUserRow?: CreateUserResponse) => {
+                            if (err) {
+                                request.log.error(err);
+                                return reply.code(500).send({ error: 'Could not retrieve new user.' });
+                            }
+                            return reply.code(201).send(newUserRow);
+                        }
+                    );
+                }
+            );
         }
-    }
-
-    const keys = Object.keys(userDb);
-    const lastKey = keys[keys.length - 1];
-    const newUserId: number = +lastKey + 1;
-
-    let newUser: CreateUserResponse;
-    newUser = {
-        id: newUserId,
-        username: newUserData.username,
-        email: newUserData.email,
-        avatar: newUserData.avatar,
-    };
-
-    userDb[newUserId] = newUser;
-    console.log(newUser);
-    return newUser;
+    );
 }
 
-export async function getUser(request: FastifyRequest<{ Params: { id: number } }>, reply: FastifyReply) {
-    let userId = request.params.id;
+export function getUser(
+    request: FastifyRequest<{ Params: { id: number } }>,
+    reply: FastifyReply): void {
+    const userId = request.params.id;
 
-    if (!(userId in userDb)) {
-        return reply.code(404).send({ error: "User not found" });
-    }
-    return userDb[userId];
+    const stmt = db.prepare('SELECT * FROM users WHERE id = ?');
+    stmt.get(
+        userId,
+        (err: Error | null, row?: CreateUserResponse) => {
+        if (err) {
+            request.log.error(err);
+            return reply
+            .code(500)
+            .send({ error: 'Database error on SELECT' });
+        }
+
+        if (!row) {
+            return reply
+            .code(404)
+            .send({ error: 'User not found' });
+        }
+
+        return reply
+            .code(200)
+            .send(row);
+        }
+    );
 }
