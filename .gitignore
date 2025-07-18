@@ -1,7 +1,9 @@
 /roam/transcendence.db
 /node_modules/
-*/node_modules/
+*/node_modules/*
 .env
 .env.local
 /frontend/dist/
 /Notes/roam/transcendence.db
+/backend/services/user/node_modules/
+/backend/services/auth/node_modules/
