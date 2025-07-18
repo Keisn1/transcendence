@@ -27,7 +27,9 @@ const createUserSchema = {
 
 export async function userRoutes(app: FastifyInstance) {
     // User routes
-    app.get("/:id", getUser);
-    app.post("/", { schema: createUserSchema }, createUser);
+    app.get("/:id", getUser); // GET /api/user/24 - public
+    app.post("/", { schema: createUserSchema }, createUser); // test for username present or not - needs to private
+    // app.update("/:id", { schema: updateUserSchema }, updateUser ); // only be done with JWT authentication - public
+    // app.delete("/:id", deleteUser); // only be done with JWT authentication - public
     app.log.info("user routes registered");
 }

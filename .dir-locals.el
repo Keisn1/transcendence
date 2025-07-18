@@ -1,5 +1,5 @@
-((nil . ((org-roam-directory . "~/workspace/transcendence/roam")
-         (org-roam-db-location . "~/workspace/transcendence/roam/transcendence.db")))
+((nil . ((org-roam-directory . "~/workspace/transcendence/Notes/roam")
+         (org-roam-db-location . "~/workspace/transcendence/Notes/roam/transcendence.db")))
 
  (org-mode . ((eval . (add-hook 'after-save-hook
                                 (lambda nil

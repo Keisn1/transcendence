@@ -4,3 +4,4 @@
 .env
 .env.local
 /frontend/dist/
+/Notes/roam/transcendence.db
