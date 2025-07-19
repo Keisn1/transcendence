@@ -7,35 +7,20 @@ SELECT name, type, sql FROM sqlite_master WHERE type='table';
 #+end_src
 
 #+RESULTS:
-| name                                          | type  | sql                                    |
-|-----------------------------------------------+-------+----------------------------------------|
-| schema_migrations                             | table | "CREATE TABLE schema_migrations (      |
-| version INTEGER PRIMARY KEY                   |       |                                        |
-| applied_at DATETIME DEFAULT CURRENT_TIMESTAMP |       |                                        |
-| )"                                            |       |                                        |
-| users                                         | table | "CREATE TABLE users (                  |
-| id INTEGER PRIMARY KEY AUTOINCREMENT          |       |                                        |
-| username TEXT UNIQUE NOT NULL                 |       |                                        |
-| email TEXT UNIQUE NOT NULL                    |       |                                        |
-| password_hash TEXT NOT NULL                   |       |                                        |
-| created_at DATETIME DEFAULT CURRENT_TIMESTAMP |       |                                        |
-| updated_at DATETIME DEFAULT CURRENT_TIMESTAMP |       |                                        |
-| )"                                            |       |                                        |
-| sqlite_sequence                               | table | CREATE TABLE sqlite_sequence(name,seq) |
+| name                                          | type  | sql                               |
+|-----------------------------------------------+-------+-----------------------------------|
+| schema_migrations                             | table | "CREATE TABLE schema_migrations ( |
+| version INTEGER PRIMARY KEY                   |       |                                   |
+| applied_at DATETIME DEFAULT CURRENT_TIMESTAMP |       |                                   |
+| )"                                            |       |                                   |
+
+
 
 #+begin_src sqlite :db ./auth.db :colnames yes
 PRAGMA table_info(users);
 #+end_src
 
 #+RESULTS:
-| cid | name          | type     | notnull | dflt_value        | pk |
-|-----+---------------+----------+---------+-------------------+----|
-|   0 | id            | INTEGER  |       0 |                   |  1 |
-|   1 | username      | TEXT     |       1 |                   |  0 |
-|   2 | email         | TEXT     |       1 |                   |  0 |
-|   3 | password_hash | TEXT     |       1 |                   |  0 |
-|   4 | created_at    | DATETIME |       0 | CURRENT_TIMESTAMP |  0 |
-|   5 | updated_at    | DATETIME |       0 | CURRENT_TIMESTAMP |  0 |
 
 #+begin_src sqlite :db ./auth.db :colnames yes
 SELECT * FROM schema_migrations ORDER BY version;

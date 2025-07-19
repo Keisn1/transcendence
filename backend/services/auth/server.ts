@@ -1,12 +1,16 @@
+// Load environment variables
+require("dotenv").config();
+
 import Fastify from "fastify";
 import { routes } from "./routes/routes";
 import databasePlugin from "./plugins/database";
+import { config } from "./config/environment";
 
 const server = Fastify({
     logger: true,
 });
 
-server.register(require("@fastify/jwt"), { secret: "supersecret" });
+server.register(require("@fastify/jwt"), { secret: config.jwt.secret });
 server.register(databasePlugin);
 server.register(routes, { prefix: "api/auth" });
 

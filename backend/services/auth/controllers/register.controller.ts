@@ -1,10 +1,11 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { genSaltSync, hashSync } from "bcrypt-ts";
+import { genSaltSync, hashSync } from "bcrypt";
+import { createUser } from "../services/userService";
 
 interface RegisterBody {
     username: string;
-    password: string;
     email: string;
+    password: string;
 }
 
 interface RegisterResponse {
@@ -18,47 +19,58 @@ export default async function register(
     request: FastifyRequest<{ Body: RegisterBody }>,
     reply: FastifyReply,
 ): Promise<RegisterResponse> {
-    const { username, password, email } = request.body;
+    const { username, email, password } = request.body;
 
     try {
-        // 1. Create user in User Service
-        const userResponse = await fetch("http://user-service:3001/api/users", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, email }),
+        // Create user profile (only username/email)
+        const userServiceUser = await createUser({
+            username,
+            email,
         });
 
-        if (!userResponse.ok) {
-            const error = await userResponse.json();
-            return reply.code(userResponse.status).send(error);
+        // Validate user service response
+        if (!userServiceUser || !userServiceUser.id) {
+            throw new Error("User service failed to create user");
         }
 
-        const user = await userResponse.json();
-
-        // 2. Store auth credentials in Auth Service
+        // Hash password (stays in auth service)
         const salt = genSaltSync(10);
         const passwordHash = hashSync(password, salt);
 
-        // Store in your auth database
-        // server is a
-        await request.server.db.query("INSERT INTO auth_credentials (user_id, password_hash, salt) VALUES (?, ?, ?)", [
-            user.id,
+        // Store only user_id and password_hash in auth service
+        await request.server.db.run("INSERT INTO auth_credentials (user_id, password_hash) VALUES (?, ?)", [
+            userServiceUser.id,
             passwordHash,
-            salt,
         ]);
 
-        // 3. Generate JWT token
-        const token = request.server.jwt.sign({ id: user.id, username: user.username }, { expiresIn: "24h" });
+        // Generate JWT with user service data
+        const token = request.server.jwt.sign({
+            id: userServiceUser.id,
+            username: userServiceUser.username,
+            email: userServiceUser.email,
+        });
 
-        return reply.code(201).send({
+        return reply.status(201).send({
             token,
             user: {
-                id: user.id,
-                username: user.username,
-                email: user.email,
+                id: userServiceUser.id,
+                username: userServiceUser.username,
+                email: userServiceUser.email,
             },
         });
-    } catch (error) {
-        return reply.code(500).send({ error: " Internal server error" });
+    } catch (err) {
+        const error = err as Error;
+        console.error("Registration error:", error);
+        // More specific error handling
+        if (error.message.includes("409")) {
+            return reply.status(409).send({ error: "User already exists" });
+        }
+        if (error.message.includes("User service")) {
+            return reply.status(502).send({ error: "External service unavailable" });
+        }
+        if (error.message.includes("UNIQUE constraint")) {
+            return reply.status(409).send({ error: "User already exists" });
+        }
+        return reply.status(500).send({ error: "Registration failed" });
     }
 }

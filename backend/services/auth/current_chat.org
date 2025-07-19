@@ -1,0 +1,77 @@
+:PROPERTIES:
+:GPTEL_MODEL: claude-sonnet-4-20250514
+:GPTEL_BACKEND: Claude
+:GPTEL_SYSTEM: You are a large language model living in Emacs and a helpful assistant. Avoid long answers.
+:GPTEL_BOUNDS: ((response (921 2338)))
+:END:
+
+*** parts of othe health routes are still outcommented. I'm using sqlite, so i'm not sure if they are of any need or how i should check the database to be working
+#+begin_src typescript :results output
+function routes(fastify: FastifyInstance) {
+    fastify.get("/health", async () => {
+        return {
+            status: "healthy",
+            service: "auth-service",
+            timestamp: new Date().toISOString(),
+            // database: {
+            //   host: dbConfig.host,
+            //   port: dbConfig.port,
+            //   database: dbConfig.database,
+            // },
+        };
+    });
+    fastify.post("/register", { schema: registerSchema }, register);
+}
+
+
+#+end_src
+
+
+For SQLite, you should check database connectivity differently. Here's what to change in your health route:
+
+#+begin_src typescript
+fastify.get("/health", async (request, reply) => {
+    try {
+        // Test database connection with a simple query
+        await fastify.db.query("SELECT 1 as test");
+
+        return {
+            status: "healthy",
+            service: "auth-service",
+            timestamp: new Date().toISOString(),
+            database: {
+                type: "sqlite",
+                file: "./auth.db",
+                status: "connected"
+            },
+        };
+    } catch (error) {
+        return reply.status(503).send({
+            status: "unhealthy",
+            service: "auth-service",
+            timestamp: new Date().toISOString(),
+            database: {
+                type: "sqlite",
+                file: "./auth.db",
+                status: "disconnected",
+                error: error.message
+            },
+        });
+    }
+});
+#+end_src
+
+Also, in your =server.ts=, replace the =@fastify/sqlite= registration with your custom database plugin:
+
+#+begin_src typescript
+// Remove this line:
+// server.register(require("@fastify/sqlite"), {
+//     dbFile: "./auth.db",
+// });
+
+// Add this instead:
+import databasePlugin from "./database";
+server.register(databasePlugin);
+#+end_src
+
+This tests the actual database connection and provides meaningful health status for SQLite.

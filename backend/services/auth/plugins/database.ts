@@ -25,7 +25,13 @@ async function runMigrations(db: any) {
         await db.exec("BEGIN TRANSACTION");
 
         try {
-            const applied = await db.get("SELECT version FROM schema_migrations WHERE version = ?", version);
+            const applied = await new Promise((resolve, reject) => {
+                db.get("SELECT version FROM schema_migrations WHERE version = ?", [version], (err: any, row: any) => {
+                    if (err) reject(err);
+                    else resolve(row);
+                });
+            });
+            console.log(applied);
 
             if (!applied) {
                 // SQLite returns undefined for no results
