@@ -242,3 +242,4 @@ This approach:
 - Works well with SQLite's simplicity
 
 *****
+* node types

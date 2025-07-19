@@ -7,12 +7,19 @@ SELECT name, type, sql FROM sqlite_master WHERE type='table';
 #+end_src
 
 #+RESULTS:
-| name                                          | type  | sql                               |
-|-----------------------------------------------+-------+-----------------------------------|
-| schema_migrations                             | table | "CREATE TABLE schema_migrations ( |
-| version INTEGER PRIMARY KEY                   |       |                                   |
-| applied_at DATETIME DEFAULT CURRENT_TIMESTAMP |       |                                   |
-| )"                                            |       |                                   |
+| name                                          | type                          | sql                                    |
+|-----------------------------------------------+-------------------------------+----------------------------------------|
+| schema_migrations                             | table                         | "CREATE TABLE schema_migrations (      |
+| version INTEGER PRIMARY KEY                   |                               |                                        |
+| applied_at DATETIME DEFAULT CURRENT_TIMESTAMP |                               |                                        |
+| )"                                            |                               |                                        |
+| sqlite_sequence                               | table                         | CREATE TABLE sqlite_sequence(name,seq) |
+| auth_credentials                              | table                         | "CREATE TABLE auth_credentials (       |
+| user_id INTEGER PRIMARY KEY                   | -- References user service ID |                                        |
+| password_hash TEXT NOT NULL                   |                               |                                        |
+| created_at DATETIME DEFAULT CURRENT_TIMESTAMP |                               |                                        |
+| updated_at DATETIME DEFAULT CURRENT_TIMESTAMP |                               |                                        |
+| )"                                            |                               |                                        |
 
 
 

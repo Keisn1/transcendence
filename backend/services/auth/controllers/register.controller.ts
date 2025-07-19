@@ -38,8 +38,9 @@ export default async function register(
         const passwordHash = hashSync(password, salt);
 
         // Store only user_id and password_hash in auth service
-        await request.server.db.run("INSERT INTO auth_credentials (user_id, password_hash) VALUES (?, ?)", [
+        await request.server.db.run("INSERT INTO auth_credentials (user_id, email, password_hash) VALUES (?, ?, ?)", [
             userServiceUser.id,
+            email,
             passwordHash,
         ]);
 

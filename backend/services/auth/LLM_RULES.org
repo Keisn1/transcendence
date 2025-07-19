@@ -29,4 +29,4 @@ When asked for an explanation:
 1. **Include code examples** - Provide practical, working code snippets that demonstrate the concept (inside org-structure-templates)
 2. **Use metaphors** - Relate technical concepts to real-world analogies to make them more intuitive
 3. **Add a "For Dummies" section** - Include a simplified explanation using plain language, avoiding jargon
-4. Structure as: Brief overview → Code examples → Metaphors → For Dummies section
+4. Structure as: Explanation → Code examples → Metaphors → For Dummies section

@@ -80,4 +80,47 @@ async function createUser(userData: CreateUserData): Promise<User> {
     }
 }
 
-export { createUser };
+async function getUserById(id: number): Promise<User | null> {
+    if (config.userService.mock) {
+        console.log("🔧 Using mock user service for getUserById");
+
+        // Simulate API delay
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        const user = mockUsers.find((user) => user.id === id);
+        return user || null;
+    }
+
+    // Real implementation
+    try {
+        console.log("🌐 Calling real user service for getUserById");
+        const response = await fetch(`${config.userService.url}/api/users/${id}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
+        if (response.status === 404) {
+            return null;
+        }
+
+        if (!response.ok) {
+            throw new Error(`User service error: ${response.status} ${response.statusText}`);
+        }
+
+        const user = await response.json();
+
+        if (!user || !user.id) {
+            throw new Error("Invalid user service response");
+        }
+
+        return user;
+    } catch (err) {
+        const error = err as Error;
+        console.error("User service error:", error);
+        throw new Error(`User service failed: ${error.message}`);
+    }
+}
+
+export { createUser, getUserById };
