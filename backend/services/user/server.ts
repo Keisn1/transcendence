@@ -1,11 +1,11 @@
 import Fastify, { FastifyRequest } from "fastify";
-import './database'; 
-import { initDatabase } from './database/init';
+import "./database";
+import { initDatabase } from "./database/init";
 import { routes } from "./routes/routes";
 import { FastifyJwtVerifyOptions } from "@fastify/jwt";
 import { userRoutes } from "./routes/userRoutes";
 
-const app = Fastify({
+const server = Fastify({
     logger: true,
 });
 
@@ -24,10 +24,10 @@ initDatabase();
 //     }
 // });
 
-app.register(routes, { prefix: "api" });
-app.register(userRoutes, { prefix: "api/user" });
+server.register(routes, { prefix: "api" });
+server.register(userRoutes, { prefix: "api/user" });
 
-app.listen({ port: 3000 }, (err, address) => {
+server.listen({ port: 3000 }, (err, address) => {
     if (err) {
         console.error(err);
         process.exit(1);

@@ -7,3 +7,5 @@
 /Notes/roam/transcendence.db
 /backend/services/user/node_modules/
 /backend/services/auth/node_modules/
+/backend/services/users.db
+/backend/services/user/users.db
