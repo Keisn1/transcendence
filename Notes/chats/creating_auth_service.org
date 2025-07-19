@@ -726,7 +726,7 @@ But =request.server= is the Fastify way because it keeps your routes decoupled f
 
 For Fastify with SQLite, you have a few options:
 
-** Option 1: @fastify/sqlite (Official Fastify plugin)
+**** Option 1: @fastify/sqlite (Official Fastify plugin)
 #+begin_src bash
 npm install @fastify/sqlite
 #+end_src
@@ -740,7 +740,7 @@ await app.register(require('@fastify/sqlite'), {
 await request.server.sqlite.query('SELECT * FROM users');
 #+end_src
 
-** Option 2: better-sqlite3 (Most popular, synchronous)
+**** Option 2: better-sqlite3 (Most popular, synchronous)
 #+begin_src bash
 npm install better-sqlite3
 npm install @types/better-sqlite3 # for TypeScript
@@ -756,13 +756,13 @@ const stmt = db.prepare('INSERT INTO auth_credentials (user_id, password_hash, s
 stmt.run(userId, passwordHash, salt);
 #+end_src
 
-** Option 3: sqlite3 (Asynchronous, callback-based)
+**** Option 3: sqlite3 (Asynchronous, callback-based)
 #+begin_src bash
 npm install sqlite3
 npm install @types/sqlite3
 #+end_src
 
-** Recommendation:
+**** Recommendation:
 
 For your use case, I'd recommend *better-sqlite3* because:
 - It's faster and more reliable

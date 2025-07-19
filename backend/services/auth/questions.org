@@ -1,0 +1,138 @@
+#+title: Questions
+
+- How do plugins work in fastify?
+- How can I put a password on the database?
+
+* Fastify plugins
+** Fastify Plugins Overview
+
+Plugins in Fastify are reusable pieces of functionality that extend the framework's capabilities. They follow an encapsulation model where each plugin has its own context.
+
+** Code Examples
+
+#+begin_src typescript
+// Basic plugin structure
+import fp from "fastify-plugin";
+
+async function myPlugin(fastify, options) {
+    // Add functionality to fastify instance
+    fastify.decorate('myUtility', () => 'Hello World');
+
+    // Register routes
+    fastify.get('/plugin-route', async (request, reply) => {
+        return { message: 'From plugin' };
+    });
+}
+
+export default fp(myPlugin);
+#+end_src
+
+#+begin_src typescript
+// Using the plugin
+import Fastify from 'fastify';
+import myPlugin from './my-plugin';
+
+const fastify = Fastify();
+
+// Register plugin
+await fastify.register(myPlugin, {
+    someOption: 'value'
+});
+
+// Now you can use decorated methods
+console.log(fastify.myUtility()); // "Hello World"
+#+end_src
+
+#+begin_src typescript
+// Plugin with encapsulation (without fp wrapper)
+async function encapsulatedPlugin(fastify, options) {
+    // This decoration only exists within this plugin's scope
+    fastify.decorate('localUtility', () => 'Only here');
+
+    fastify.get('/local-route', async () => {
+        return fastify.localUtility();
+    });
+}
+
+// Register without fp() - creates isolated scope
+await fastify.register(encapsulatedPlugin);
+#+end_src
+
+** Metaphors
+
+Think of Fastify plugins like *LEGO building blocks*:
+- Each plugin is a specialized block (database, authentication, logging)
+- You snap them together to build your application
+- Some blocks (with =fp()=) share their features with the whole structure
+- Others (without =fp()=) keep their features contained within their section
+
+Or like *apartment building utilities*:
+- Each plugin is like adding a utility (electricity, plumbing, internet)
+- =fp()= makes utilities available to all apartments
+- Without =fp()=, utilities are only available to specific floors
+
+** For Dummies Section
+
+*What's a plugin?* A chunk of code that adds new abilities to your Fastify server.
+
+*How do they work?* You write a function that receives the Fastify instance and adds stuff to it (routes, utilities, etc.).
+
+*The magic wrapper (=fp=)?* Without it, your plugin lives in its own bubble. With it, everything you add becomes available everywhere in your app.
+
+*Why use them?* Instead of cramming everything into one giant file, you split features into organized, reusable pieces. Need database access? Write a plugin. Need authentication? Another plugin. Clean and modular!
+
+***
+* SQL statements
+- query  (SELECT statements)
+#+begin_src typescript :results output
+  query: (sql: string, params: any[] = []) => {
+      return new Promise((resolve, reject) => {
+          db.all(sql, params, (err, rows) => {
+              if (err) reject(err);
+              else resolve(rows);
+          });
+      });
+  }
+    #+end_src
+  - Uses =db.all()= - fetches all matching rows
+  - Returns array of results
+- run (INSERT/UPDATE/DELETE)
+  #+begin_src typescript :results output
+    run: (sql: string, params: any[] = []) => {
+        return new Promise((resolve, reject) => {
+            db.run(sql, params, function (err) {
+                if (err) reject(err);
+                else resolve({ lastID: this.lastID, changes: this.changes });
+            });
+        });
+    }
+  #+end_src
+  - Uses =db.run()= - executes without returning data
+  - Returns metadata: =lastID= (auto-increment) and =changes= (affected rows)
+
+- explain async, await and Promise in that context
+* Fastify Decoration
+- what happens with this line
+  #+begin_src typescript :results output
+fastify.decorate("db", dbWrapper);
+  #+end_src
+  - Adds =dbWrapper= to Fastify instance as =fastify.db=. Now you can use:
+    #+begin_src typescript
+    await fastify.db.query("SELECT * FROM users")
+    await fastify.db.run("INSERT INTO users ...")
+  #+end_src
+* Fastify Hooks
+  #+begin_src typescript :results output
+    fastify.addHook("onClose", async () => {
+        return new Promise<void>((resolve) => {
+            db.close((err) => {
+                if (err) console.error("Error closing database:", err);
+                resolve();
+            });
+        });
+    });
+  #+end_src
+  - Registers cleanup function that runs when Fastify shuts down:
+    - Properly closes SQLite database connection
+    - Prevents "database locked" errors
+    - Ensures graceful shutdown
