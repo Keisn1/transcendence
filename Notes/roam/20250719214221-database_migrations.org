@@ -1,0 +1,110 @@
+:PROPERTIES:
+:ID:       d59c55d5-8ce4-42c8-9f20-8d976aaa4aa5
+:END:
+#+title: database migrations
+#+date: [2025-07-19 Sat 21:42]
+#+startup: overview
+
+* Database migration
+
+For SQLite migrations with Fastify, you have a few options. Here's a simple but effective approach:
+** 1. Create a migrations system
+
+Create =migrations/001_initial.sql=:
+#+begin_src sql
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS schema_migrations (
+    version INTEGER PRIMARY KEY,
+    applied_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+#+end_src
+
+** 2. Update your database plugin
+
+#+begin_src typescript
+// plugins/database.ts
+import fp from "fastify-plugin";
+import sqlite3 from "sqlite3";
+import { open } from "sqlite";
+import fs from "fs/promises";
+import path from "path";
+
+async function runMigrations(db: any) {
+    const migrationsDir = path.join(__dirname, "../migrations");
+
+    // Ensure migrations table exists
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS schema_migrations (
+            version INTEGER PRIMARY KEY,
+            applied_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    const files = await fs.readdir(migrationsDir);
+    const migrations = files
+        .filter(f => f.endsWith('.sql'))
+        .sort();
+
+    for (const file of migrations) {
+        const version = parseInt(file.split('_')[0]);
+
+        // Check if migration already applied
+        const applied = await db.get(
+            'SELECT version FROM schema_migrations WHERE version = ?',
+            version
+        );
+
+        if (!applied) {
+            const sql = await fs.readFile(path.join(migrationsDir, file), 'utf8');
+            await db.exec(sql);
+            await db.run(
+                'INSERT INTO schema_migrations (version) VALUES (?)',
+                version
+            );
+            console.log(`Applied migration: ${file}`);
+        }
+    }
+}
+
+async function databasePlugin(fastify: any) {
+    const db = await open({
+        filename: "./auth.db",
+        driver: sqlite3.Database,
+    });
+
+    // Run migrations on startup
+    await runMigrations(db);
+
+    fastify.decorate("db", db);
+
+    fastify.addHook("onClose", async () => {
+        await db.close();
+    });
+}
+
+export default fp(databasePlugin);
+#+end_src
+
+** 3. Create new migrations
+
+For new changes, create =migrations/002_add_roles.sql=:
+#+begin_src sql
+ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'user';
+CREATE INDEX idx_users_role ON users(role);
+#+end_src
+
+This approach:
+- Runs migrations automatically on startup
+- Tracks applied migrations
+- Allows incremental database changes
+- Works well with SQLite's simplicity
+
+*****
