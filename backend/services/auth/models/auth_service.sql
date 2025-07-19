@@ -1,8 +1,0 @@
-
-CREATE TABLE auth_credentials (
-    user_id INTEGER PRIMARY KEY,
-    password_hash VARCHAR(255) NOT NULL,
-    salt VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);

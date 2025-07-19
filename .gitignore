@@ -9,3 +9,4 @@
 /backend/services/auth/node_modules/
 /backend/services/users.db
 /backend/services/user/users.db
+/backend/services/auth/database/auth.db

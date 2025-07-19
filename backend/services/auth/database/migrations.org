@@ -1,0 +1,104 @@
+#+title: Migrations
+
+* 1. Direct SQLite queries in org-babel
+
+#+begin_src sqlite :db ./auth.db :colnames yes
+SELECT name, type, sql FROM sqlite_master WHERE type='table';
+#+end_src
+
+#+RESULTS:
+| name                                          | type  | sql                                    |
+|-----------------------------------------------+-------+----------------------------------------|
+| schema_migrations                             | table | "CREATE TABLE schema_migrations (      |
+| version INTEGER PRIMARY KEY                   |       |                                        |
+| applied_at DATETIME DEFAULT CURRENT_TIMESTAMP |       |                                        |
+| )"                                            |       |                                        |
+| users                                         | table | "CREATE TABLE users (                  |
+| id INTEGER PRIMARY KEY AUTOINCREMENT          |       |                                        |
+| username TEXT UNIQUE NOT NULL                 |       |                                        |
+| email TEXT UNIQUE NOT NULL                    |       |                                        |
+| password_hash TEXT NOT NULL                   |       |                                        |
+| created_at DATETIME DEFAULT CURRENT_TIMESTAMP |       |                                        |
+| updated_at DATETIME DEFAULT CURRENT_TIMESTAMP |       |                                        |
+| )"                                            |       |                                        |
+| sqlite_sequence                               | table | CREATE TABLE sqlite_sequence(name,seq) |
+
+#+begin_src sqlite :db ./auth.db :colnames yes
+PRAGMA table_info(users);
+#+end_src
+
+#+RESULTS:
+| cid | name          | type     | notnull | dflt_value        | pk |
+|-----+---------------+----------+---------+-------------------+----|
+|   0 | id            | INTEGER  |       0 |                   |  1 |
+|   1 | username      | TEXT     |       1 |                   |  0 |
+|   2 | email         | TEXT     |       1 |                   |  0 |
+|   3 | password_hash | TEXT     |       1 |                   |  0 |
+|   4 | created_at    | DATETIME |       0 | CURRENT_TIMESTAMP |  0 |
+|   5 | updated_at    | DATETIME |       0 | CURRENT_TIMESTAMP |  0 |
+
+#+begin_src sqlite :db ./auth.db :colnames yes
+SELECT * FROM schema_migrations ORDER BY version;
+#+end_src
+
+#+RESULTS:
+| version | applied_at          |
+|---------+---------------------|
+|       1 | 2025-07-19 15:02:41 |
+
+* 2. Check specific table structure
+
+#+begin_src sqlite :db ./auth.db :colnames yes
+.schema users
+#+end_src
+
+#+RESULTS:
+| CREATE TABLE users (                          |   |
+|-----------------------------------------------+---|
+| id INTEGER PRIMARY KEY AUTOINCREMENT          |   |
+| username TEXT UNIQUE NOT NULL                 |   |
+| email TEXT UNIQUE NOT NULL                    |   |
+| password_hash TEXT NOT NULL                   |   |
+| created_at DATETIME DEFAULT CURRENT_TIMESTAMP |   |
+| updated_at DATETIME DEFAULT CURRENT_TIMESTAMP |   |
+| );                                            |   |
+
+* 3. List all tables and indexes
+
+#+begin_src sqlite :db ./auth.db :colnames yes
+SELECT
+    name,
+    type,
+    CASE
+        WHEN type = 'table' THEN (SELECT COUNT(*) FROM pragma_table_info(name))
+        ELSE NULL
+    END as column_count
+FROM sqlite_master
+WHERE type IN ('table', 'index')
+ORDER BY type, name;
+#+end_src
+
+#+RESULTS:
+| name                     | type  | column_count |
+|--------------------------+-------+--------------|
+| sqlite_autoindex_users_1 | index |              |
+| sqlite_autoindex_users_2 | index |              |
+| schema_migrations        | table |            0 |
+| sqlite_sequence          | table |            0 |
+| users                    | table |            0 |
+
+* 4. Verify migration status
+
+#+begin_src sqlite :db ./auth.db :colnames yes
+SELECT
+    version,
+    applied_at,
+    datetime(applied_at, 'localtime') as local_time
+FROM schema_migrations
+ORDER BY version;
+#+end_src
+
+#+RESULTS:
+| version | applied_at          | local_time          |
+|---------+---------------------+---------------------|
+|       1 | 2025-07-19 15:02:41 | 2025-07-19 17:02:41 |

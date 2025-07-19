@@ -28,6 +28,7 @@ const registerSchema = {
                     },
                 },
             },
+
         },
     },
 } as const;

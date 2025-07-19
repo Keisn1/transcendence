@@ -6,11 +6,7 @@ const server = Fastify({
     logger: true,
 });
 
-server.register(require("@fastify/jwt"), {
-    secret: "supersecret", // Use environment variable in production
-});
-
-// Register database plugin (example with SQLite)
+server.register(require("@fastify/jwt"), { secret: "supersecret" });
 server.register(databasePlugin);
 server.register(routes, { prefix: "api/auth" });
 

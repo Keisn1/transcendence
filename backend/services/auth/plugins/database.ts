@@ -1,6 +1,50 @@
 import fp from "fastify-plugin";
 import sqlite3 from "sqlite3";
 import { FastifyInstance } from "fastify";
+import path from "path";
+import fs from "fs/promises";
+
+async function runMigrations(db: any) {
+    const migrationsDir = path.join(__dirname, "../database");
+
+    // Ensure migrations table exists
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS schema_migrations (
+            version INTEGER PRIMARY KEY,
+            applied_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    const files = await fs.readdir(migrationsDir);
+    const migrations = files.filter((f) => f.endsWith(".sql")).sort();
+
+    for (const file of migrations) {
+        const version = parseInt(file.split("_")[0]);
+
+        // Use a transaction to make this atomic
+        await db.exec("BEGIN TRANSACTION");
+
+        try {
+            const applied = await db.get("SELECT version FROM schema_migrations WHERE version = ?", version);
+
+            if (!applied) {
+                // SQLite returns undefined for no results
+                console.log(`Applying migration: ${file}`);
+                const sql = await fs.readFile(path.join(migrationsDir, file), "utf8");
+                await db.exec(sql);
+                await db.run("INSERT INTO schema_migrations (version) VALUES (?)", version);
+                console.log(`Applied migration: ${file}`);
+            } else {
+                console.log(`Already applied: ${file}`);
+            }
+
+            await db.exec("COMMIT");
+        } catch (error) {
+            await db.exec("ROLLBACK");
+            throw error;
+        }
+    }
+}
 
 interface DatabasePlugin {
     query(sql: string, params?: any[]): Promise<any[]>;
@@ -8,7 +52,7 @@ interface DatabasePlugin {
 }
 
 async function databasePlugin(fastify: FastifyInstance) {
-    const db = new sqlite3.Database("./auth.db");
+    const db = new sqlite3.Database("./database/auth.db");
 
     const dbWrapper: DatabasePlugin = {
         query: (sql: string, params: any[] = []) => {
@@ -29,6 +73,9 @@ async function databasePlugin(fastify: FastifyInstance) {
             });
         },
     };
+
+    // Run migrations on startup
+    await runMigrations(db);
 
     fastify.decorate("db", dbWrapper);
 
