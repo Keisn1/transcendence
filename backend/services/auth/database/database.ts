@@ -5,7 +5,7 @@ import path from "path";
 import fs from "fs/promises";
 
 async function runMigrations(db: any) {
-    const migrationsDir = path.join(__dirname, "../database");
+    const migrationsDir = path.join(__dirname, "../migrations");
 
     // Ensure migrations table exists
     await db.exec(`

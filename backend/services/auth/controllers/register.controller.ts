@@ -1,6 +1,5 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { genSaltSync, hashSync } from "bcrypt";
-import { createUser } from "../services/userService";
 
 interface RegisterBody {
     username: string;
@@ -22,41 +21,31 @@ export default async function register(
     const { username, email, password } = request.body;
 
     try {
-        // Create user profile (only username/email)
-        const userServiceUser = await createUser({
-            username,
-            email,
-        });
-
-        // Validate user service response
-        if (!userServiceUser || !userServiceUser.id) {
-            throw new Error("User service failed to create user");
-        }
-
         // Hash password (stays in auth service)
         const salt = genSaltSync(10);
         const passwordHash = hashSync(password, salt);
 
         // Store only user_id and password_hash in auth service
-        await request.server.db.run("INSERT INTO auth_credentials (user_id, email, password_hash) VALUES (?, ?, ?)", [
-            userServiceUser.id,
-            email,
-            passwordHash,
-        ]);
+        const result = await request.server.db.run(
+            "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)",
+            [username, email, passwordHash],
+        );
 
-        // Generate JWT with user service data
+        const userId = result.lastID;
+
+        // Generate JWT
         const token = request.server.jwt.sign({
-            id: userServiceUser.id,
-            username: userServiceUser.username,
-            email: userServiceUser.email,
+            id: userId,
+            username: username,
+            email: email,
         });
 
         return reply.status(201).send({
             token,
             user: {
-                id: userServiceUser.id,
-                username: userServiceUser.username,
-                email: userServiceUser.email,
+                id: userId,
+                username: username,
+                email: email,
             },
         });
     } catch (err) {

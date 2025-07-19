@@ -3,7 +3,7 @@ require("dotenv").config();
 
 import Fastify from "fastify";
 import { routes } from "./routes/routes";
-import databasePlugin from "./plugins/database";
+import databasePlugin from "./database/database";
 import { config } from "./config/environment";
 
 const server = Fastify({

@@ -2,6 +2,11 @@
 
 Please follow these rules for our entire conversation:
 
+*Be aware that you are writing into emacs org-mode*
+- don't use markdown markup (double ** etc.)
+- this means use the hierarchies correctly
+- try to make the topics "foldable"
+
 *Conciseness Rules:*
 - Keep responses brief and to-the-point
 - Avoid lengthy explanations unless specifically requested

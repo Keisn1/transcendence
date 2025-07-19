@@ -9,7 +9,7 @@ export default async function healthRoute(request: any, reply: any) {
             timestamp: new Date().toISOString(),
             database: {
                 type: "sqlite",
-                file: "./auth.db",
+                file: "./database/auth.db",
                 status: "connected",
             },
         };
@@ -21,7 +21,7 @@ export default async function healthRoute(request: any, reply: any) {
             timestamp: new Date().toISOString(),
             database: {
                 type: "sqlite",
-                file: "./auth.db",
+                file: "./database/auth.db",
                 status: "disconnected",
                 error: errorMessage,
             },
