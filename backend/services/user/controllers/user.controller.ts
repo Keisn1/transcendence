@@ -1,21 +1,8 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { User } from "../models/User";
 import {} from "fastify";
-
-var userDb: Record<number, User> = {
-    123: {
-        id: 123,
-        username: "john_doe",
-        email: "john@example.com",
-        avatar: "https://example.com/avatar.jpg",
-    },
-    124: {
-        id: 124,
-        username: "jane_doe",
-        email: "jane@example.com",
-        avatar: "https://example.com/avatar.jpg",
-    },
-};
+import { db } from '../database';
+import * as userRepo from '../repositories/user.repository';
 
 export interface CreateUserBody {
     username: string;
@@ -30,42 +17,58 @@ export interface CreateUserResponse {
     avatar: string;
 }
 
-export async function createUser(
-    request: FastifyRequest<{ Body: CreateUserBody }>,
-    reply: FastifyReply,
-): Promise<CreateUserResponse> {
-    let newUserData = request.body;
-
-    console.log(newUserData.username);
-
-    for (const user of Object.values(userDb)) {
-        if (user.username === newUserData.username) {
-            return reply.code(400).send({ error: "Username is already being used" });
+export async function getUser(
+  request: FastifyRequest<{ Params: { id: number } }>,
+  reply: FastifyReply) {
+    try {
+        const user = await userRepo.findUserById(request.params.id);
+        if (!user) {
+            return reply.code(404).send({ error: 'User not found' });
         }
+        return reply.code(200).send(user);
+    } catch (err: any) {
+        request.log.error(err);
+        return reply.code(500).send({ error: 'Internal server error' });
     }
-
-    const keys = Object.keys(userDb);
-    const lastKey = keys[keys.length - 1];
-    const newUserId: number = +lastKey + 1;
-
-    let newUser: CreateUserResponse;
-    newUser = {
-        id: newUserId,
-        username: newUserData.username,
-        email: newUserData.email,
-        avatar: newUserData.avatar,
-    };
-
-    userDb[newUserId] = newUser;
-    console.log(newUser);
-    return newUser;
 }
 
-export async function getUser(request: FastifyRequest<{ Params: { id: number } }>, reply: FastifyReply) {
-    let userId = request.params.id;
+export async function createUser(
+    request: FastifyRequest<{ Body: CreateUserBody }>,
+    reply: FastifyReply) {
+    const { username, email, avatar } = request.body;
 
-    if (!(userId in userDb)) {
-        return reply.code(404).send({ error: "User not found" });
+    try {
+        const existing = await userRepo.findUserByUsername(username);
+        if (existing) {
+            return reply.code(400).send({ message: 'Username is already in use.' });
+        }
+        const newUser = await userRepo.insertUser({ username, email, avatar });
+        return reply.code(201).send(newUser);
+    } catch (err: any) {
+        if (err.message.includes('UNIQUE constraint failed')) {
+            return reply.code(400).send({ message: 'Username or email already in use.' });
+        }
+        request.log.error(err);
+        return reply.code(500).send({ error: 'Internal server error' });
     }
-    return userDb[userId];
+}
+
+export async function deleteUser(
+    request: FastifyRequest<{ Params: { id: number } }>,
+    reply: FastifyReply
+    ) {
+    const id = request.params.id;
+
+    if (Number.isNaN(id)) return reply.code(400).send({ error: 'Invalid user id' });
+
+    try {
+        const user = await userRepo.deleteUser(id);
+        return reply.code(200).send(user);
+    } catch (err: any) {
+        if (err.message.includes('not found')) {
+            return reply.code(404).send({ error: err.message });
+        }
+        request.log.error(err);
+        return reply.code(500).send({ error: 'Internal server error' });
+    }
 }
