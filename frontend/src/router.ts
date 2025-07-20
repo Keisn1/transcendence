@@ -72,7 +72,7 @@ export default class Router {
         }
 
         console.log("creating new view");
-        this.currentView = new match.route.view();
+        this.currentView = new match.route.view(this);
         this.currentView.render();
     }
 

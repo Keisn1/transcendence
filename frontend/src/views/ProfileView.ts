@@ -2,6 +2,7 @@ import AbstractView from "./AbstractView.ts";
 import { Navbar } from "../components/navbar/navbar.ts";
 import type Router from "../router.ts";
 import { Profile } from "../components/profile/profile.ts";
+import { AuthService } from "../services/auth/auth.service.ts";
 
 export default class extends AbstractView {
     private navbar: Navbar | null = null;
@@ -13,6 +14,13 @@ export default class extends AbstractView {
     }
 
     render() {
+        const authService = AuthService.getInstance();
+        if (!authService.isAuthenticated()) {
+            console.log("herer");
+            this.router?.navigateTo("/signup");
+            return;
+        }
+
         this.navbar = new Navbar();
         document.body.appendChild(this.navbar.getContainer());
 

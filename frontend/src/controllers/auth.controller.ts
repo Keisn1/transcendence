@@ -40,7 +40,7 @@ export class AuthController {
 
     public async signUp(credentials: SignUpBody): Promise<void> {
         await this.authService.signUp(credentials);
-        this.router.navigateTo(this.previousRoute);
+        this.router.navigateTo("/profile");
     }
 
     public setPreviousRoute(route: string): void {

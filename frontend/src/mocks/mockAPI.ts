@@ -1,7 +1,4 @@
-const mockUsers = [
-    { id: "1", username: "admin", password: "admin123", email: "admin@example.com" },
-    { id: "2", username: "user", password: "user123", email: "user@example.com" },
-];
+import { mockUsers } from "./mockData";
 
 export function setupMockApi() {
     const originalFetch = window.fetch;

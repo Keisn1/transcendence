@@ -18,6 +18,7 @@ export class Profile extends BaseComponent {
     private populateUserData() {
         if (!this.user) return;
 
+        console.log(this.user);
         const usernameEl = this.container.querySelector("#profile-username")!;
         const emailEl = this.container.querySelector("#profile-email");
         const avatarEl = this.container.querySelector("#profile-avatar");

@@ -2,6 +2,7 @@ import navbarTemplate from "./navbar.html?raw";
 import { BaseComponent } from "../BaseComponent";
 import { AuthService } from "../../services/auth/auth.service.ts";
 import { AuthController } from "../../controllers/auth.controller.ts";
+import type { User } from "../../types/auth.types.ts";
 
 export class Navbar extends BaseComponent {
     private authService: AuthService;
@@ -30,19 +31,22 @@ export class Navbar extends BaseComponent {
         const isAuthenticated = this.authService.isAuthenticated();
         const user = this.authService.getCurrentUser();
 
-        // Update profile dropdown visibility
         const profileDropdown = this.container.querySelector(".relative.ml-3");
         const menu = this.container.querySelector<HTMLElement>('[role="menu"]')!;
         const authButtons = this.container.querySelector("#auth-buttons");
+        const avatarImg = this.container.querySelector("#navbar-avatar") as HTMLImageElement;
 
-        // hide the menu by default
         menu.classList.add("hidden");
+
         if (isAuthenticated && user) {
-            // Show profile dropdown
             profileDropdown?.classList.remove("hidden");
             authButtons?.classList.add("hidden");
+
+            // Update avatar if available
+            if (avatarImg && user.avatar) {
+                avatarImg.src = user.avatar;
+            }
         } else {
-            // Hide profile dropdown, show auth buttons
             profileDropdown?.classList.add("hidden");
             authButtons?.classList.remove("hidden");
         }
