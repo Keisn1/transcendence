@@ -30,6 +30,38 @@ export function setupMockApi() {
             }
         }
 
+        if (urlString === "/api/user/signup" && options?.method === "POST") {
+            const body = JSON.parse(options.body as string);
+
+            // Check if user already exists
+            const existingUser = mockUsers.find((u) => u.email === body.email);
+            if (existingUser) {
+                return new Response("User already exists", { status: 409 });
+            }
+
+            // Create new user
+            const newUser = {
+                id: String(mockUsers.length + 1),
+                username: body.username,
+                email: body.email,
+                password: body.password,
+            };
+
+            mockUsers.push(newUser);
+
+            const { password, ...userWithoutPassword } = newUser;
+            return new Response(
+                JSON.stringify({
+                    token: "mock-jwt-token-" + newUser.id,
+                    user: userWithoutPassword,
+                }),
+                {
+                    status: 201,
+                    headers: { "Content-Type": "application/json" },
+                },
+            );
+        }
+
         return originalFetch(url, options);
     };
 }

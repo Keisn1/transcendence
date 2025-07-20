@@ -4,6 +4,7 @@ import GameView from "./views/GameView.ts";
 import ProfileView from "./views/ProfileView.ts";
 import LoginView from "./views/LoginView.ts";
 import { AuthController } from "./controllers/auth.controller.ts";
+import SignUpView from "./views/SignUpView.ts";
 
 export default class Router {
     private currentView: AbstractView | null = null;
@@ -20,7 +21,8 @@ export default class Router {
 
     private routing() {
         const authController = AuthController.getInstance();
-        if (authController && location.pathname !== "/login" && location.pathname !== "/signout") {
+        const dontCound = ["/login", "/signout", "/signup"];
+        if (authController && !dontCound.includes(location.pathname)) {
             authController.setPreviousRoute(location.pathname);
         }
 
@@ -40,6 +42,10 @@ export default class Router {
             {
                 path: "/login",
                 view: LoginView,
+            },
+            {
+                path: "/signup",
+                view: SignUpView,
             },
         ];
 

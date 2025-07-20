@@ -1,4 +1,4 @@
-import { type User, type LoginResponse, type LoginBody } from "../../types/auth.types";
+import type { User, LoginResponse, LoginBody, SignUpBody, SignUpResponse } from "../../types/auth.types";
 
 export class AuthService {
     private static instance: AuthService;
@@ -39,6 +39,27 @@ export class AuthService {
         }
 
         const data: LoginResponse = await response.json();
+        const user: User = data.user;
+        this.currentUser = user;
+        this.saveUserToStorage(user);
+        this.saveTokenToStorage(data.token);
+        this.notifyListeners();
+    }
+
+    async signUp(credentials: SignUpBody): Promise<void> {
+        const response = await fetch("/api/user/signup", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(credentials),
+        });
+
+        if (!response.ok) {
+            throw new Error("Sign up failed");
+        }
+
+        const data: SignUpResponse = await response.json();
         const user: User = data.user;
         this.currentUser = user;
         this.saveUserToStorage(user);
