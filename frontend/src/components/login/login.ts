@@ -15,19 +15,18 @@ export class Login extends BaseComponent {
         this.addEventListenerWithCleanup(loginForm, "submit", this.handleLogin.bind(this));
     }
 
-    private handleLogin(e: Event) {
+    private async handleLogin(e: Event) {
         e.preventDefault();
         const username = (document.getElementById("username") as HTMLInputElement).value;
         const password = (document.getElementById("password") as HTMLInputElement).value;
-        console.log(password);
 
-        const authController = AuthController.getInstance();
-        authController.login({
-            id: "123",
-            username: username,
-            email: `${username}@example.com`,
-            avatar: "https://example.com/avatar.jpg",
-        });
+        try {
+            const authController = AuthController.getInstance();
+            await authController.login({ username, password });
+        } catch (error) {
+            // Show error message to user
+            console.error("Login failed:", error);
+        }
     }
 
     destroy(): void {

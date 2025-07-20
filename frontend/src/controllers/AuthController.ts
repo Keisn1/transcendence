@@ -32,9 +32,14 @@ export class AuthController {
         }
     }
 
-    public login(userData: any): void {
-        this.authService.login(userData);
-        this.router.navigateTo(this.previousRoute);
+    public async login(credentials: { username: string; password: string }): Promise<void> {
+        try {
+            await this.authService.login(credentials);
+            this.router.navigateTo(this.previousRoute);
+        } catch (error) {
+            // Handle login error (show error message, etc.)
+            console.error("Login failed:", error);
+        }
     }
 
     public setPreviousRoute(route: string): void {

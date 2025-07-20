@@ -31,11 +31,28 @@ export class AuthService {
         return this.currentUser !== null;
     }
 
-    login(user: User): void {
-        console.log("logging in");
-        this.currentUser = user;
-        this.saveUserToStorage(user);
-        this.notifyListeners();
+    async login(credentials: { username: string; password: string }): Promise<void> {
+        try {
+            const response = await fetch("/api/user/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(credentials),
+            });
+
+            if (!response.ok) {
+                throw new Error("Login failed");
+            }
+
+            const user: User = await response.json();
+            this.currentUser = user;
+            this.saveUserToStorage(user);
+            this.notifyListeners();
+        } catch (error) {
+            console.error("Login error:", error);
+            throw error;
+        }
     }
 
     logout(): void {
