@@ -1,13 +1,10 @@
-import { AuthService } from "../../services/auth/auth";
+import { AuthController } from "../../controllers/AuthController";
 import { BaseComponent } from "../BaseComponent";
 import loginTemplate from "./login.html?raw";
 
 export class Login extends BaseComponent {
-    private authService: AuthService;
-
     constructor() {
         super("div", "login-container");
-        this.authService = AuthService.getInstance();
         this.container.innerHTML = loginTemplate;
 
         this.setupEventListeners();
@@ -24,18 +21,13 @@ export class Login extends BaseComponent {
         const password = (document.getElementById("password") as HTMLInputElement).value;
         console.log(password);
 
-        // Here you would normally call an API
-        // For now, simulate login success
-        this.authService.login({
+        const authController = AuthController.getInstance();
+        authController.login({
             id: "123",
             username: username,
             email: `${username}@example.com`,
             avatar: "https://example.com/avatar.jpg",
         });
-
-        // Redirect to dashboard
-        history.pushState(null, "", "/");
-        window.dispatchEvent(new PopStateEvent("popstate"));
     }
 
     destroy(): void {

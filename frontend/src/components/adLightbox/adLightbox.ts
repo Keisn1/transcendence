@@ -28,4 +28,7 @@ export class AdLightBox extends BaseComponent {
             this.addEventListenerWithCleanup(closeBtn, "click", () => hideAd());
         }
     }
+    destroy(): void {
+        super.destroy();
+    }
 }

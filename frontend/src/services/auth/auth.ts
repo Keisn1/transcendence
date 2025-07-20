@@ -32,12 +32,14 @@ export class AuthService {
     }
 
     login(user: User): void {
+        console.log("logging in");
         this.currentUser = user;
         this.saveUserToStorage(user);
         this.notifyListeners();
     }
 
     logout(): void {
+        console.log("logging out");
         this.currentUser = null;
         this.clearUserFromStorage();
         this.notifyListeners();
@@ -71,8 +73,7 @@ export class AuthService {
     }
 
     private notifyListeners(): void {
+        console.log("notifying listeners about login or logout");
         this.listeners.forEach((listener) => listener(this.currentUser));
     }
 }
-
-let request = { params: { user: "john doe" } };

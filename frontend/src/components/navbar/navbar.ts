@@ -1,6 +1,7 @@
 import navbarTemplate from "./navbar.html?raw";
 import { AuthService } from "../../services/auth/auth";
 import { BaseComponent } from "../BaseComponent";
+import { AuthController } from "../../controllers/AuthController";
 
 export class Navbar extends BaseComponent {
     private authService: AuthService;
@@ -64,25 +65,12 @@ export class Navbar extends BaseComponent {
 
         // Setup logout handler
         const logoutLink = this.container.querySelector<HTMLElement>("#logout-link");
+
         if (logoutLink) {
             const handleLogout = (e: Event) => {
                 e.preventDefault();
-                this.authService.logout();
-
-                // Get current path
-                const currentPath = window.location.pathname;
-
-                // List of paths that require authentication
-                const authRequiredPaths = ["/profile", "/account", "/settings"];
-
-                // Check if current page requires auth
-                if (authRequiredPaths.includes(currentPath)) {
-                    // If yes, redirect to home
-                    window.location.replace("/");
-                } else {
-                    // If not, refresh the current page
-                    window.location.reload();
-                }
+                const authController = AuthController.getInstance();
+                authController.logout();
             };
             this.addEventListenerWithCleanup(logoutLink, "click", handleLogout);
         }
