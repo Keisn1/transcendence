@@ -6,9 +6,9 @@ export default class extends AbstractView {
     private navbar: Navbar | null = null;
     private gameComponent: GameComponent | null = null;
 
-    constructor() {
-        super();
-        this.setTitle("GameView");
+    constructor(router?: Router) {
+        super(router);
+        this.setTitle("Game");
     }
 
     render() {

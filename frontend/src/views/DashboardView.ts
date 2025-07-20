@@ -1,13 +1,14 @@
 import AbstractView from "./AbstractView.ts";
 import { Navbar } from "../components/navbar/navbar.ts";
 import { AdLightBox } from "../components/adLightbox/adLightbox.ts";
+import type Router from "../router.ts";
 
 export default class extends AbstractView {
     private navbar: Navbar | null = null;
     private adLightBox: AdLightBox | null = null;
 
-    constructor() {
-        super();
+    constructor(router?: Router) {
+        super(router);
         this.setTitle("Dashboard");
     }
 

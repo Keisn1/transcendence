@@ -1,13 +1,14 @@
 import AbstractView from "./AbstractView.ts";
 import { Navbar } from "../components/navbar/navbar.ts";
 import { Login } from "../components/login/login.ts";
+import type Router from "../router.ts";
 
 export default class extends AbstractView {
     private navbar: Navbar | null = null;
     private login: Login | null = null;
 
-    constructor() {
-        super();
+    constructor(router?: Router) {
+        super(router);
         this.setTitle("Login");
     }
 
@@ -15,7 +16,7 @@ export default class extends AbstractView {
         this.navbar = new Navbar();
         document.body.appendChild(this.navbar.getContainer());
 
-        this.login = new Login();
+        this.login = new Login(this.router);
         document.body.appendChild(this.login.getContainer());
     }
 
