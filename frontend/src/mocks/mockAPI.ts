@@ -15,10 +15,16 @@ export function setupMockApi() {
 
             if (user) {
                 const { password, ...userWithoutPassword } = user;
-                return new Response(JSON.stringify(userWithoutPassword), {
-                    status: 200,
-                    headers: { "Content-Type": "application/json" },
-                });
+                return new Response(
+                    JSON.stringify({
+                        token: "mock-jwt-token-12345", // Add mock token
+                        user: userWithoutPassword,
+                    }),
+                    {
+                        status: 200,
+                        headers: { "Content-Type": "application/json" },
+                    },
+                );
             } else {
                 return new Response("Unauthorized", { status: 401 });
             }

@@ -6,6 +6,11 @@ export interface User {
     avatar?: string;
 }
 
+export interface LoginResponse {
+    token: string;
+    user: User;
+}
+
 export class AuthService {
     private static instance: AuthService;
     private currentUser: User | null = null;
@@ -44,9 +49,11 @@ export class AuthService {
             throw new Error("Login failed");
         }
 
-        const user: User = await response.json();
+        const data: LoginResponse = await response.json();
+        const user: User = data.user;
         this.currentUser = user;
         this.saveUserToStorage(user);
+        this.saveTokenToStorage(data.token);
         this.notifyListeners();
     }
 
@@ -54,7 +61,20 @@ export class AuthService {
         console.log("logging out");
         this.currentUser = null;
         this.clearUserFromStorage();
+        this.clearTokenFromStorage();
         this.notifyListeners();
+    }
+
+    private saveTokenToStorage(token: string): void {
+        localStorage.setItem("authToken", token);
+    }
+
+    private clearTokenFromStorage(): void {
+        localStorage.removeItem("authToken");
+    }
+
+    getAuthToken(): string | null {
+        return localStorage.getItem("authToken");
     }
 
     // methods that control User Data in localStorage
