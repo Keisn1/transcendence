@@ -27,7 +27,7 @@ export default class extends AbstractView {
 
         // Remove DOM elements
         document.getElementById("navbar-container")?.remove();
-        document.getElementById("ad-lightbox")?.remove();
+        document.getElementById("ad-lightbox-container")?.remove();
 
         // Clear references
         this.navbar = null;
