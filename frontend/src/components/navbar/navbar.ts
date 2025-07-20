@@ -68,6 +68,21 @@ export class Navbar extends BaseComponent {
             const handleLogout = (e: Event) => {
                 e.preventDefault();
                 this.authService.logout();
+
+                // Get current path
+                const currentPath = window.location.pathname;
+
+                // List of paths that require authentication
+                const authRequiredPaths = ["/profile", "/account", "/settings"];
+
+                // Check if current page requires auth
+                if (authRequiredPaths.includes(currentPath)) {
+                    // If yes, redirect to home
+                    window.location.replace("/");
+                } else {
+                    // If not, refresh the current page
+                    window.location.reload();
+                }
             };
             this.addEventListenerWithCleanup(logoutLink, "click", handleLogout);
         }
