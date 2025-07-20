@@ -1,24 +1,20 @@
 import navbarTemplate from "./navbar.html?raw";
 import { AuthService } from "../../services/auth/auth";
+import { BaseComponent } from "../BaseComponent";
 
-export class Navbar {
-    private container: HTMLDivElement;
-    private eventListenerCleanups: (() => void)[] = [];
+export class Navbar extends BaseComponent {
     private authService: AuthService;
     private authCleanup: (() => void) | null = null;
 
     constructor() {
+        super("div", "navbar-container");
         this.authService = AuthService.getInstance();
 
-        const navbarContainer = document.createElement("div");
-        navbarContainer.id = "navbar-container";
-        navbarContainer.innerHTML = navbarTemplate;
-
-        this.container = navbarContainer;
+        this.container.innerHTML = navbarTemplate;
         this.setupEvents();
         this.setupLinks();
         this.setupAuthListener();
-        this.updateNavbarState(); // Initial state
+        this.updateNavbarState();
     }
 
     private setupAuthListener() {
@@ -35,28 +31,20 @@ export class Navbar {
 
         // Update profile dropdown visibility
         const profileDropdown = this.container.querySelector(".relative.ml-3");
+        const menu = this.container.querySelector<HTMLElement>('[role="menu"]')!;
         const authButtons = this.container.querySelector("#auth-buttons");
 
+        // hide the menu by default
+        menu.classList.add("hidden");
         if (isAuthenticated && user) {
-            console.log("Show profile dropdown");
             // Show profile dropdown
             profileDropdown?.classList.remove("hidden");
             authButtons?.classList.add("hidden");
-            // Update profile image if available
-            // const profileImg = this.container.querySelector<HTMLImageElement>('img[alt=""]');
-            // if (profileImg && user.avatar) {
-            //     profileImg.src = user.avatar;
-            // }
         } else {
             // Hide profile dropdown, show auth buttons
-            console.log("showing Login and SignIn Button");
             profileDropdown?.classList.add("hidden");
             authButtons?.classList.remove("hidden");
         }
-    }
-
-    getContainer(): HTMLDivElement {
-        return this.container;
     }
 
     setupLinks() {
@@ -66,38 +54,27 @@ export class Navbar {
     }
 
     setupEvents() {
-        const button = this.container.querySelector("#user-menu-button")!;
-        const menu = this.container.querySelector('[role="menu"]')!;
+        const button = this.container.querySelector<HTMLElement>("#user-menu-button");
+        const menu = this.container.querySelector<HTMLElement>('[role="menu"]');
 
         if (button && menu) {
             const toggleMenu = () => menu.classList.toggle("hidden");
-            button.addEventListener("click", toggleMenu);
-            // Store cleanup function
-            this.eventListenerCleanups.push(() => {
-                button.removeEventListener("click", toggleMenu);
-            });
+            this.addEventListenerWithCleanup(button, "click", toggleMenu);
         }
 
         // Setup logout handler
-        const logoutLink = this.container.querySelector("#logout-link");
+        const logoutLink = this.container.querySelector<HTMLElement>("#logout-link");
         if (logoutLink) {
             const handleLogout = (e: Event) => {
                 e.preventDefault();
                 this.authService.logout();
-                // Redirect to home or login page
-                // window.location.href = "/";
             };
-
-            logoutLink.addEventListener("click", handleLogout);
-            this.eventListenerCleanups.push(() => {
-                logoutLink.removeEventListener("click", handleLogout);
-            });
+            this.addEventListenerWithCleanup(logoutLink, "click", handleLogout);
         }
     }
 
     destroy() {
-        this.eventListenerCleanups.forEach((cleanup) => cleanup());
-        this.eventListenerCleanups = [];
+        super.destroy(); // This handles the event listener cleanups
 
         if (this.authCleanup) {
             this.authCleanup();

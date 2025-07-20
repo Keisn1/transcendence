@@ -1,24 +1,17 @@
 import gameTemplate from "./game.html?raw";
 import { PongGame } from "./game";
+import { BaseComponent } from "../BaseComponent";
 
-export class GameComponent {
-    private container: HTMLDivElement;
+export class GameComponent extends BaseComponent {
     private canvas: HTMLCanvasElement;
     private game: PongGame;
 
     constructor() {
-        const gameContainer = document.createElement("div");
-        gameContainer.classList.add("relative", "flex", "items-center", "justify-center", "h-screen");
-        gameContainer.id = "game-container";
-        gameContainer.innerHTML = gameTemplate;
+        super("div", "game-container");
 
-        this.canvas = gameContainer.querySelector("#canvas")! as HTMLCanvasElement;
-        this.container = gameContainer;
+        this.container.innerHTML = gameTemplate;
+        this.canvas = this.container.querySelector("#canvas")! as HTMLCanvasElement;
         this.game = new PongGame(this.canvas);
-    }
-
-    getContainer(): HTMLDivElement {
-        return this.container;
     }
 
     async play() {
@@ -26,6 +19,7 @@ export class GameComponent {
     }
 
     destroy() {
+        super.destroy();
         this.game?.destroy();
 
         // Remove DOM elements

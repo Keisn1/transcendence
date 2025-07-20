@@ -1,22 +1,11 @@
+import { BaseComponent } from "../BaseComponent";
 import adLightboxTemplate from "./adLightbox.html?raw";
 
-export class AdLightBox {
-    private container: HTMLDivElement;
-    private eventListeners: (() => void)[] = [];
-
+export class AdLightBox extends BaseComponent {
     constructor() {
-        const adLightbox = document.createElement("div");
-        adLightbox.id = "ad-lightbox";
-        adLightbox.classList.add("hidden");
-        adLightbox.innerHTML = adLightboxTemplate;
-        adLightbox.classList.add("flex", "justify-center"); // this needs to be handled elsewhere
-
-        this.container = adLightbox;
+        super("div", "ad-lightbox-container", ["hidden", "flex", "justify-center"]);
+        this.container.innerHTML = adLightboxTemplate;
         this.setupEvents();
-    }
-
-    getContainer(): HTMLDivElement {
-        return this.container;
     }
 
     setupEvents() {
@@ -24,35 +13,19 @@ export class AdLightBox {
         const hideAd = () => this.container.classList.add("hidden");
 
         const showAdAfterTimeout = () => {
-            setTimeout(showAd, 1000); // wait 1 seconds
+            setTimeout(showAd, 1000); // wait 1 second
         };
+
+        // Attach to window
         window.addEventListener("load", showAdAfterTimeout);
-
-        this.eventListeners.push(() => {
-            window.removeEventListener("load", showAdAfterTimeout); // only initially page load
-            // if you insist of seeing the load everytime on Dashboard
-            // just put
-            // showAdAfterTimeout();
-            // instead of
-            // window.addEventListener("load", showAdAfterTimeout);
+        this.eventListenerCleanups.push(() => {
+            window.removeEventListener("load", showAdAfterTimeout);
         });
 
-        const hideAdAfterClick = (e: Event) => {
-            const target = e.target as HTMLElement;
-            if (target.id === "ad-close-btn") {
-                hideAd();
-            }
-        };
-
-        this.container.addEventListener("click", hideAdAfterClick);
-
-        this.eventListeners.push(() => {
-            this.container.removeEventListener("click", hideAdAfterClick);
-        });
-    }
-
-    destroy() {
-        this.eventListeners.forEach((cleanup) => cleanup());
-        this.eventListeners = [];
+        // For DOM elements, use the helper method
+        const closeBtn = this.container.querySelector("#ad-close-btn") as HTMLElement;
+        if (closeBtn) {
+            this.addEventListenerWithCleanup(closeBtn, "click", () => hideAd());
+        }
     }
 }
