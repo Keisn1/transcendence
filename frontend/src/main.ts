@@ -2,7 +2,7 @@ import "./style.css";
 import "./components/navbar/navbar.ts"; // Add this line
 import "./components/adLightbox/adLightbox.ts"; // Add this line
 import Router from "./router.ts";
-import { AuthController } from "./controllers/AuthController.ts";
+import { AuthController } from "./controllers/auth.controller.ts";
 
 import { setupMockApi } from "./mocks/mockAPI.ts";
 

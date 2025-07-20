@@ -1,4 +1,4 @@
-import { AuthService } from "../services/auth/auth";
+import { AuthService } from "../services/auth/auth.service.ts";
 import Router from "../router";
 
 export class AuthController {

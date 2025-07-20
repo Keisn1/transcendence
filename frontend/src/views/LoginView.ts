@@ -16,7 +16,7 @@ export default class extends AbstractView {
         this.navbar = new Navbar();
         document.body.appendChild(this.navbar.getContainer());
 
-        this.login = new Login(this.router);
+        this.login = new Login();
         document.body.appendChild(this.login.getContainer());
     }
 

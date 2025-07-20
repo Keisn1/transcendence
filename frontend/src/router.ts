@@ -3,7 +3,7 @@ import DashboardView from "./views/DashboardView.ts";
 import GameView from "./views/GameView.ts";
 import ProfileView from "./views/ProfileView.ts";
 import LoginView from "./views/LoginView.ts";
-import { AuthController } from "./controllers/AuthController.ts";
+import { AuthController } from "./controllers/auth.controller.ts";
 
 export default class Router {
     private currentView: AbstractView | null = null;

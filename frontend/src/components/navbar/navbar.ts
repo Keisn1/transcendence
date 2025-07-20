@@ -1,7 +1,7 @@
 import navbarTemplate from "./navbar.html?raw";
-import { AuthService } from "../../services/auth/auth";
 import { BaseComponent } from "../BaseComponent";
-import { AuthController } from "../../controllers/AuthController";
+import { AuthService } from "../../services/auth/auth.service.ts";
+import { AuthController } from "../../controllers/auth.controller.ts";
 
 export class Navbar extends BaseComponent {
     private authService: AuthService;

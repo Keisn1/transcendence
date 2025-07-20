@@ -1,14 +1,10 @@
-import { AuthController } from "../../controllers/AuthController";
-import type Router from "../../router";
+import { AuthController } from "../../controllers/auth.controller.ts";
 import { BaseComponent } from "../BaseComponent";
 import loginTemplate from "./login.html?raw";
 
 export class Login extends BaseComponent {
-    private router?: Router;
-
-    constructor(router?: Router) {
+    constructor() {
         super("div", "login-container");
-        this.router = router;
         this.container.innerHTML = loginTemplate;
 
         this.setupEventListeners();
@@ -57,8 +53,5 @@ export class Login extends BaseComponent {
 
     destroy(): void {
         super.destroy();
-        // remove Eventlistener
-        const loginForm = document.getElementById("login-form");
-        loginForm?.removeEventListener("submit", this.handleLogin.bind(this));
     }
 }
