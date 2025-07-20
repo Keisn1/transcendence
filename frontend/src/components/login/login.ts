@@ -29,6 +29,13 @@ export class Login extends BaseComponent {
             await authController.login({ username, password });
         } catch (error) {
             // Show error message to user
+            // Enhanced error logging
+            console.error("Login attempt failed:", {
+                username: username,
+                timestamp: new Date().toISOString(),
+                error: error instanceof Error ? error.message : "Unknown error",
+                stack: error instanceof Error ? error.stack : null,
+            });
             this.showError("Login failed. Please check your credentials.");
         }
     }

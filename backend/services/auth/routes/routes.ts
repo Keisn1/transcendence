@@ -1,8 +1,7 @@
 import { FastifyInstance } from "fastify";
-import healthRoute  from "./health";
+import healthRoute from "./health";
 import register from "../controllers/register.controller";
 import login from "../controllers/login.controller";
-
 
 const registerSchema = {
     body: {
@@ -29,7 +28,6 @@ const registerSchema = {
                     },
                 },
             },
-
         },
     },
 } as const;
@@ -65,6 +63,5 @@ const loginSchema = {
 export async function routes(fastify: FastifyInstance) {
     fastify.get("/health", healthRoute);
     fastify.post("/register", { schema: registerSchema }, register);
-fastify.post("/login", { schema: loginSchema }, login);
+    fastify.post("/login", { schema: loginSchema }, login);
 }
-
