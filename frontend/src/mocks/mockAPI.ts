@@ -11,7 +11,7 @@ export function setupMockApi() {
 
         if (urlString === "/api/user/login" && options?.method === "POST") {
             const body = JSON.parse(options.body as string);
-            const user = mockUsers.find((u) => u.username === body.username && u.password === body.password);
+            const user = mockUsers.find((u) => u.email === body.email && u.password === body.password);
 
             if (user) {
                 const { password, ...userWithoutPassword } = user;

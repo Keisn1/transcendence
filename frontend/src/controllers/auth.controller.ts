@@ -32,7 +32,7 @@ export class AuthController {
         }
     }
 
-    public async login(credentials: { username: string; password: string }): Promise<void> {
+    public async login(credentials: { email: string; password: string }): Promise<void> {
         await this.authService.login(credentials);
         this.router.navigateTo(this.previousRoute);
     }

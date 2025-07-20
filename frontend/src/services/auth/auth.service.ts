@@ -1,15 +1,4 @@
-// auth.ts
-export interface User {
-    id: string;
-    username: string;
-    email: string;
-    avatar?: string;
-}
-
-export interface LoginResponse {
-    token: string;
-    user: User;
-}
+import { type User, type LoginResponse, type LoginBody } from "../../types/auth.types";
 
 export class AuthService {
     private static instance: AuthService;
@@ -36,7 +25,7 @@ export class AuthService {
         return this.currentUser !== null;
     }
 
-    async login(credentials: { username: string; password: string }): Promise<void> {
+    async login(credentials: LoginBody): Promise<void> {
         const response = await fetch("/api/user/login", {
             method: "POST",
             headers: {

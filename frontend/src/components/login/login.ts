@@ -17,17 +17,15 @@ export class Login extends BaseComponent {
 
     private async handleLogin(e: Event) {
         e.preventDefault();
-        const username = (document.getElementById("username") as HTMLInputElement).value;
+        const email = (document.getElementById("email") as HTMLInputElement).value;
         const password = (document.getElementById("password") as HTMLInputElement).value;
 
         try {
             const authController = AuthController.getInstance();
-            await authController.login({ username, password });
+            await authController.login({ email: email, password: password });
         } catch (error) {
-            // Show error message to user
-            // Enhanced error logging
             console.error("Login attempt failed:", {
-                username: username,
+                email: email,
                 timestamp: new Date().toISOString(),
                 error: error instanceof Error ? error.message : "Unknown error",
                 stack: error instanceof Error ? error.stack : null,
