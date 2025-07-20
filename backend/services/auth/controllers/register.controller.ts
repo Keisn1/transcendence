@@ -1,18 +1,6 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { genSaltSync, hashSync } from "bcrypt";
-
-interface RegisterBody {
-    username: string;
-    email: string;
-    password: string;
-}
-
-interface RegisterResponse {
-    id: number;
-    username: string;
-    email: string;
-    avatar: string;
-}
+import { RegisterBody, RegisterResponse } from "../types/auth.types";
 
 export default async function register(
     request: FastifyRequest<{ Body: RegisterBody }>,
@@ -40,14 +28,16 @@ export default async function register(
             email: email,
         });
 
-        return reply.status(201).send({
+        const response: RegisterResponse = {
             token,
             user: {
-                id: userId,
+                id: String(userId),
                 username: username,
                 email: email,
             },
-        });
+        };
+
+        return response;
     } catch (err) {
         const error = err as Error;
         console.error("Registration error:", error);
@@ -64,3 +54,32 @@ export default async function register(
         return reply.status(500).send({ error: "Registration failed" });
     }
 }
+
+export const registerSchema = {
+    body: {
+        type: "object",
+        properties: {
+            username: { type: "string", minLength: 1 },
+            email: { type: "string", format: "email" },
+            password: { type: "string", minLength: 8 },
+        },
+        required: ["username", "email", "password"],
+        additionalProperties: false,
+    },
+    response: {
+        201: {
+            type: "object",
+            properties: {
+                token: { type: "string" }, // Added token
+                user: {
+                    type: "object",
+                    properties: {
+                        id: { type: "number" },
+                        username: { type: "string" },
+                        email: { type: "string" },
+                    },
+                },
+            },
+        },
+    },
+} as const;

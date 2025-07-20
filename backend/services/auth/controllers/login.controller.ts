@@ -1,12 +1,11 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { compareSync } from "bcrypt";
+import { User, LoginBody, LoginResponse } from "../types/auth.types";
 
-interface LoginBody {
-    email: string;
-    password: string;
-}
-
-export default async function login(request: FastifyRequest<{ Body: LoginBody }>, reply: FastifyReply) {
+export default async function login(
+    request: FastifyRequest<{ Body: LoginBody }>,
+    reply: FastifyReply,
+): Promise<LoginResponse> {
     const { email, password } = request.body;
 
     try {
@@ -19,7 +18,7 @@ export default async function login(request: FastifyRequest<{ Body: LoginBody }>
             return reply.status(401).send({ error: "Invalid credentials" });
         }
 
-        const user = userRecords[0];
+        const user: User = userRecords[0];
 
         // Generate JWT
         const token = request.server.jwt.sign({
@@ -28,16 +27,46 @@ export default async function login(request: FastifyRequest<{ Body: LoginBody }>
             email: user.email,
         });
 
-        return reply.send({
+        const response: LoginResponse = {
             token,
             user: {
                 id: user.id,
                 username: user.username,
                 email: user.email,
             },
-        });
+        };
+
+        return response;
     } catch (error) {
         console.error("Login error:", error);
         return reply.status(500).send({ error: "Login failed" });
     }
 }
+
+export const loginSchema = {
+    body: {
+        type: "object",
+        properties: {
+            email: { type: "string", format: "email" },
+            password: { type: "string", minLength: 1 },
+        },
+        required: ["email", "password"],
+        additionalProperties: false,
+    },
+    response: {
+        200: {
+            type: "object",
+            properties: {
+                token: { type: "string" },
+                user: {
+                    type: "object",
+                    properties: {
+                        id: { type: "number" },
+                        username: { type: "string" },
+                        email: { type: "string" },
+                    },
+                },
+            },
+        },
+    },
+} as const;

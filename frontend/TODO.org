@@ -46,7 +46,8 @@ this.ball = new Ball(canvas, config.ballConfig);
 - [ ] setup nginx and setup production environment
 - [ ] clean up navbar html
   - [ ] set all the links and important attributes (everything that is not tailwind inside the component itsel)
-
+* TODO backend
+- [ ] define uuid before inserting
 * TODO UserStories
 ** TODO Login
 As a visitor to the website, I want to easily log in with my credentials and be redirected to a personalized dashboard, so I can access my account features and have a seamless authenticated experience.
