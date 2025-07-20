@@ -9,6 +9,28 @@ export function setupMockApi() {
     (window as any).fetch = async (url: string | Request, options?: RequestInit): Promise<Response> => {
         const urlString = typeof url === "string" ? url : url.url;
 
+        if (urlString === "/api/profile" && options?.method === "GET") {
+            // Get auth token from headers or localStorage
+            const authHeader = options.headers ? (options.headers as Record<string, string>)["Authorization"] : null;
+            const token = authHeader || localStorage.getItem("authToken");
+
+            if (!token) {
+                return new Response("Unauthorized", { status: 401 });
+            }
+
+            // In real app, decode token. For mock, return current user
+            const userData = localStorage.getItem("user");
+            if (userData) {
+                const user = JSON.parse(userData);
+                return new Response(JSON.stringify(user), {
+                    status: 200,
+                    headers: { "Content-Type": "application/json" },
+                });
+            }
+
+            return new Response("User not found", { status: 404 });
+        }
+
         if (urlString === "/api/user/login" && options?.method === "POST") {
             const body = JSON.parse(options.body as string);
             const user = mockUsers.find((u) => u.email === body.email && u.password === body.password);

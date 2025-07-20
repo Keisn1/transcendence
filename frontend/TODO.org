@@ -49,5 +49,10 @@ this.ball = new Ball(canvas, config.ballConfig);
 * TODO backend
 - [ ] define uuid before inserting
 * TODO UserStories
-** TODO Login
-As a visitor to the website, I want to easily log in with my credentials and be redirected to a personalized dashboard, so I can access my account features and have a seamless authenticated experience.
+** DONE Login
+As a visitor to the website, I want to easily log in with my credentials, so I can access my account features and have a seamless authenticated experience.
+
+** DONE Signup
+As a visitor to the website, I want to easily sign up email and password, so I can track my games.
+** TODO Avatar
+As a registered user of the website, I want to be able to navigate to my profile, where I can see my Username, my email and my avatar, so I can individualize my appearance on the website.
