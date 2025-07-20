@@ -38,3 +38,13 @@ export interface SignUpResponse {
     token: string;
     user: User;
 }
+
+export interface UpdateProfileBody {
+    username?: string;
+    email?: string;
+    avatar?: File | string; // File for upload, string for URL
+}
+
+export interface UpdateProfileResponse {
+    user: User;
+}

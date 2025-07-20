@@ -28,3 +28,12 @@ export const mockUsers = [
         avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
     },
 ];
+
+// Use working placeholder services instead of Unsplash
+export const avatarOptions = [
+    "https://ui-avatars.com/api/?name=User&size=150&background=random",
+    "https://ui-avatars.com/api/?name=Avatar&size=150&background=6366f1&color=fff",
+    "https://ui-avatars.com/api/?name=Profile&size=150&background=f59e0b&color=fff",
+    "https://ui-avatars.com/api/?name=Player&size=150&background=10b981&color=fff",
+    "https://ui-avatars.com/api/?name=Gamer&size=150&background=ef4444&color=fff",
+];

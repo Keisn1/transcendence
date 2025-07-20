@@ -67,7 +67,7 @@ export default class Router {
         }
 
         if (this.currentView && typeof this.currentView.destroy === "function") {
-            console.log("destroying a view", this.currentView);
+            console.log("destroying a view");
             this.currentView.destroy();
         }
 

@@ -1,0 +1,1313 @@
+:PROPERTIES:
+:GPTEL_MODEL: claude-sonnet-4-20250514
+:GPTEL_BACKEND: Claude
+:GPTEL_SYSTEM: You are a large language model living in Emacs and a helpful assistant. Avoid long answers.
+:GPTEL_BOUNDS: ((response (2008 2472) (2968 7638) (7796 8653) (8777 12001) (12116 20536) (21270 23335) (33360 35344) (35619 38722) (38761 40424) (40503 43218)))
+:END:
+
+*** Please follow these rules for our entire conversation:
+
+*Be aware that you are writing into emacs org-mode*
+- don't use markdown markup (double ** etc.)
+- use org mode Document structure (headlines, plain lists)
+
+*Conciseness Rules:*
+- Keep responses brief and to-the-point
+- Avoid lengthy explanations unless specifically requested
+- Don't repeat information already established in the conversation
+
+*Code/File Modification Rules:*
+- Only show the specific lines/sections that need to be changed
+- Use diff-style format or clear "change this section" indicators
+- Never reproduce entire files unless explicitly asked
+- Focus on what to modify, not what stays the same
+
+*Architectural Approach Rules:*
+- When asked for alternative approaches, present the complete new solution
+- Don't show incremental changes from the previous approach
+- Treat each architectural request as a fresh design question
+- Provide the full picture of the new approach in one response
+
+*Clarification:*
+- If unsure whether you want changes or a new approach, ask for clarification
+- "Changes" = modifications to existing code/structure
+- "Approach/Alternative" = complete new solution presentation
+
+*Explanation Rule:*
+When asked for an explanation:
+1. **Include code examples** - Provide practical, working code snippets that demonstrate the concept (inside org-structure-templates)
+2. **Use metaphors** - Relate technical concepts to real-world analogies to make them more intuitive
+3. **Add a "For Dummies" section** - Include a simplified explanation using plain language, avoiding jargon
+4. Structure as: Explanation → Code examples → Metaphors → For Dummies section
+
+
+
+
+Understood. I'll follow these rules for our entire conversation:
+
+- Use org-mode structure (headlines, plain lists) instead of markdown
+- Keep responses concise and focused
+- For modifications: show only changed sections with clear indicators
+- For new approaches: present complete fresh solutions
+- For explanations: include code examples, metaphors, and simplified sections
+- Ask for clarification between "changes" vs "new approach" when unclear
+
+Ready to help!
+*** I've developed this frontend for a ponggame and I now want to implement this user story
+#+begin_example
+As a registered user of the website, I want to be able to navigate to my profile, where I can see my Username, my email and my avatar, so I can individualize my appearance on the website.
+#+end_example
+I want to continue my established structure.
+Please guide me through that.
+
+Remark: The way of how to access this profile is already defined. The navbar.html has a profile dropdown.
+
+
+
+I'll guide you through implementing the profile user story following your established structure.
+
+- Implementation Plan
+
+You need to create:
+1. Profile component to display user information
+2. Profile service to fetch/manage profile data
+3. Update ProfileView to use the new component
+4. Add profile API endpoint to mockAPI
+
+**** Step 1: Create Profile Component
+
+Create =src/components/profile/profile.ts=:
+
+#+begin_src typescript
+import { BaseComponent } from "../BaseComponent";
+import profileTemplate from "./profile.html?raw";
+import { AuthService } from "../../services/auth/auth.service";
+import type { User } from "../../types/auth.types";
+
+export class Profile extends BaseComponent {
+    private authService: AuthService;
+    private user: User | null = null;
+
+    constructor() {
+        super("div", "profile-content");
+        this.authService = AuthService.getInstance();
+        this.user = this.authService.getCurrentUser();
+        this.container.innerHTML = profileTemplate;
+        this.populateUserData();
+    }
+
+    private populateUserData() {
+        if (!this.user) return;
+
+        const usernameEl = this.container.querySelector("#profile-username");
+        const emailEl = this.container.querySelector("#profile-email");
+        const avatarEl = this.container.querySelector("#profile-avatar");
+
+        if (usernameEl) usernameEl.textContent = this.user.username;
+        if (emailEl) usernameEl.textContent = this.user.email;
+        if (avatarEl && this.user.avatar) {
+            (avatarEl as HTMLImageElement).src = this.user.avatar;
+        }
+    }
+
+    destroy(): void {
+        super.destroy();
+    }
+}
+#+end_src
+
+**** Step 2: Create Profile HTML Template
+
+Create =src/components/profile/profile.html=:
+
+#+begin_src html
+<div class="max-w-2xl mx-auto mt-8 bg-white shadow rounded-lg">
+  <div class="px-6 py-8">
+    <div class="flex items-center space-x-6">
+      <img id="profile-avatar" class="w-24 h-24 rounded-full object-cover"
+           src="https://raw.githubusercontent.com/Keisn1/transcendence/erik_frontend_tryout/frontend/public/images/default-pfp.png"
+           alt="Profile Avatar">
+
+      <div class="flex-1">
+        <h1 class="text-2xl font-bold text-gray-900">Profile Information</h1>
+
+        <div class="mt-4 space-y-3">
+          <div>
+            <label class="text-sm font-medium text-gray-500">Username</label>
+            <p id="profile-username" class="text-lg text-gray-900">Loading...</p>
+          </div>
+
+          <div>
+            <label class="text-sm font-medium text-gray-500">Email</label>
+            <p id="profile-email" class="text-lg text-gray-900">Loading...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+#+end_src
+
+**** Step 3: Update ProfileView
+
+In =ProfileView.ts=, replace the content:
+
+#+begin_src typescript
+// Remove this section:
+let profileContainer = document.createElement("div");
+profileContainer.id = "profile-container";
+profileContainer.innerHTML = "Hello World";
+
+fetch("/api/profile")
+    .then((response) => response.text())
+    .then((text) => console.log(text));
+document.body.appendChild(profileContainer);
+
+// Replace with:
+this.profile = new Profile();
+document.body.appendChild(this.profile.getContainer());
+#+end_src
+
+Add import and property:
+#+begin_src typescript
+import { Profile } from "../components/profile/profile.ts";
+
+// Add to class properties:
+private profile: Profile | null = null;
+#+end_src
+
+Update destroy method:
+#+begin_src typescript
+destroy() {
+    console.log("Destroying ProfileView");
+    this.navbar?.destroy();
+    this.profile?.destroy();
+    document.getElementById("navbar-container")?.remove();
+    document.getElementById("profile-content")?.remove();
+}
+#+end_src
+
+**** Step 4: Add Profile API to MockAPI
+
+In =mockAPI.ts=, add this endpoint:
+
+#+begin_src typescript
+if (urlString === "/api/profile" && options?.method === "GET") {
+    // Get auth token from headers or localStorage
+    const token = options.headers?.["Authorization"] || localStorage.getItem("authToken");
+
+    if (!token) {
+        return new Response("Unauthorized", { status: 401 });
+    }
+
+    // In real app, decode token. For mock, return current user
+    const userData = localStorage.getItem("user");
+    if (userData) {
+        const user = JSON.parse(userData);
+        return new Response(JSON.stringify(user), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+        });
+    }
+
+    return new Response("User not found", { status: 404 });
+}
+#+end_src
+
+This implementation follows your established patterns and provides a clean profile display that matches your existing component structure.
+*** right now, when I go to /profile explicietly without being logged in, it shows an empty profile view. I would actually would like to redirect to signup
+
+You need to add authentication guard to ProfileView. Here's the change:
+
+**** Update ProfileView.ts
+
+In the =render()= method, add authentication check at the beginning:
+
+#+begin_src typescript
+render() {
+    // Add this authentication guard
+    const authService = AuthService.getInstance();
+    if (!authService.isAuthenticated()) {
+        this.router?.navigateTo("/signup");
+        return;
+    }
+
+    // Existing render code continues...
+    this.navbar = new Navbar();
+    document.body.appendChild(this.navbar.getContainer());
+
+    this.profile = new Profile();
+    document.body.appendChild(this.profile.getContainer());
+}
+#+end_src
+
+Add the import at the top:
+
+#+begin_src typescript
+import { AuthService } from "../services/auth/auth.service.ts";
+#+end_src
+
+Now when unauthenticated users try to access =/profile=, they'll be redirected to signup.
+
+*****
+*** how could i populate some data into my mocks so that i can have avatars and render them in different places. ?
+
+Here's how to populate mock data with avatars:
+
+**** Update Mock Users Data
+
+In =mockAPI.ts=, replace the =mockUsers= array:
+
+#+begin_src typescript
+const mockUsers = [
+    {
+        id: "1",
+        username: "admin",
+        password: "admin123",
+        email: "admin@example.com",
+        avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face"
+    },
+    {
+        id: "2",
+        username: "user",
+        password: "user123",
+        email: "user@example.com",
+        avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face"
+    },
+    {
+        id: "3",
+        username: "gamer",
+        password: "game123",
+        email: "gamer@example.com",
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
+    },
+    {
+        id: "4",
+        username: "player",
+        password: "play123",
+        email: "player@example.com",
+        avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face"
+    }
+];
+#+end_src
+
+**** Update Navbar Avatar Display
+
+In =navbar.ts=, modify =updateNavbarState()= method:
+
+#+begin_src typescript
+updateNavbarState() {
+    console.log("updating navbar");
+    const isAuthenticated = this.authService.isAuthenticated();
+    const user = this.authService.getCurrentUser();
+
+    const profileDropdown = this.container.querySelector(".relative.ml-3");
+    const menu = this.container.querySelector<HTMLElement>('[role="menu"]')!;
+    const authButtons = this.container.querySelector("#auth-buttons");
+    const avatarImg = this.container.querySelector("#navbar-avatar") as HTMLImageElement;
+
+    menu.classList.add("hidden");
+
+    if (isAuthenticated && user) {
+        profileDropdown?.classList.remove("hidden");
+        authButtons?.classList.add("hidden");
+
+        // Update avatar if available
+        if (avatarImg && user.avatar) {
+            avatarImg.src = user.avatar;
+        }
+    } else {
+        profileDropdown?.classList.add("hidden");
+        authButtons?.classList.remove("hidden");
+    }
+}
+#+end_src
+
+**** Update Navbar HTML Template
+
+In =navbar.html=, add an id to the avatar img:
+
+#+begin_src html
+<!-- Find this line and add id: -->
+<img id="navbar-avatar" class="size-8 rounded-full" src="https://raw.githubusercontent.com/Keisn1/transcendence/erik_frontend_tryout/frontend/public/images/default-pfp.png" alt="" />
+#+end_src
+
+**** Fix Profile Component Email Display
+
+In =profile.ts=, fix the email display bug:
+
+#+begin_src typescript
+private populateUserData() {
+    if (!this.user) return;
+
+    const usernameEl = this.container.querySelector("#profile-username");
+    const emailEl = this.container.querySelector("#profile-email");
+    const avatarEl = this.container.querySelector("#profile-avatar");
+
+    if (usernameEl) usernameEl.textContent = this.user.username;
+    if (emailEl) emailEl.textContent = this.user.email; // Fixed: was showing username
+    if (avatarEl && this.user.avatar) {
+        (avatarEl as HTMLImageElement).src = this.user.avatar;
+    }
+}
+#+end_src
+
+Now you have diverse avatars that display in both the navbar and profile page when users log in.
+
+*****
+*** right now, those images are links, how would a user actually be able to store images? (upload images?
+
+Here's how to implement user avatar upload functionality:
+
+**** Step 1: Update User Types
+
+In =auth.types.ts=, add:
+
+#+begin_src typescript
+export interface UpdateProfileBody {
+    username?: string;
+    email?: string;
+    avatar?: File | string; // File for upload, string for URL
+}
+
+export interface UpdateProfileResponse {
+    user: User;
+}
+#+end_src
+
+**** Step 2: Create Avatar Upload Component
+
+Create =src/components/avatarUpload/avatarUpload.ts=:
+
+#+begin_src typescript
+import { BaseComponent } from "../BaseComponent";
+import { AuthService } from "../../services/auth/auth.service";
+
+export class AvatarUpload extends BaseComponent {
+    private authService: AuthService;
+    private onAvatarChange?: (avatarUrl: string) => void;
+
+    constructor(onAvatarChange?: (avatarUrl: string) => void) {
+        super("div", "avatar-upload", ["flex", "flex-col", "items-center", "space-y-4"]);
+        this.authService = AuthService.getInstance();
+        this.onAvatarChange = onAvatarChange;
+        this.render();
+    }
+
+    private render() {
+        const user = this.authService.getCurrentUser();
+        this.container.innerHTML = `
+            <div class="relative">
+                <img id="avatar-preview"
+                     src="${user?.avatar || '/images/default-pfp.png'}"
+                     alt="Avatar"
+                     class="w-32 h-32 rounded-full object-cover border-4 border-gray-300">
+                <label for="avatar-input"
+                       class="absolute bottom-0 right-0 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full p-2 cursor-pointer shadow-lg">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89L8.98 4.22A2 2 0 0110.645 3.5h2.71a2 2 0 011.664.72L16.405 6.11A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                </label>
+            </div>
+            <input type="file"
+                   id="avatar-input"
+                   accept="image/*"
+                   class="hidden">
+            <p class="text-sm text-gray-600">Click camera icon to upload new avatar</p>
+        `;
+
+        this.setupEvents();
+    }
+
+    private setupEvents() {
+        const fileInput = this.container.querySelector('#avatar-input') as HTMLInputElement;
+        const preview = this.container.querySelector('#avatar-preview') as HTMLImageElement;
+
+        this.addEventListenerWithCleanup(fileInput, 'change', (e) => {
+            const file = (e.target as HTMLInputElement).files?.[0];
+            if (file) {
+                // Preview immediately
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const avatarUrl = e.target?.result as string;
+                    preview.src = avatarUrl;
+
+                    // Simulate upload and update user
+                    this.uploadAvatar(file);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    private async uploadAvatar(file: File) {
+        try {
+            // Create FormData for file upload
+            const formData = new FormData();
+            formData.append('avatar', file);
+
+            const response = await fetch('/api/profile/avatar', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Authorization': `Bearer ${this.authService.getAuthToken()}`
+                }
+            });
+
+            if (!response.ok) throw new Error('Upload failed');
+
+            const data = await response.json();
+
+            // Update user in AuthService
+            await this.authService.updateProfile({ avatar: data.avatarUrl });
+
+            // Notify parent component
+            if (this.onAvatarChange) {
+                this.onAvatarChange(data.avatarUrl);
+            }
+
+        } catch (error) {
+            console.error('Avatar upload failed:', error);
+            // Reset preview on error
+            const user = this.authService.getCurrentUser();
+            const preview = this.container.querySelector('#avatar-preview') as HTMLImageElement;
+            preview.src = user?.avatar || '/images/default-pfp.png';
+        }
+    }
+}
+#+end_src
+
+**** Step 3: Update AuthService
+
+In =auth.service.ts=, add:
+
+#+begin_src typescript
+async updateProfile(updates: UpdateProfileBody): Promise<void> {
+    const response = await fetch('/api/profile', {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.getAuthToken()}`
+        },
+        body: JSON.stringify(updates)
+    });
+
+    if (!response.ok) throw new Error('Profile update failed');
+
+    const data = await response.json();
+    this.currentUser = data.user;
+    this.saveUserToStorage(data.user);
+    this.notifyListeners();
+}
+#+end_src
+
+**** Step 4: Update Profile Component
+
+In =profile.ts=, add avatar upload:
+
+#+begin_src typescript
+import { AvatarUpload } from "../avatarUpload/avatarUpload";
+
+export class Profile extends BaseComponent {
+    private authService: AuthService;
+    private user: User | null = null;
+    private avatarUpload: AvatarUpload | null = null;
+
+    constructor() {
+        super("div", "profile-content");
+        this.authService = AuthService.getInstance();
+        this.user = this.authService.getCurrentUser();
+        this.container.innerHTML = profileTemplate;
+        this.setupAvatarUpload();
+        this.populateUserData();
+    }
+
+    private setupAvatarUpload() {
+        this.avatarUpload = new AvatarUpload((newAvatarUrl) => {
+            // Refresh user data when avatar changes
+            this.user = this.authService.getCurrentUser();
+            this.populateUserData();
+        });
+
+        const avatarContainer = this.container.querySelector('#avatar-container');
+        if (avatarContainer) {
+            avatarContainer.appendChild(this.avatarUpload.getContainer());
+        }
+    }
+
+    destroy(): void {
+        this.avatarUpload?.destroy();
+        super.destroy();
+    }
+}
+#+end_src
+
+**** Step 5: Update Profile HTML Template
+
+In =profile.html=, replace avatar section:
+
+#+begin_src html
+<div class="max-w-2xl mx-auto mt-8 bg-white shadow rounded-lg">
+  <div class="px-6 py-8">
+    <div class="flex items-center space-x-6">
+      <!-- Replace img with container for avatar upload component -->
+      <div id="avatar-container"></div>
+
+      <div class="flex-1">
+        <!-- rest stays the same -->
+      </div>
+    </div>
+  </div>
+</div>
+#+end_src
+
+**** Step 6: Update Mock API
+
+In =mockAPI.ts=, add avatar upload endpoints:
+
+#+begin_src typescript
+// Add after existing endpoints
+if (urlString === "/api/profile/avatar" && options?.method === "POST") {
+    const token = options.headers?.["Authorization"] || localStorage.getItem("authToken");
+    if (!token) return new Response("Unauthorized", { status: 401 });
+
+    // Simulate file processing - in real app, you'd save to cloud storage
+    const mockAvatarUrl = `https://images.unsplash.com/photo-${Date.now()}?w=150&h=150&fit=crop&crop=face`;
+
+    return new Response(JSON.stringify({ avatarUrl: mockAvatarUrl }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" }
+    });
+}
+
+if (urlString === "/api/profile" && options?.method === "PUT") {
+    const token = options.headers?.["Authorization"] || localStorage.getItem("authToken");
+    if (!token) return new Response("Unauthorized", { status: 401 });
+
+    const updates = JSON.parse(options.body as string);
+    const userData = localStorage.getItem("user");
+
+    if (userData) {
+        const user = JSON.parse(userData);
+        const updatedUser = { ...user, ...updates };
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+
+        return new Response(JSON.stringify({ user: updatedUser }), {
+            status: 200,
+            headers: { "Content-Type": "application/json" }
+        });
+    }
+
+    return new Response("User not found", { status: 404 });
+}
+#+end_src
+
+Now users can upload avatar images which get previewed immediately and update across the application.
+
+***** )
+*** when i try the upload of some image file, it fails with
+#+begin_example
+XHRPUT
+http://localhost:5173/api/profile
+[HTTP/1.1 404 Not Found 6ms]
+
+Avatar upload failed: Error: Profile update failed
+    updateProfile auth.service.ts:139
+    uploadAvatar avatarUpload.ts:83
+    onload avatarUpload.ts:57
+    setupEvents avatarUpload.ts:52
+    addEventListenerWithCleanup BaseComponent.ts:26
+    setupEvents avatarUpload.ts:47
+    render avatarUpload.ts:40
+    AvatarUpload avatarUpload.ts:12
+    setupAvatarUpload profile.ts:36
+    Profile profile.ts:17
+    render ProfileView.ts:27
+    routing router.ts:76
+    Router router.ts:14
+    <anonymous> main.ts:11
+#+end_example
+
+I thought that it would acutally mock out the call
+
+The issue is that your mock API isn't intercepting the PUT request to =/api/profile=. Looking at your mockAPI.ts file, you already have the PUT endpoint but it's positioned after the return statement for the original fetch.
+
+**** Fix Mock API Positioning
+
+In =mockAPI.ts=, move the profile endpoints before the =return originalFetch(url, options);= line:
+
+#+begin_src typescript
+export function setupMockApi() {
+    const originalFetch = window.fetch;
+
+    (window as any).fetch = async (url: string | Request, options?: RequestInit): Promise<Response> => {
+        const urlString = typeof url === "string" ? url : url.url;
+
+        // Move these BEFORE the originalFetch return
+        if (urlString === "/api/profile" && options?.method === "PUT") {
+            const authHeader = options.headers ? (options.headers as Record<string, string>)["Authorization"] : null;
+            const token = authHeader || localStorage.getItem("authToken");
+            if (!token) return new Response("Unauthorized", { status: 401 });
+
+            const updates = JSON.parse(options.body as string);
+            const userData = localStorage.getItem("user");
+
+            if (userData) {
+                const user = JSON.parse(userData);
+                const updatedUser = { ...user, ...updates };
+                localStorage.setItem("user", JSON.stringify(updatedUser));
+
+                return new Response(JSON.stringify({ user: updatedUser }), {
+                    status: 200,
+                    headers: { "Content-Type": "application/json" }
+                });
+            }
+
+            return new Response("User not found", { status: 404 });
+        }
+
+        // All existing endpoints stay here...
+        if (urlString === "/api/profile/avatar" && options?.method === "POST") {
+            // ... existing code
+        }
+
+        // This should be at the very end
+        return originalFetch(url, options);
+    };
+}
+#+end_src
+
+The mock API intercepts requests in order, and since your PUT endpoint was after the =originalFetch= return, it never got reached.
+
+*** honestly i'm not completely getting this solution. Why are there now two fetches
+#+begin_src js :results output
+            const response = await fetch("/api/profile/avatar", {
+                method: "POST",
+                body: formData,
+                headers: {
+                    Authorization: `Bearer ${this.authService.getAuthToken()}`,
+                },
+            });
+
+#+end_src
+inside avatarUpload and
+#+begin_src js :results output
+
+        const response = await fetch("/api/profile", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${this.getAuthToken()}`,
+            },
+            body: JSON.stringify(updates),
+        });
+
+#+end_src
+in auth.service.ts?
+
+You're right to be confused! There are two different operations happening:
+
+**** Two Separate API Calls Explained
+
+**/ 1. Upload Avatar File (=/api/profile/avatar= POST)
+- Handles file upload (multipart form data)
+- Returns just the new avatar URL
+- Simulates storing file on server/cloud storage
+
+**/ 2. Update User Profile (=/api/profile= PUT)
+- Updates user data in database
+- Takes JSON data (not files)
+- Updates the complete user object
+
+**** The Flow
+
+1. User selects image file
+2. =avatarUpload.ts= uploads file to =/api/profile/avatar= → gets back avatar URL
+3. =avatarUpload.ts= calls =authService.updateProfile()= with that URL
+4. =authService= sends PUT to =/api/profile= → updates user record with new avatar URL
+
+**** Simpler Single-Endpoint Approach
+
+If you want just one call, modify =avatarUpload.ts=:
+
+#+begin_src typescript
+private async uploadAvatar(file: File) {
+    try {
+        // Skip the file upload, directly update profile
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const avatarDataUrl = e.target?.result as string;
+
+            // Single call to update profile
+            await this.authService.updateProfile({ avatar: avatarDataUrl });
+
+            if (this.onAvatarChange) {
+                this.onAvatarChange(avatarDataUrl);
+            }
+        };
+        reader.readAsDataURL(file);
+
+    } catch (error) {
+        console.error('Avatar upload failed:', error);
+    }
+}
+#+end_src
+
+Remove the =/api/profile/avatar= endpoint from mockAPI.ts.
+
+This approach stores the image as base64 data directly in the user profile (good for mocks, but not production).
+
+***
+*** Ok, why is updateProfile inside AuthService?
+
+Good question! That's a design decision that can go either way. Here's the reasoning:
+
+**** Why it's Currently in AuthService
+
+- AuthService manages the current user state and authentication
+- Profile updates need to update the cached user data and notify listeners
+- It has access to auth tokens needed for API calls
+- Keeps user-related operations centralized
+
+**** Alternative: Separate ProfileService
+
+You could create a dedicated ProfileService:
+
+#+begin_src typescript
+// src/services/profile/profile.service.ts
+export class ProfileService {
+    private authService: AuthService;
+
+    constructor() {
+        this.authService = AuthService.getInstance();
+    }
+
+    async updateProfile(updates: UpdateProfileBody): Promise<void> {
+        const response = await fetch('/api/profile', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.authService.getAuthToken()}`
+            },
+            body: JSON.stringify(updates)
+        });
+
+        if (!response.ok) throw new Error('Profile update failed');
+
+        const data = await response.json();
+
+        // Notify AuthService to update cached user
+        this.authService.updateCurrentUser(data.user);
+    }
+}
+#+end_src
+
+**** Which Approach is Better?
+
+- *Current (AuthService)*: Simpler, fewer files, keeps user state management centralized
+- *Separate Service*: Better separation of concerns, more scalable for complex profile features
+
+For your current scope, keeping it in AuthService is fine. Move it to ProfileService if you add more profile-specific features like game statistics, preferences, etc.
+
+***  i find the second one more appealing
+
+Great choice! Let's refactor to use a separate ProfileService:
+
+**** Step 1: Create ProfileService
+
+Create =src/services/profile/profile.service.ts=:
+
+#+begin_src typescript
+import { AuthService } from "../auth/auth.service";
+import type { UpdateProfileBody } from "../../types/auth.types";
+
+export class ProfileService {
+    private static instance: ProfileService;
+    private authService: AuthService;
+
+    private constructor() {
+        this.authService = AuthService.getInstance();
+    }
+
+    static getInstance(): ProfileService {
+        if (!ProfileService.instance) {
+            ProfileService.instance = new ProfileService();
+        }
+        return ProfileService.instance;
+    }
+
+    async updateProfile(updates: UpdateProfileBody): Promise<void> {
+        const response = await fetch('/api/profile', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.authService.getAuthToken()}`
+            },
+            body: JSON.stringify(updates)
+        });
+
+        if (!response.ok) throw new Error('Profile update failed');
+
+        const data = await response.json();
+
+        // Notify AuthService to update cached user
+        this.authService.updateCurrentUser(data.user);
+    }
+}
+#+end_src
+
+**** Step 2: Update AuthService
+
+In =auth.service.ts=, remove the =updateProfile= method and add:
+
+#+begin_src typescript
+// Remove the existing updateProfile method
+
+// Add this method instead:
+updateCurrentUser(user: User): void {
+    this.currentUser = user;
+    this.saveUserToStorage(user);
+    this.notifyListeners();
+}
+#+end_src
+
+**** Step 3: Update AvatarUpload Component
+
+In =avatarUpload.ts=, change the import and service usage:
+
+#+begin_src typescript
+import { ProfileService } from "../../services/profile/profile.service";
+
+export class AvatarUpload extends BaseComponent {
+    private authService: AuthService;
+    private profileService: ProfileService;
+    private onAvatarChange?: (avatarUrl: string) => void;
+
+    constructor(onAvatarChange?: (avatarUrl: string) => void) {
+        super("div", "avatar-upload", ["flex", "flex-col", "items-center", "space-y-4"]);
+        this.authService = AuthService.getInstance();
+        this.profileService = ProfileService.getInstance();
+        this.onAvatarChange = onAvatarChange;
+        this.render();
+    }
+
+    private async uploadAvatar(file: File) {
+        try {
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const avatarDataUrl = e.target?.result as string;
+
+                // Use ProfileService instead of AuthService
+                await this.profileService.updateProfile({ avatar: avatarDataUrl });
+
+                if (this.onAvatarChange) {
+                    this.onAvatarChange(avatarDataUrl);
+                }
+            };
+            reader.readAsDataURL(file);
+
+        } catch (error) {
+            console.error('Avatar upload failed:', error);
+            // Reset preview on error
+            const user = this.authService.getCurrentUser();
+            const preview = this.container.querySelector('#avatar-preview') as HTMLImageElement;
+            preview.src = user?.avatar || '/images/default-pfp.png';
+        }
+    }
+}
+#+end_src
+
+Now you have clean separation of concerns: AuthService handles authentication, ProfileService handles profile operations.
+
+*****
+*** but also the fetch in avatarUpload is gone
+
+You're right! I removed the file upload endpoint. Here's the complete two-endpoint approach with ProfileService:
+
+**** Update AvatarUpload Component
+
+In =avatarUpload.ts=, restore the two-step upload:
+
+#+begin_src typescript
+private async uploadAvatar(file: File) {
+    try {
+        // Step 1: Upload file to get avatar URL
+        const formData = new FormData();
+        formData.append('avatar', file);
+
+        const response = await fetch('/api/profile/avatar', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Authorization': `Bearer ${this.authService.getAuthToken()}`
+            }
+        });
+
+        if (!response.ok) throw new Error('Upload failed');
+
+        const data = await response.json();
+
+        // Step 2: Update profile with new avatar URL
+        await this.profileService.updateProfile({ avatar: data.avatarUrl });
+
+        // Notify parent component
+        if (this.onAvatarChange) {
+            this.onAvatarChange(data.avatarUrl);
+        }
+
+    } catch (error) {
+        console.error('Avatar upload failed:', error);
+        // Reset preview on error
+        const user = this.authService.getCurrentUser();
+        const preview = this.container.querySelector('#avatar-preview') as HTMLImageElement;
+        preview.src = user?.avatar || '/images/default-pfp.png';
+    }
+}
+#+end_src
+
+**** Ensure Mock API Has Both Endpoints
+
+In =mockAPI.ts=, keep both endpoints:
+
+#+begin_src typescript
+// File upload endpoint
+if (urlString === "/api/profile/avatar" && options?.method === "POST") {
+    const token = options.headers?.["Authorization"] || localStorage.getItem("authToken");
+    if (!token) return new Response("Unauthorized", { status: 401 });
+
+    const mockAvatarUrl = `https://images.unsplash.com/photo-${Date.now()}?w=150&h=150&fit=crop&crop=face`;
+
+    return new Response(JSON.stringify({ avatarUrl: mockAvatarUrl }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" }
+    });
+}
+
+// Profile update endpoint
+if (urlString === "/api/profile" && options?.method === "PUT") {
+    // ... existing PUT code
+}
+#+end_src
+
+Now you have both: clean ProfileService architecture AND proper file upload simulation.
+
+*** ok, with this setup and using the Mock, the upload of a file should actually not be possible. And also I'm not getting a random image. Or should I?
+
+You're absolutely right to be confused! Let me clarify what should happen:
+
+**** What Currently Happens (Mock Setup)
+
+1. User selects image file → preview shows immediately (this works)
+2. Mock API ignores the actual file content completely
+3. Mock returns a random Unsplash URL (not the uploaded image)
+4. User's avatar gets set to that random URL
+
+**** What You're Experiencing
+
+- The file "upload" appears to work but you get a random image instead of your uploaded file
+- This is actually correct behavior for the mock setup
+
+**** The Mock Limitations
+
+The mock can't actually store/serve your uploaded files because:
+- No backend server to process files
+- No cloud storage integration
+- localStorage can't efficiently store large image files
+
+**** Expected Mock Behavior
+
+You should see:
+1. Your selected image in the preview initially
+2. After "upload", it changes to a random Unsplash image
+3. That random image persists and shows in navbar/profile
+
+**** Alternative: Store as Base64 (Real Upload Preview)
+
+If you want to actually see your uploaded image, modify =avatarUpload.ts=:
+
+#+begin_src typescript
+private async uploadAvatar(file: File) {
+    try {
+        // Skip server upload, use base64 directly
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const base64Avatar = e.target?.result as string;
+
+            // Directly update profile with base64 image
+            await this.profileService.updateProfile({ avatar: base64Avatar });
+
+            if (this.onAvatarChange) {
+                this.onAvatarChange(base64Avatar);
+            }
+        };
+        reader.readAsDataURL(file);
+
+    } catch (error) {
+        console.error('Avatar upload failed:', error);
+    }
+}
+#+end_src
+
+This way you'd actually see your uploaded image everywhere in the app.
+
+*Which approach do you prefer?*
+- Current: Simulates real file upload (but shows random image)
+- Alternative: Shows actual uploaded image (more realistic for development)
+
+*****
+*** I get the error
+#+begin_example
+GET
+https://images.unsplash.com/photo-1753035534005?w=150&h=150&fit=crop&crop=face
+NS_BINDING_ABORTED
+
+A resource is blocked by OpaqueResponseBlocking, please check browser console for details. photo-1753035534005
+#+end_example
+
+
+
+The issue is CORS - Unsplash blocks direct image access from other domains. Let's use a different approach for mock avatars.
+
+**** Fix Mock API with Working Image URLs
+
+In =mockAPI.ts=, replace the avatar endpoint with working URLs:
+
+#+begin_src typescript
+if (urlString === "/api/profile/avatar" && options?.method === "POST") {
+    const token = options.headers?.["Authorization"] || localStorage.getItem("authToken");
+    if (!token) return new Response("Unauthorized", { status: 401 });
+
+    // Use working placeholder services instead of Unsplash
+    const avatarOptions = [
+        "https://ui-avatars.com/api/?name=User&size=150&background=random",
+        "https://ui-avatars.com/api/?name=Avatar&size=150&background=6366f1&color=fff",
+        "https://ui-avatars.com/api/?name=Profile&size=150&background=f59e0b&color=fff",
+        "https://ui-avatars.com/api/?name=Player&size=150&background=10b981&color=fff",
+        "https://ui-avatars.com/api/?name=Gamer&size=150&background=ef4444&color=fff"
+    ];
+
+    const randomAvatar = avatarOptions[Math.floor(Math.random() * avatarOptions.length)];
+
+    return new Response(JSON.stringify({ avatarUrl: randomAvatar }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" }
+    });
+}
+#+end_src
+
+**** Update Initial Mock Users
+
+In =mockAPI.ts=, also fix the initial user avatars:
+
+#+begin_src typescript
+const mockUsers = [
+    {
+        id: "1",
+        username: "admin",
+        password: "admin123",
+        email: "admin@example.com",
+        avatar: "https://ui-avatars.com/api/?name=Admin&size=150&background=6366f1&color=fff"
+    },
+    {
+        id: "2",
+        username: "user",
+        password: "user123",
+        email: "user@example.com",
+        avatar: "https://ui-avatars.com/api/?name=User&size=150&background=f59e0b&color=fff"
+    },
+    {
+        id: "3",
+        username: "gamer",
+        password: "game123",
+        email: "gamer@example.com",
+        avatar: "https://ui-avatars.com/api/?name=Gamer&size=150&background=10b981&color=fff"
+    },
+    {
+        id: "4",
+        username: "player",
+        password: "play123",
+        email: "player@example.com",
+        avatar: "https://ui-avatars.com/api/?name=Player&size=150&background=ef4444&color=fff"
+    }
+];
+#+end_src
+
+**** Alternative: Use Base64 Approach
+
+If you prefer to show the actual uploaded image, use this approach in =avatarUpload.ts=:
+
+#+begin_src typescript
+private async uploadAvatar(file: File) {
+    try {
+        // Store actual uploaded image as base64
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const base64Image = e.target?.result as string;
+
+            await this.profileService.updateProfile({ avatar: base64Image });
+
+            if (this.onAvatarChange) {
+                this.onAvatarChange(base64Image);
+            }
+        };
+        reader.readAsDataURL(file);
+
+    } catch (error) {
+        console.error('Avatar upload failed:', error);
+    }
+}
+#+end_src
+
+The first approach gives you working placeholder avatars, the second shows your actual uploaded images.
+
+*** for production, what is better?
+
+For production, you want the *two-step approach with real file upload*, not base64. Here's why:
+
+**** Base64 Problems in Production
+- Creates massive JSON payloads (1MB image = 1.3MB base64 text)
+- Bloats database with binary data
+- Slows API responses and increases bandwidth
+- Makes caching inefficient
+- Poor performance for mobile users
+
+**** Production-Ready Architecture
+
+*Step 1: Upload to Cloud Storage*
+#+begin_src typescript
+// Upload file directly to cloud storage (AWS S3, Cloudinary, etc.)
+const response = await fetch('/api/upload/avatar', {
+    method: 'POST',
+    body: formData, // Contains actual file
+    headers: { 'Authorization': `Bearer ${token}` }
+});
+
+const { imageUrl } = await response.json();
+// Returns: "https://cdn.yourapp.com/avatars/user123_timestamp.jpg"
+#+end_src
+
+*Step 2: Save URL to Database*
+#+begin_src typescript
+// Update user profile with just the URL
+await fetch('/api/profile', {
+    method: 'PUT',
+    body: JSON.stringify({ avatar: imageUrl }),
+    headers: { 'Content-Type': 'application/json' }
+});
+#+end_src
+
+**** Why This is Better
+- *Performance*: Images served from CDN, not your API
+- *Scalability*: Cloud storage handles millions of files
+- *Efficiency*: Database stores tiny URLs, not huge images
+- *Caching*: CDNs cache images globally for fast loading
+- *Processing*: Cloud services can auto-resize, optimize, etc.
+
+**** Popular Solutions
+- *AWS S3 + CloudFront*
+- *Cloudinary* (handles resizing, optimization automatically)
+- *Firebase Storage*
+- *Supabase Storage*
+
+Your current mock setup actually simulates this production pattern correctly - it just replaces cloud storage with a placeholder service.
+
+*****
+*** but the services are not on the same server than the nginx server
+
+Ah, that changes everything! With nginx, frontend, and backend on separate servers, you need a shared storage solution.
+
+**** Architecture Options
+
+*/ Option 1: Dedicated File Server
+
+#+begin_example
+┌─────────────┐    ┌──────────────┐    ┌─────────────┐    ┌─────────────┐
+│   nginx     │    │   frontend   │    │   backend   │    │ file server │
+│ (reverse    │    │   server     │    │   API       │    │ (storage)   │
+│  proxy)     │    │              │    │             │    │             │
+└─────────────┘    └──────────────┘    └─────────────┘    └─────────────┘
+#+end_example
+
+/Nginx Config:/
+#+begin_src nginx
+# Route uploads to dedicated file server
+location /uploads/ {
+    proxy_pass http://fileserver.internal:8080/uploads/;
+    expires 30d;
+    add_header Cache-Control "public, immutable";
+}
+#+end_src
+
+/Backend uploads to file server:/
+#+begin_src javascript
+// Backend sends file to file server
+const formData = new FormData();
+formData.append('file', fileBuffer);
+
+const response = await fetch('http://fileserver.internal:8080/upload', {
+    method: 'POST',
+    body: formData
+});
+
+const { filename } = await response.json();
+return `/uploads/${filename}`; // URL accessible via nginx
+#+end_src
+
+*/ Option 2: Network File System (NFS/SMB)
+
+#+begin_example
+┌─────────────┐    ┌──────────────┐    ┌─────────────┐
+│   nginx     │    │   frontend   │    │   backend   │
+│             │    │              │    │             │
+└─────────────┘    └──────────────┘    └─────────────┘
+       │                                      │
+       └─────── Shared Storage ──────────────┘
+            /mnt/shared-uploads/
+#+end_example
+
+/Setup:/
+- Mount shared storage on both nginx and backend servers
+- Backend writes files to =/mnt/shared-uploads/=
+- Nginx serves files from =/mnt/shared-uploads/=
+
+*/ Option 3: Object Storage (S3-Compatible)
+
+Use MinIO (self-hosted S3-compatible storage):
+
+#+begin_src javascript
+// Backend uploads to MinIO
+const minioClient = new Minio.Client({
+    endPoint: 'minio.internal',
+    accessKey: 'key',
+    secretKey: 'secret'
+});
+
+await minioClient.putObject('avatars', filename, fileBuffer);
+
+// Return public URL
+return `https://yourapp.com/storage/avatars/${filename}`;
+#+end_src
+
+/Nginx proxies storage requests:/
+#+begin_src nginx
+location /storage/ {
+    proxy_pass http://minio.internal:9000/;
+}
+#+end_src
+
+**** Recommendation
+
+For your setup, I'd recommend /Option 1 (Dedicated File Server)/ because:
+
+- Simple to implement
+- No complex shared filesystem setup
+- Easy to scale and backup
+- Clear separation of concerns
+- Can add image processing (resize, optimize) on the file server
+
+Would you like me to detail the implementation of the dedicated file server approach?
+
+***

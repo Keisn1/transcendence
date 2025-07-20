@@ -89,13 +89,23 @@ export class AuthService {
 
     // methods that control User Data in localStorage
     private saveUserToStorage(user: User): void {
-        localStorage.setItem("user", JSON.stringify(user));
+        try {
+            localStorage.setItem("user", JSON.stringify(user));
+        } catch (error) {
+            console.error("Failed to save user data to localStorage:", error);
+        }
     }
 
     private loadUserFromStorage(): void {
-        const userData = localStorage.getItem("user");
-        if (userData) {
-            this.currentUser = JSON.parse(userData);
+        try {
+            const userData = localStorage.getItem("user");
+            if (userData && userData !== "undefined" && userData !== "null") {
+                this.currentUser = JSON.parse(userData);
+            }
+        } catch (error) {
+            console.warn("Failed to parse user data from localStorage, clearing it:", error);
+            localStorage.removeItem("user");
+            this.currentUser = null;
         }
     }
 
@@ -117,5 +127,12 @@ export class AuthService {
     private notifyListeners(): void {
         console.log("notifying listeners about login or logout");
         this.listeners.forEach((listener) => listener(this.currentUser));
+    }
+
+    // Add this method instead:
+    updateCurrentUser(user: User): void {
+        this.currentUser = user;
+        this.saveUserToStorage(user);
+        this.notifyListeners();
     }
 }

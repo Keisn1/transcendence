@@ -1,10 +1,45 @@
-import { mockUsers } from "./mockData";
+import { mockUsers, avatarOptions } from "./mockData";
 
 export function setupMockApi() {
     const originalFetch = window.fetch;
 
     (window as any).fetch = async (url: string | Request, options?: RequestInit): Promise<Response> => {
         const urlString = typeof url === "string" ? url : url.url;
+
+        if (urlString === "/api/profile/avatar" && options?.method === "POST") {
+            const authHeader = options.headers ? (options.headers as Record<string, string>)["Authorization"] : null;
+            const token = authHeader || localStorage.getItem("authToken");
+            if (!token) return new Response("Unauthorized", { status: 401 });
+
+            const randomAvatar = avatarOptions[Math.floor(Math.random() * avatarOptions.length)];
+
+            return new Response(JSON.stringify({ avatarUrl: randomAvatar }), {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+            });
+        }
+
+        if (urlString === "/api/profile" && options?.method === "PUT") {
+            const authHeader = options.headers ? (options.headers as Record<string, string>)["Authorization"] : null;
+            const token = authHeader || localStorage.getItem("authToken");
+            if (!token) return new Response("Unauthorized", { status: 401 });
+
+            const updates = JSON.parse(options.body as string);
+            const userData = localStorage.getItem("user");
+
+            if (userData) {
+                const user = JSON.parse(userData);
+                const updatedUser = { ...user, ...updates };
+                localStorage.setItem("user", JSON.stringify(updatedUser));
+
+                return new Response(JSON.stringify({ user: updatedUser }), {
+                    status: 200,
+                    headers: { "Content-Type": "application/json" },
+                });
+            }
+
+            return new Response("User not found", { status: 404 });
+        }
 
         if (urlString === "/api/profile" && options?.method === "GET") {
             // Get auth token from headers or localStorage
