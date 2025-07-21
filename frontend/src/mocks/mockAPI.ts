@@ -19,7 +19,7 @@ export function setupMockApi() {
             });
         }
 
-        if (urlString === "/api/profile" && options?.method === "PUT") {
+        if (urlString === "/api/user" && options?.method === "PUT") {
             const authHeader = options.headers ? (options.headers as Record<string, string>)["Authorization"] : null;
             const token = authHeader || localStorage.getItem("authToken");
             if (!token) return new Response("Unauthorized", { status: 401 });
@@ -94,7 +94,7 @@ export function setupMockApi() {
             }
 
             // Create new user
-            const newUser = {
+            const newUser: any = {
                 id: String(mockUsers.length + 1),
                 username: body.username,
                 email: body.email,
