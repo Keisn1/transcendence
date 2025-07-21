@@ -41,10 +41,6 @@ export default async function register(
     } catch (err) {
         const error = err as Error;
         console.error("Registration error:", error);
-        // More specific error handling
-        if (error.message.includes("409")) {
-            return reply.status(409).send({ error: "User already exists" });
-        }
         if (error.message.includes("User service")) {
             return reply.status(502).send({ error: "External service unavailable" });
         }
