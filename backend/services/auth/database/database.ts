@@ -57,7 +57,7 @@ interface DatabasePlugin {
     run(sql: string, params?: any[]): Promise<{ lastID: number; changes: number }>;
 }
 
-async function databasePlugin(fastify: FastifyInstance) {
+async function databasePlugin(server: FastifyInstance) {
     const db = new sqlite3.Database("./database/auth.db");
 
     const dbWrapper: DatabasePlugin = {
@@ -83,9 +83,9 @@ async function databasePlugin(fastify: FastifyInstance) {
     // Run migrations on startup
     await runMigrations(db);
 
-    fastify.decorate("db", dbWrapper);
+    server.decorate("db", dbWrapper);
 
-    fastify.addHook("onClose", async () => {
+    server.addHook("onClose", async () => {
         return new Promise<void>((resolve) => {
             db.close((err) => {
                 if (err) console.error("Error closing database:", err);
