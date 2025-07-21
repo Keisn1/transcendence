@@ -35,7 +35,7 @@ export default async function update(
 	values.push(userId);
 
 	try {
-		const sql = `UPDATE users SET ${fields.join(", ")} WHERE id = ?`;
+		const sql = `UPDATE users SET ${fields.join(", ")}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`;
 		const result = await request.server.db.run(sql, values);
 
 		if (result.changes === 0) {
