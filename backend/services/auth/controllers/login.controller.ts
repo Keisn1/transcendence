@@ -14,7 +14,7 @@ export default async function login(
             [email],
         );
 
-        if (!userRecords.length || !compareSync(password, userRecords[0].password_hash)) {
+        if (!userRecords.length || !compareSync(password, userRecords[0].password_hash)) { // NOTE compareSync can be repladed with async compare for non blocking
             return reply.status(401).send({ error: "Invalid credentials" });
         }
 

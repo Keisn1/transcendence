@@ -25,3 +25,16 @@ export interface RegisterResponse {
     token: string;
     user: User;
 }
+
+export interface UpdateUserBody {
+    id: number;
+    username?: string;
+    email?: string;
+    password?: string;
+}
+
+export interface UpdateUserResponse {
+    id: number;
+    username: string;
+    email: string;
+}
