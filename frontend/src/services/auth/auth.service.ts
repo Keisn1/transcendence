@@ -129,7 +129,6 @@ export class AuthService {
         this.listeners.forEach((listener) => listener(this.currentUser));
     }
 
-    // Add this method instead:
     updateCurrentUser(user: User): void {
         this.currentUser = user;
         this.saveUserToStorage(user);

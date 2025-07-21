@@ -29,10 +29,10 @@ export class Navbar extends BaseComponent {
     updateNavbarState() {
         console.log("updating navbar");
         const isAuthenticated = this.authService.isAuthenticated();
-        const user = this.authService.getCurrentUser();
+        const user: User = this.authService.getCurrentUser()!;
 
-        const profileDropdown = this.container.querySelector(".relative.ml-3");
-        const menu = this.container.querySelector<HTMLElement>('[role="menu"]')!;
+        const profileDropdown = this.container.querySelector(".relative.ml-3"); // TODO put it into a container with a better name
+        const menu = this.container.querySelector<HTMLElement>('[role="menu"]')!; // TODO put it into a container with a better name
         const authButtons = this.container.querySelector("#auth-buttons");
         const avatarImg = this.container.querySelector("#navbar-avatar") as HTMLImageElement;
 

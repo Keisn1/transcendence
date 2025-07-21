@@ -22,10 +22,11 @@ export class AuthController {
 
     public logout(): void {
         const currentPath = window.location.pathname;
-        console.log(currentPath);
         this.authService.logout();
 
-        const authRequiredPaths = ["/profile", "/account", "/settings"];
+        const authRequiredPaths = [
+            "/profile", // , "/account", "/settings"
+        ];
 
         if (authRequiredPaths.includes(currentPath)) {
             console.log("navigating to /");

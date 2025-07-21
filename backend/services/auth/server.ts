@@ -12,7 +12,7 @@ const server = Fastify({
 
 server.register(require("@fastify/jwt"), { secret: config.jwt.secret });
 server.register(databasePlugin);
-server.register(routes, { prefix: "api/auth" });
+server.register(routes, { prefix: "api/user" });
 
 server.listen({ port: 3000 }, (err: any, address: any) => {
     if (err) {

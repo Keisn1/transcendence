@@ -36,7 +36,7 @@ this.ball = new Ball(canvas, config.ballConfig);
   - [[file:~/workspace/transcendence/chats/component_based_architecture.org::*when do i destroy views?][when do i destroy views?]]
 - [X] refresh view with new content from the server
 
-- [ ] why does adlightbox does not show up when you return to the dashboard
+- [X] why does adlightbox does not show up when you return to the dashboard
   - there is a reason for this [[file:src/components/adLightbox/adLightbox.ts::window.removeEventListener("load", showAdAfterTimeout); // only initially page load]]
   - it's only when the page is loaded ("load" event)
 
