@@ -4,10 +4,10 @@ import { RunResult } from "sqlite3";
 import { UpdateUserBody, UpdateUserResponse } from "../types/auth.types";
 
 export default async function update(
-	request: FastifyRequest<{ Body: UpdateUserBody }> ,
+	request: FastifyRequest<{ Params: { id: number }; Body: UpdateUserBody }> ,
 	reply: FastifyReply
 	): Promise<UpdateUserResponse> {
-	const userId = request.body.id;
+	const userId = request.params.id;
 	const { username, email, password } = request.body;
 
 	const fields: string[] = [];
@@ -58,10 +58,16 @@ export default async function update(
 }
 
 export const updateUserSchema = {
+	params: {
+		type: "object",
+		properties: {
+			id: { type: "number" }
+		},
+		required: ["id"],
+	},
 	body: {
 		type: "object",
 		properties: {
-			id: { type: "integer" },
 			username: { type: "string", minLength: 1 },
 			email: { type: "string", format: "email" },
 			password: { type: "string", minLength: 8 }
