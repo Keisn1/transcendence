@@ -2,7 +2,12 @@ import "fastify";
 
 declare module "fastify" {
     interface FastifyRequest {
-        jwtVerify(): Promise<{ id: number; email: string, username: string }>;
+        jwtVerify(): Promise<{ id: number, username: string, email: string }>;
+        user: {
+          id: number
+          username: string
+          email: string
+        }
     }
     interface FastifyInstance {
         jwtAuth(request: FastifyRequest, reply: FastifyReply): Promise<void>;
