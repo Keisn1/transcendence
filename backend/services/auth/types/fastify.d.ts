@@ -1,8 +1,11 @@
 import "fastify";
 
 declare module "fastify" {
+    interface FastifyRequest {
+        jwtVerify(): Promise<{ id: number; email: string, username: string }>;
+    }
     interface FastifyInstance {
-        // JWT plugin methods
+        jwtAuth(request: FastifyRequest, reply: FastifyReply): Promise<void>;
         jwt: {
             sign(payload: any, options?: any): string; // Create JWT tokens
             verify(token: string, options?: any): any; // Verify JWT tokens

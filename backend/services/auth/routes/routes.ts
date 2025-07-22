@@ -8,5 +8,5 @@ export async function routes(fastify: FastifyInstance) {
     fastify.get("/health", healthRoute);
     fastify.post("/signup", { schema: registerSchema }, register); // incorporates user creation
     fastify.post("/login", { schema: loginSchema }, login);
-    fastify.put("/:id", { schema: updateUserSchema }, update); // updates user; might be straightforward
+    fastify.put("/:id", { preHandler: fastify.jwtAuth, schema: updateUserSchema }, update);
 }

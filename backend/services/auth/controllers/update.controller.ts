@@ -1,14 +1,10 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { genSaltSync, hashSync } from "bcrypt";
-import { RunResult } from "sqlite3";
 import { UpdateUserBody, UpdateUserResponse } from "../types/auth.types";
 
-export default async function update(
-	request: FastifyRequest<{ Params: { id: number }; Body: UpdateUserBody }> ,
-	reply: FastifyReply
-	): Promise<UpdateUserResponse> {
-	const userId = request.params.id;
-	const { username, email, password } = request.body;
+export default async function update(request: FastifyRequest, reply: FastifyReply): Promise<UpdateUserResponse> {
+	const { id } = request.params as { id: number }
+	const { username, email, password } = request.body as UpdateUserBody
 
 	const fields: string[] = [];
 	const values: any[] = [];
@@ -28,11 +24,11 @@ export default async function update(
 		values.push(passwordHash);
 	}
 
-	if (fields.length == 0) {
+	if (fields.length === 0) {
 		return reply.status(400).send({ error: "No valid fields to update" });
 	}
 
-	values.push(userId);
+	values.push(id);
 
 	try {
 		const sql = `UPDATE users SET ${fields.join(", ")}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`;
@@ -44,7 +40,7 @@ export default async function update(
 
 		const [updated] = await request.server.db.query(
 			"SELECT id, username, email FROM users WHERE id = ?",
-			[userId]
+			[id]
 		);
 
 		return updated;

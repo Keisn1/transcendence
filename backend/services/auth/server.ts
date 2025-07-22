@@ -4,13 +4,15 @@ require("dotenv").config();
 import Fastify from "fastify";
 import { routes } from "./routes/routes";
 import databasePlugin from "./database/database";
-import { config } from "./config/environment";
+// import { config } from "./config/environment";
+import jwtPlugin from "./plugins/auth.plugin";
 
 const server = Fastify({
     logger: true,
 });
 
-server.register(require("@fastify/jwt"), { secret: config.jwt.secret });
+server.register(jwtPlugin);
+// server.register(require("@fastify/jwt"), { secret: config.jwt.secret });
 server.register(databasePlugin);
 server.register(routes, { prefix: "api/user" });
 
