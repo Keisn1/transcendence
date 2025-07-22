@@ -3,7 +3,7 @@ import { genSaltSync, hashSync } from "bcrypt";
 import { UpdateUserBody, UpdateUserResponse } from "../types/auth.types";
 
 export default async function update(request: FastifyRequest, reply: FastifyReply): Promise<UpdateUserResponse> {
-	const { id } = request.params as { id: number }
+	const id = request.user.id;
 	const { username, email, password } = request.body as UpdateUserBody
 
 	const fields: string[] = [];
@@ -54,13 +54,6 @@ export default async function update(request: FastifyRequest, reply: FastifyRepl
 }
 
 export const updateUserSchema = {
-	params: {
-		type: "object",
-		properties: {
-			id: { type: "number" }
-		},
-		required: ["id"],
-	},
 	body: {
 		type: "object",
 		properties: {
