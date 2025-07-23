@@ -10,3 +10,6 @@
 /backend/services/users.db
 /backend/services/user/users.db
 /backend/services/auth/database/auth.db
+/backend/services/auth/dist
+/vault*
+!/vault/entrypoint.sh
