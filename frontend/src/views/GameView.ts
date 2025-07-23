@@ -17,8 +17,26 @@ export default class extends AbstractView {
         document.body.appendChild(this.navbar.getContainer());
 
         this.gameComponent = new GameComponent();
-        document.body.appendChild(this.gameComponent.getContainer());
-        this.gameComponent.play();
+        const gameContainer = this.gameComponent.getContainer();
+        document.body.appendChild(gameContainer);
+
+        const startBtn = document.createElement("button");
+        startBtn.id = "start-game-btn";
+        startBtn.textContent = "Start Game";
+        startBtn.classList.add("px-4","py-2","bg-gray-700","text-white","rounded");
+        startBtn.style.position = "absolute";
+        startBtn.style.top      = "9rem";
+        startBtn.style.right    = "1rem";
+        gameContainer.appendChild(startBtn);
+
+        startBtn.addEventListener("click", () => {
+            startBtn.disabled = true;
+            if (this.gameComponent) {
+            this.gameComponent.play().then(() => {
+                startBtn.disabled = false;
+            });
+            }
+        });
     }
 
     destroy() {

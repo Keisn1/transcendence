@@ -109,7 +109,7 @@ export class PongGame {
         this.ctx.font = "200px serif";
         this.ctx.fillStyle = "#fff";
 
-        for (let i = 0; i <= 3; ++i) {
+        for (let i = 3; i > 0; --i) {
             this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
             this.ctx.fillText(`${i}`, this.canvas.width / 2, this.canvas.height / 2);
             await delay(100);
