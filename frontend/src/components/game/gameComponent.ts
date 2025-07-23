@@ -1,6 +1,7 @@
 import gameTemplate from "./game.html?raw";
 import { PongGame } from "./game";
 import { BaseComponent } from "../BaseComponent";
+import { type AiLevel } from "./gameControls";
 
 export class GameComponent extends BaseComponent {
     private canvas: HTMLCanvasElement;
@@ -12,6 +13,10 @@ export class GameComponent extends BaseComponent {
         this.container.innerHTML = gameTemplate;
         this.canvas = this.container.querySelector("#canvas")! as HTMLCanvasElement;
         this.game = new PongGame(this.canvas);
+    }
+
+    public setAiLevel(level: AiLevel) {
+        this.game.setAiLevel(level);
     }
 
     async play() {

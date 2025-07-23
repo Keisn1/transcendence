@@ -2,6 +2,7 @@ import AbstractView from "./AbstractView.ts";
 import { Navbar } from "../components/navbar/navbar.ts";
 import { GameComponent } from "../components/game/gameComponent.ts";
 import Router from "../router.ts";
+import { GameControlsComponent, type AiLevel } from "../components/game/gameControls";
 
 export default class extends AbstractView {
     private navbar: Navbar | null = null;
@@ -20,22 +21,12 @@ export default class extends AbstractView {
         const gameContainer = this.gameComponent.getContainer();
         document.body.appendChild(gameContainer);
 
-        const startBtn = document.createElement("button");
-        startBtn.id = "start-game-btn";
-        startBtn.textContent = "Start Game";
-        startBtn.classList.add("px-4","py-2","bg-gray-700","text-white","rounded");
-        startBtn.style.position = "absolute";
-        startBtn.style.top      = "9rem";
-        startBtn.style.right    = "1rem";
-        gameContainer.appendChild(startBtn);
+        const controls = new GameControlsComponent();
+        gameContainer.appendChild(controls.getContainer());
 
-        startBtn.addEventListener("click", () => {
-            startBtn.disabled = true;
-            if (this.gameComponent) {
-            this.gameComponent.play().then(() => {
-                startBtn.disabled = false;
-            });
-            }
+        controls.onStart((level: AiLevel) => {
+            this.gameComponent?.setAiLevel(level);
+            this.gameComponent?.play();
         });
     }
 
