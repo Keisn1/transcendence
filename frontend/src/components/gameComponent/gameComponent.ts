@@ -2,11 +2,12 @@ import gameTemplate from "./game.html?raw";
 import { PongGame } from "../../game/game";
 import { BaseComponent } from "../BaseComponent";
 import { type AiLevel } from "../../game/game";
-
+import { GameControlsComponent } from "../gameControls/gameControls";
 
 export class GameComponent extends BaseComponent {
     private canvas: HTMLCanvasElement;
     private game: PongGame;
+    private gameControls: GameControlsComponent;
 
     constructor() {
         super("div", "game-container");
@@ -14,11 +15,16 @@ export class GameComponent extends BaseComponent {
         this.container.innerHTML = gameTemplate;
         this.canvas = this.container.querySelector("#canvas")! as HTMLCanvasElement;
         this.game = new PongGame(this.canvas);
+
+        this.gameControls = new GameControlsComponent();
+        this.gameControls.onStart(this.startCallback);
+        this.container.appendChild(this.gameControls.getContainer());
     }
 
-    public setAiLevel(level: AiLevel) {
+    private startCallback = (level: AiLevel) => {
         this.game.setAiLevel(level);
-    }
+        this.play();
+    };
 
     async play() {
         await this.game.start();
@@ -26,6 +32,7 @@ export class GameComponent extends BaseComponent {
 
     destroy() {
         super.destroy();
+        this.gameControls?.offStart(this.startCallback); // Clean up callback
         this.game?.destroy();
 
         // Remove DOM elements

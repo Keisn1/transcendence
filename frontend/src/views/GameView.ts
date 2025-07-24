@@ -1,9 +1,7 @@
 import AbstractView from "./AbstractView.ts";
 import { Navbar } from "../components/navbar/navbar.ts";
-import { GameComponent } from "../components/game/gameComponent.ts";
+import { GameComponent } from "../components/gameComponent/gameComponent.ts";
 import Router from "../router.ts";
-import { GameControlsComponent } from "../components/gameControls/gameControls.ts";
-import { type AiLevel } from "../game/game.ts"
 
 export default class extends AbstractView {
     private navbar: Navbar | null = null;
@@ -19,16 +17,7 @@ export default class extends AbstractView {
         document.body.appendChild(this.navbar.getContainer());
 
         this.gameComponent = new GameComponent();
-        const gameContainer = this.gameComponent.getContainer();
-        document.body.appendChild(gameContainer);
-
-        const controls = new GameControlsComponent();
-        gameContainer.appendChild(controls.getContainer());
-
-        controls.onStart((level: AiLevel) => {
-            this.gameComponent?.setAiLevel(level);
-            this.gameComponent?.play();
-        });
+        document.body.appendChild(this.gameComponent.getContainer());
     }
 
     destroy() {
