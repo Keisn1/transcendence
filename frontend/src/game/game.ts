@@ -2,7 +2,6 @@ import { Ball, type BallConfig } from "./ball";
 import { Paddle, type Paddles, type PaddleConfig } from "./paddle";
 import { InputManager } from "./inputManager";
 import { AiController } from "./aiController";
-import { type AiLevel } from "./gameControls";
 
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
@@ -21,6 +20,8 @@ export interface GameConfig {
 
     controls?: ControlsConfig;
 }
+
+export type AiLevel = "none" | "easy" | "hard";
 
 export class PongGame {
     private inputManager: InputManager;

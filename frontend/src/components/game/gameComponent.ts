@@ -1,7 +1,8 @@
 import gameTemplate from "./game.html?raw";
-import { PongGame } from "./game";
+import { PongGame } from "../../game/game";
 import { BaseComponent } from "../BaseComponent";
-import { type AiLevel } from "./gameControls";
+import { type AiLevel } from "../../game/game";
+
 
 export class GameComponent extends BaseComponent {
     private canvas: HTMLCanvasElement;
