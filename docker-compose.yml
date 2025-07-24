@@ -1,0 +1,47 @@
+services:
+  auth-service:
+    build:
+      context: ./backend/services/auth
+    container_name: auth
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./vault/init:/vault/init  # Required for .env access
+  nginx:
+    build:
+        context: .
+        dockerfile: ./nginx/Dockerfile
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "8443:8443"   # for HTTPS
+    volumes:
+      - ./nginx/conf/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/modsecurity:/etc/nginx/modsec:ro
+      - ./vault/init:/etc/nginx/certs
+      - ./vault/init:/vault/init
+
+  vault:
+    container_name: vault
+    build:
+      context: .
+      dockerfile: ./vault/Dockerfile
+    ports:
+      - "8200:8200" #disable for prod so no one access it, but internal communications still work between services.
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - vault-data:/vault/data
+      - ./vault/init:/vault/init
+      - ./vault/init/vault-auto-init-unseal.sh:/usr/local/bin/vault-auto-init-unseal.sh:ro
+      - ./:/transcendence
+    #command: vault server -dev -dev-root-token-id=root -dev-listen-address=0.0.0.0:8200
+    #dev mode, also listen to only http until we have certificates done
+    environment:
+      VAULT_ADDR: http://127.0.0.1:8200
+      # VAULT_ROLE_ID: $VAULT_ROLE_ID
+      # VAULT_SECRET_ID: $VAULT_SECRET_ID
+      #accessible through localhost:8200, token, pw: root
+      #doesn't save shit in dev mode btw
+volumes:
+  vault-data:
