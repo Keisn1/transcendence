@@ -15,3 +15,4 @@
 /vault/init/*
 !/vault/init/entrypoint.sh
 !/vault/init/vault-auto-init-unseal.sh
+!/vault/init/vault.hcl

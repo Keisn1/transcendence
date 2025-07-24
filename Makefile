@@ -31,7 +31,11 @@ exec-vault:
 	docker exec -it vault sh
 
 clean-vol:
+	docker compose down -v
 	docker volume prune -f
+
+clean-vault-volumes:
+	docker volume rm -f $$(docker volume ls -q --filter name=_vault-data)
 
 clean-all:
 	docker system prune -a -f
