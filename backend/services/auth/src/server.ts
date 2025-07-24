@@ -58,9 +58,8 @@ if (process.env.ENV !== "production") {
     });
 
     server.register(jwtPlugin);
-    // server.register(require("@fastify/jwt"), { secret: config.jwt.secret });
     server.register(dbPlugin);
-    server.register(routes, { prefix: "api/user" });
+    server.register(routes, { prefix: "api" });
 
     server.listen({ port: 3000 }, (err: any, address: any) => {
         if (err) {

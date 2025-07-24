@@ -7,8 +7,18 @@ import getProfile, { getCurrentUserSchema } from "../controllers/getProfile.cont
 
 export async function routes(fastify: FastifyInstance) {
     fastify.get("/health", healthRoute);
-    fastify.post("/signup", { schema: registerSchema }, register); // incorporates user creation
-    fastify.post("/login", { schema: loginSchema }, login);
-    fastify.put("/", { preHandler: fastify.jwtAuth, schema: updateUserSchema }, update);
-    fastify.get("/me", { preHandler: fastify.jwtAuth, schema: getCurrentUserSchema }, getProfile);
+    fastify.register(
+        (fastify: FastifyInstance) => {
+            fastify.post("/signup", { schema: registerSchema }, register); // incorporates user creation
+            fastify.post("/login", { schema: loginSchema }, login);
+        },
+        { prefix: "auth" },
+    );
+    fastify.register(
+        (fastify: FastifyInstance) => {
+            fastify.get("", { preHandler: fastify.jwtAuth, schema: getCurrentUserSchema }, getProfile);
+            fastify.put("", { preHandler: fastify.jwtAuth, schema: updateUserSchema }, update);
+        },
+        { prefix: "user" },
+    );
 }
