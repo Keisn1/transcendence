@@ -14,3 +14,4 @@
 /vault/vault-data
 /vault/init/*
 !/vault/init/entrypoint.sh
+!/vault/init/vault-auto-init-unseal.sh
