@@ -57,7 +57,7 @@ interface DatabasePlugin {
     run(sql: string, params?: any[]): Promise<{ lastID: number; changes: number }>;
 }
 
-async function databasePlugin(server: FastifyInstance) {
+async function dbPlugin(server: FastifyInstance) {
     const db = new sqlite3.Database("./db/auth.db");
 
     const dbWrapper: DatabasePlugin = {
@@ -95,4 +95,4 @@ async function databasePlugin(server: FastifyInstance) {
     });
 }
 
-export default fp(databasePlugin);
+export default fp(dbPlugin);

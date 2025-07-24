@@ -5,6 +5,8 @@ services:
     container_name: auth
     ports:
       - "3000:3000"
+    environment:
+      - ENV=production
     volumes:
       - ./vault/init:/vault/init # Required for .env access
 
