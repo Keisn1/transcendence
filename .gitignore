@@ -11,5 +11,7 @@
 /backend/services/user/users.db
 /backend/services/auth/database/auth.db
 /backend/services/auth/dist
-/vault*
-!/vault/entrypoint.sh
+/vault/vault-data
+/vault/init/*
+!/vault/init/entrypoint.sh
+!/vault/init/vault-auto-init-unseal.sh
