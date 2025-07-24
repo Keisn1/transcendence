@@ -31,7 +31,6 @@ export class GameControlsComponent extends BaseComponent {
     }
 
     private setStarting() {
-        this.startBtn.disabled = true;
         this.startBtn.textContent = "Restart Game";
     }
 

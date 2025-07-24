@@ -22,6 +22,8 @@ export class GameComponent extends BaseComponent {
     }
 
     private startCallback = (level: AiLevel) => {
+        this.game.destroy();
+        this.game = new PongGame(this.canvas);
         this.game.setAiLevel(level);
         this.play();
     };
