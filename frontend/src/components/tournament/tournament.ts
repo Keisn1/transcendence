@@ -1,0 +1,70 @@
+// import { TournamentController } from "../../controllers/tournament.controller.ts";
+import { BaseComponent } from "../BaseComponent";
+import tournamentTemplate from "./tournament.html?raw";
+import type { TournamentSignupBody } from "../../types/tournament.types.ts";
+
+
+export class TournamentSignup extends BaseComponent {
+    constructor() {
+        super("div", "tournament-container");
+        this.container.innerHTML = tournamentTemplate;
+        this.setupEventListeners();
+    }
+
+    private setupEventListeners() {
+        const form = this.container.querySelector<HTMLFormElement>('#tournament-form')!;
+        this.addEventListenerWithCleanup(form, 'submit', this.handleSubmit.bind(this));
+    }
+
+    private async handleSubmit(e: Event) {
+        e.preventDefault();
+        const data = this.getFormData();
+
+        if (!this.validate(data)) return;
+
+        try {
+            // const controller = TournamentController.getInstance();
+            // await controller.registerPlayers(data);
+        } catch (error) {
+            console.error('Tournament signup failed:', error);
+            this.showError('Signup failed. Please try again.');
+        }
+    }
+
+    private getFormData(): TournamentSignupBody {
+        return {
+            player1: (this.container.querySelector('#player1') as HTMLInputElement).value,
+            player2: (this.container.querySelector('#player2') as HTMLInputElement).value,
+            player3: (this.container.querySelector('#player3') as HTMLInputElement).value,
+            player4: (this.container.querySelector('#player4') as HTMLInputElement).value,
+        };
+    }
+
+    private validate(data: TournamentSignupBody): boolean {
+        const names = [data.player1, data.player2, data.player3, data.player4]
+            .map(name => name?.trim())
+            .filter(Boolean);
+
+        if (names.length < 2) {
+            this.showError('At least two players are required to start a tournament.');
+            return false;
+        }
+        return true;
+    }
+
+    private showError(message: string) {
+        const existing = this.container.querySelector('.error-message');
+        existing?.remove();
+
+        const div = document.createElement('div');
+        div.className = 'error-message text-red-600 text-sm mt-2 text-center';
+        div.textContent = message;
+
+        const form = this.container.querySelector('#tournament-form');
+        form?.insertAdjacentElement('afterend', div);
+    }
+
+    destroy(): void {
+        super.destroy();
+    }
+}

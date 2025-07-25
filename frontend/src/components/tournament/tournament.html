@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pong Tournament Signup</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+  <div class="flex min-h-screen flex-col justify-center px-6 py-12 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-lg">
+      <img
+        class="mx-auto h-12 w-auto"
+        src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500"
+        alt="Tournament Logo"
+      />
+      <h2 class="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
+        Pong Tournament Signup
+      </h2>
+      <p class="mt-2 text-center text-sm text-gray-600">
+        Register up to 4 players below. You can choose existing members or guests.
+      </p>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-lg">
+      <form id="tournament-form" class="space-y-8 bg-white p-6 rounded-xl shadow">
+        <!-- Player slots -->
+        <template id="player-template">
+          <div class="border-b border-gray-200 pb-4">
+            <div class="flex justify-between items-center">
+              <h3 class="text-lg font-medium text-gray-900">Player <span class="slot-index"></span></h3>
+              <button type="button" class="text-sm text-red-500 remove-btn">Remove</button>
+            </div>
+
+            <div class="mt-4 space-y-4">
+              <div class="flex space-x-4">
+                <label class="flex items-center">
+                  <input type="radio" name="userType-" value="member" checked class="user-type-member" />
+                  <span class="ml-2">Member</span>
+                </label>
+                <label class="flex items-center">
+                  <input type="radio" name="userType-" value="guest" class="user-type-guest" />
+                  <span class="ml-2">Guest</span>
+                </label>
+              </div>
+
+              <!-- Member fields -->
+              <div class="member-fields space-y-2">
+                <p class="text-sm">Logged in as <strong class="member-name"></strong></p>
+                <img class="h-10 w-10 rounded-full member-avatar" alt="Avatar" />
+                <div>
+                  <label class="block text-sm">Tournament Nickname</label>
+                  <input type="text" name="nickname-" class="mt-1 block w-full rounded-md border-gray-300 focus:ring-indigo-600" placeholder="Enter nickname" />
+                </div>
+              </div>
+
+              <!-- Guest fields -->
+              <div class="guest-fields hidden space-y-2">
+                <div>
+                  <label class="block text-sm">Guest Name</label>
+                  <input type="text" name="guestName-" class="mt-1 block w-full rounded-md border-gray-300 focus:ring-indigo-600" placeholder="Enter name" />
+                </div>
+                <div>
+                  <label class="block text-sm">Upload Avatar</label>
+                  <input type="file" name="guestAvatar-" accept="image/*" class="mt-1" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <div id="players-container" class="space-y-6"></div>
+
+        <div class="flex justify-between">
+          <button id="add-player" type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-indigo-700 bg-indigo-100 hover:bg-indigo-200">
+            Add Player
+          </button>
+          <button type="submit" class="inline-flex items-center px-6 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-md shadow hover:bg-indigo-500">
+            Join Tournament
+          </button>
+        </div>
+      </form>
+
+      <p class="mt-6 text-center text-sm text-gray-500">
+        <a href="/bracket" class="font-semibold text-indigo-600 hover:text-indigo-500">View Bracket</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- external script -->
+  <script src="main.js"></script>
+</body>
+</html>
