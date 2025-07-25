@@ -56,3 +56,62 @@ As a visitor to the website, I want to easily log in with my credentials, so I c
 As a visitor to the website, I want to easily sign up email and password, so I can track my games.
 ** TODO Avatar
 As a registered user of the website, I want to be able to navigate to my profile, where I can see my Username, my email and my avatar, so I can individualize my appearance on the website.
+* TODO Stats / Match History
+- we need to track outcomes of games being played
+- display them on the profile
+  - need to make call to backendAPI
+  - probably matchService
+    - CRUD on matches (CREATION - READ - UPDATE - DELETE)~(POST - GET - PUT - DELETE)
+* TODO user friendship
+- Users can add others as friends and view their online status.
+  - probably entails having a field "online" or "loggedIn" on the user-Model
+  - maybe simulate it with 2 different browsers
+- probably a new table one-to-many
+  | userID | userID |
+  |--------+--------|
+  |      1 |      2 |
+  |      1 |      4 |
+  |      1 |      6 |
+  |      2 |      1 |
+  |      2 |      3 |
+  |      3 |      2 |
+  |      4 |      1 |
+  |      6 |      1 |
+
+- inside the userService / authService
+- when user visits the profile view
+  - the friends online statuses are going to be collected and displayed with the help of the table above
+    - maybe adding the avatar of the friend
+* TODO Tournament (flow)
+** TODO Signing up participants (min=max=4)
+1. tournament link on the navbar
+2. directed to tournament-creation (signup) page
+   - each participants is going to login
+   - visitors (maybe)
+     - prompt unique username
+     - set an avatar maybe
+   - subscribed users (Backend calls)
+     - verify that account owners credentials
+     - retrieving the avatar
+     - default is username
+     - prompt for a nickname for this tournament
+       - which does not necessarily change the username
+3. everybody clicks submit (Backend call)
+4. Click Start Tournament button (backend call)
+   - build the tournament bracket
+   - assign participants to matches
+** TODO Seeing the bracket (without backend calls)
+- intermediary view
+** TODO Announce next game (maybe animation)
+- intermediary view
+** TODO Game
+- game is being played
+- winner advances
+- saving the outcome (call to backend)
+** TODO Announce next game
+** TODO Game
+** TODO Maybe see bracket again
+** TODO Announce next game
+** TODO Loser's Game
+** TODO Announce next game
+** TODO Final
