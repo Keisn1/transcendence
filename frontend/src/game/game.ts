@@ -21,6 +21,8 @@ export interface GameConfig {
     controls?: ControlsConfig;
 }
 
+export type AiLevel = "none" | "easy" | "hard";
+
 export class PongGame {
     private inputManager: InputManager;
     private canvas: HTMLCanvasElement;
@@ -30,9 +32,9 @@ export class PongGame {
     private paddles: Paddles;
     private scores = { player1: 0, player2: 0 };
     private rallyCount: number = 0;
-    private leftAiController: AiController;
-    // private rightAiController: AiController;
     private timePassed: number = 1000;
+    private feedFrequency: number = 1000;
+    private aiController: AiController | null = null;
 
     constructor(canvas: HTMLCanvasElement, config: GameConfig = {}) {
         const defaultControls: ControlsConfig = {
@@ -72,8 +74,21 @@ export class PongGame {
             left: new Paddle("left", this.config.paddleConfig, canvas),
             right: new Paddle("right", this.config.paddleConfig, canvas),
         };
-        this.leftAiController = new AiController(this.paddles.left, canvas);
-        // this.rightAiController = new AiController(this.paddles.right, canvas);
+    }
+
+    public setAiLevel(level: AiLevel) {
+        if (this.aiController) {
+            this.aiController.destroy();
+            this.aiController = null;
+        }
+        if (level !== "none") {
+            if (level == "easy") this.feedFrequency = 1500; // not the best solution
+            this.setupAi();
+        }
+    }
+
+    private setupAi() {
+        this.aiController = new AiController(this.paddles.right, this.canvas);
     }
 
     async start() {
@@ -109,7 +124,7 @@ export class PongGame {
         this.ctx.font = "200px serif";
         this.ctx.fillStyle = "#fff";
 
-        for (let i = 0; i <= 3; ++i) {
+        for (let i = 3; i > 0; --i) {
             this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
             this.ctx.fillText(`${i}`, this.canvas.width / 2, this.canvas.height / 2);
             await delay(100);
@@ -122,11 +137,6 @@ export class PongGame {
             return true;
         }
         return false;
-    }
-
-    private feedAi() {
-        this.leftAiController.feedAi(this.ball);
-        // this.rightAiController.feedAi(this.ball);
     }
 
     private drawNewState() {
@@ -162,9 +172,9 @@ export class PongGame {
         this.inputManager.processInput();
 
         this.timePassed += elapsed;
-        if (this.timePassed >= 1000) {
-            this.timePassed -= 1000;
-            this.feedAi();
+        if (this.timePassed >= this.feedFrequency) {
+            this.timePassed -= this.feedFrequency;
+            if (this.aiController) this.aiController.feedAi(this.ball);
         }
 
         let collisionPaddle = this.checkCollision();
@@ -184,5 +194,9 @@ export class PongGame {
 
     destroy() {
         this.inputManager.destroy();
+        if (this.aiController) {
+            this.aiController.destroy();
+            this.aiController = null;
+        }
     }
 }

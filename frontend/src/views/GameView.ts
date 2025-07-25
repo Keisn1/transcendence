@@ -1,6 +1,6 @@
 import AbstractView from "./AbstractView.ts";
 import { Navbar } from "../components/navbar/navbar.ts";
-import { GameComponent } from "../components/game/gameComponent.ts";
+import { GameComponent } from "../components/gameComponent/gameComponent.ts";
 import Router from "../router.ts";
 
 export default class extends AbstractView {
@@ -18,7 +18,6 @@ export default class extends AbstractView {
 
         this.gameComponent = new GameComponent();
         document.body.appendChild(this.gameComponent.getContainer());
-        this.gameComponent.play();
     }
 
     destroy() {
