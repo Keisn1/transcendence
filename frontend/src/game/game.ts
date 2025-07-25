@@ -37,8 +37,8 @@ export class PongGame {
     private aiController: AiController | null = null;
     private gameFont = { large: "200px monospace", normal: "42px monospace",};
     private paused: boolean = false;
-    private rafId: number | null = null;
     private justPaused = false;
+    private rafId: number | null = null; // TODO: rename to requestAnimationFrame
 
     constructor(canvas: HTMLCanvasElement, config: GameConfig = {}) {
         const defaultControls: ControlsConfig = {
@@ -189,7 +189,7 @@ export class PongGame {
         }
         const elapsed = timestamp - lastTime;
 
-        this.inputManager.processInput();
+        this.inputManager.processInput(this.paused);
 
         this.timePassed += elapsed;
         if (this.timePassed >= this.feedFrequency) {
@@ -197,8 +197,8 @@ export class PongGame {
             if (this.aiController) this.aiController.feedAi(this.ball);
         }
 
-        if (this.paused) {
-            if (this.justPaused) { // just once
+        if (this.paused) { // TODO: is there a way of stopping the game loop
+            if (this.justPaused) {
                 this.ctx.fillStyle = "rgba(0,0,0,0.5)";
                 this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
                 this.justPaused = false;

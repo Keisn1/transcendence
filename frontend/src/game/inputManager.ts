@@ -36,14 +36,15 @@ export class InputManager {
         this.keyBindings.set(key, { action, trigger });
     }
 
-    processInput() {
+    processInput(isPaused: boolean) { // TODO: find clean way of doing this
         for (const [key, pressed] of this.keys) {
             const binding = this.keyBindings.get(key);
             if (!binding) continue;
 
             if (binding.trigger === "once" && this.justPressedKeys.has(key)) {
                 binding.action();
-            } else if (binding.trigger === "hold" && pressed) {
+            }
+            if (binding.trigger === "hold" && pressed && !isPaused) {
                 binding.action();
             }
         }
