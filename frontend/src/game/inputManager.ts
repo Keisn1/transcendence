@@ -1,6 +1,9 @@
+type TriggerType = "hold" | "once";
+
 export class InputManager {
     private keys = new Map<string, boolean>();
-    private keyBindings: Map<string, () => void> = new Map();
+    private keyBindings = new Map<string, { action: () => void; trigger: TriggerType }>();
+    private justPressedKeys = new Set<string>();
 
     constructor() {
         this.setupEventListeners();
@@ -13,6 +16,9 @@ export class InputManager {
 
     private handleKeyDown(e: KeyboardEvent) {
         if (this.keys.has(e.key)) {
+            if (!this.keys.get(e.key)) {
+                this.justPressedKeys.add(e.key);
+            }
             e.preventDefault();
             this.keys.set(e.key, true);
         }
@@ -25,20 +31,24 @@ export class InputManager {
         }
     }
 
-    bindKey(key: string, action: () => void) {
+    bindKey(key: string, action: () => void, trigger: TriggerType = "hold") {
         this.keys.set(key, false);
-        this.keyBindings.set(key, action);
+        this.keyBindings.set(key, { action, trigger });
     }
 
-    processInput() {
+    processInput(isPaused: boolean) { // TODO: find clean way of doing this
         for (const [key, pressed] of this.keys) {
-            if (pressed) {
-                const callback = this.keyBindings.get(key);
-                if (callback !== undefined) {
-                    callback();
-                }
+            const binding = this.keyBindings.get(key);
+            if (!binding) continue;
+
+            if (binding.trigger === "once" && this.justPressedKeys.has(key)) {
+                binding.action();
+            }
+            if (binding.trigger === "hold" && pressed && !isPaused) {
+                binding.action();
             }
         }
+        this.justPressedKeys.clear();
     }
 
     destroy() {
@@ -46,5 +56,6 @@ export class InputManager {
         document.removeEventListener("keyup", this.handleKeyUp);
         this.keys.clear();
         this.keyBindings.clear();
+        this.justPressedKeys.clear();
     }
 }

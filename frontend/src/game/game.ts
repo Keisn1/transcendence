@@ -35,6 +35,10 @@ export class PongGame {
     private timePassed: number = 1000;
     private feedFrequency: number = 1000;
     private aiController: AiController | null = null;
+    private gameFont = { large: "200px monospace", normal: "42px monospace",};
+    private paused: boolean = false;
+    private justPaused = false;
+    private rafId: number | null = null; // TODO: rename to requestAnimationFrame
 
     constructor(canvas: HTMLCanvasElement, config: GameConfig = {}) {
         const defaultControls: ControlsConfig = {
@@ -74,6 +78,9 @@ export class PongGame {
             left: new Paddle("left", this.config.paddleConfig, canvas),
             right: new Paddle("right", this.config.paddleConfig, canvas),
         };
+
+        this.ctx.textAlign = "center";
+        this.ctx.textBaseline = "middle";
     }
 
     public setAiLevel(level: AiLevel) {
@@ -82,7 +89,7 @@ export class PongGame {
             this.aiController = null;
         }
         if (level !== "none") {
-            if (level == "easy") this.feedFrequency = 1500; // not the best solution
+            if (level == "easy") this.feedFrequency = 1300; // not the best solution
             this.setupAi();
         }
     }
@@ -93,14 +100,21 @@ export class PongGame {
 
     async start() {
         await this.startTimer();
-        requestAnimationFrame((t) => this.gameLoop(t, 0));
+        this.rafId = requestAnimationFrame((t) => this.gameLoop(t, 0));
+    }
+
+    private togglePause() {
+        this.paused = !this.paused;
+        this.justPaused = this.paused;
     }
 
     private setupControls() {
-        this.inputManager.bindKey(this.config.controls.player1.up, () => this.paddles.left.moveUp(this.canvas));
-        this.inputManager.bindKey(this.config.controls.player1.down, () => this.paddles.left.moveDown(this.canvas));
-        this.inputManager.bindKey(this.config.controls.player2.up, () => this.paddles.right.moveUp(this.canvas));
-        this.inputManager.bindKey(this.config.controls.player2.down, () => this.paddles.right.moveDown(this.canvas));
+        const c = this.config.controls;
+        this.inputManager.bindKey(c.player1.up,   () => this.paddles.left.moveUp(this.canvas));
+        this.inputManager.bindKey(c.player1.down, () => this.paddles.left.moveDown(this.canvas));
+        this.inputManager.bindKey(c.player2.up,   () => this.paddles.right.moveUp(this.canvas));
+        this.inputManager.bindKey(c.player2.down, () => this.paddles.right.moveDown(this.canvas));
+        this.inputManager.bindKey("p", () => this.togglePause(), "once");
     }
 
     private drawCenterLine() {
@@ -121,7 +135,7 @@ export class PongGame {
     }
 
     private async startTimer() {
-        this.ctx.font = "200px serif";
+        this.ctx.font = this.gameFont.large;
         this.ctx.fillStyle = "#fff";
 
         for (let i = 3; i > 0; --i) {
@@ -132,8 +146,18 @@ export class PongGame {
     }
 
     private isGameOver(): boolean {
-        if (this.scores.player1 >= this.config.winningScore || this.scores.player2 >= this.config.winningScore) {
+        const p1Score = this.scores.player1;
+        const p2Score = this.scores.player2;
+        const winScore = this.config.winningScore;
+        let winMessage: string = p1Score > p2Score ? "player 1 wins" : "player 2 wins";
+        
+        if (p1Score >= winScore || p2Score >= winScore) {
             this.destroy();
+            this.ctx.font = this.gameFont.normal;
+            this.ctx.fillStyle = "rgba(0, 0, 0, 0.42)";
+            this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
+            this.ctx.fillStyle = "#fff";
+            this.ctx.fillText(winMessage, this.canvas.width / 2, this.canvas.height / 2);
             return true;
         }
         return false;
@@ -148,13 +172,9 @@ export class PongGame {
             this.ball.draw(this.ctx);
         }
 
-        this.ctx.font = "42px serif";
-        this.ctx.fillText(`${this.scores.player1}`, this.canvas.width / 4.2, this.canvas.height / 10);
-        this.ctx.fillText(
-            `${this.scores.player2}`,
-            this.canvas.width / 2 + this.canvas.width / 4.2,
-            this.canvas.height / 10,
-        );
+        this.ctx.font = this.gameFont.normal;
+        this.ctx.fillText(`${this.scores.player1}`, this.canvas.width / 4, this.canvas.height / 16);
+        this.ctx.fillText(`${this.scores.player2}`, (3 * this.canvas.width) / 4, this.canvas.height / 16);
     }
 
     private checkCollision(): Paddle | null {
@@ -169,12 +189,25 @@ export class PongGame {
         }
         const elapsed = timestamp - lastTime;
 
-        this.inputManager.processInput();
+        this.inputManager.processInput(this.paused);
 
         this.timePassed += elapsed;
         if (this.timePassed >= this.feedFrequency) {
             this.timePassed -= this.feedFrequency;
             if (this.aiController) this.aiController.feedAi(this.ball);
+        }
+
+        if (this.paused) { // TODO: is there a way of stopping the game loop
+            if (this.justPaused) {
+                this.ctx.fillStyle = "rgba(0,0,0,0.5)";
+                this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
+                this.justPaused = false;
+            }
+            this.ctx.font = this.gameFont.normal;
+            this.ctx.fillStyle = "#fff";
+            this.ctx.fillText("Paused", this.canvas.width / 2, this.canvas.height / 2);
+            requestAnimationFrame((t) => this.gameLoop(t, timestamp));
+            return;
         }
 
         let collisionPaddle = this.checkCollision();
@@ -189,14 +222,16 @@ export class PongGame {
             this.ball.reset(this.rallyCount);
         }
 
-        requestAnimationFrame((t) => this.gameLoop(t, timestamp));
+        this.rafId = requestAnimationFrame((t) => this.gameLoop(t, timestamp));
     }
 
     destroy() {
-        this.inputManager.destroy();
-        if (this.aiController) {
-            this.aiController.destroy();
-            this.aiController = null;
+         if (this.rafId !== null) {
+            cancelAnimationFrame(this.rafId);
+            this.rafId = null;
         }
+        this.inputManager.destroy();
+        this.aiController?.destroy();
+        this.aiController = null;
     }
 }

@@ -22,6 +22,12 @@ export class GameComponent extends BaseComponent {
     }
 
     private startCallback = (level: AiLevel) => {
+        this.game.destroy();
+
+        const ctx = this.canvas.getContext("2d")!;
+        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        this.game = new PongGame(this.canvas);
         this.game.setAiLevel(level);
         this.play();
     };
