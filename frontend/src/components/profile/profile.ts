@@ -8,12 +8,22 @@ export class Profile extends BaseComponent {
     private authService: AuthService;
     private user: User | null = null;
     private avatarUpload: AvatarUpload | null = null;
+    private usernameEl: HTMLElement;
+    private emailEl: HTMLElement;
+    private avatarEl: HTMLImageElement;
+    private avatarContainer: HTMLElement;
 
     constructor() {
         super("div", "profile-content");
         this.authService = AuthService.getInstance();
         this.user = this.authService.getCurrentUser();
         this.container.innerHTML = profileTemplate;
+
+        this.usernameEl = this.container.querySelector("#profile-username")!;
+        this.emailEl = this.container.querySelector("#profile-email")!;
+        this.avatarEl = this.container.querySelector("#profile-avatar")!;
+        this.avatarContainer = this.container.querySelector("#avatar-container")!;
+
         this.setupAvatarUpload();
         this.populateUserData();
     }
@@ -21,14 +31,10 @@ export class Profile extends BaseComponent {
     private populateUserData() {
         if (!this.user) return;
 
-        const usernameEl = this.container.querySelector("#profile-username")!;
-        const emailEl = this.container.querySelector("#profile-email");
-        const avatarEl = this.container.querySelector("#profile-avatar");
-
-        if (usernameEl) usernameEl.textContent = this.user.username;
-        if (emailEl) emailEl.textContent = this.user.email;
-        if (avatarEl && this.user.avatar) {
-            (avatarEl as HTMLImageElement).src = this.user.avatar;
+        if (this.usernameEl) this.usernameEl.textContent = this.user.username;
+        if (this.emailEl) this.emailEl.textContent = this.user.email;
+        if (this.avatarEl && this.user.avatar) {
+            (this.avatarEl as HTMLImageElement).src = this.user.avatar;
         }
     }
 
@@ -39,10 +45,7 @@ export class Profile extends BaseComponent {
             this.populateUserData();
         });
 
-        const avatarContainer = this.container.querySelector("#avatar-container");
-        if (avatarContainer) {
-            avatarContainer.appendChild(this.avatarUpload.getContainer());
-        }
+        this.avatarContainer.appendChild(this.avatarUpload.getContainer());
     }
 
     destroy(): void {
