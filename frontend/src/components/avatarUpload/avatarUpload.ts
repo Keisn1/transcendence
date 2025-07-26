@@ -7,11 +7,17 @@ export class AvatarUpload extends BaseComponent {
     private profileService: ProfileService;
     private onAvatarChange?: (avatarUrl: string) => void;
 
+    private fileInput!: HTMLInputElement;
+    private preview!: HTMLImageElement;
+
     constructor(onAvatarChange?: (avatarUrl: string) => void) {
         super("div", "avatar-upload", ["flex", "flex-col", "items-center", "space-y-4"]);
         this.authService = AuthService.getInstance();
         this.profileService = ProfileService.getInstance();
         this.onAvatarChange = onAvatarChange;
+
+        this.fileInput = this.container.querySelector("#avatar-input")!;
+        this.preview = this.container.querySelector("#avatar-preview")!;
         this.render();
     }
 
@@ -44,17 +50,14 @@ export class AvatarUpload extends BaseComponent {
     }
 
     private setupEvents() {
-        const fileInput = this.container.querySelector("#avatar-input") as HTMLInputElement;
-        const preview = this.container.querySelector("#avatar-preview") as HTMLImageElement;
-
-        this.addEventListenerWithCleanup(fileInput, "change", (e) => {
+        this.addEventListenerWithCleanup(this.fileInput, "change", (e) => {
             const file = (e.target as HTMLInputElement).files?.[0];
             if (file) {
                 // Preview immediately
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const avatarUrl = e.target?.result as string;
-                    preview.src = avatarUrl;
+                    this.preview.src = avatarUrl;
 
                     // Simulate upload and update user
                     this.uploadAvatar(file);
@@ -93,8 +96,7 @@ export class AvatarUpload extends BaseComponent {
             console.error("Avatar upload failed:", error);
             // Reset preview on error
             const user = this.authService.getCurrentUser();
-            const preview = this.container.querySelector("#avatar-preview") as HTMLImageElement;
-            preview.src = user?.avatar || "/images/default-pfp.png";
+            this.preview.src = user?.avatar || "/images/default-pfp.png";
         }
     }
 }
