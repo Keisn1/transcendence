@@ -4,15 +4,17 @@ import signupTemplate from "./signup.html?raw";
 import type { SignUpBody } from "../../types/auth.types";
 
 export class SignUp extends BaseComponent {
+    private signupForm: HTMLFormElement;
+
     constructor() {
         super("div", "signup-container");
         this.container.innerHTML = signupTemplate;
+        this.signupForm = this.container.querySelector<HTMLFormElement>("#signup-form")!;
         this.setupEventListeners();
     }
 
     private setupEventListeners() {
-        const signupForm = this.container.querySelector<HTMLFormElement>("#signup-form")!;
-        this.addEventListenerWithCleanup(signupForm, "submit", this.handleSignUp.bind(this));
+        this.addEventListenerWithCleanup(this.signupForm, "submit", this.handleSignUp.bind(this));
     }
 
     private async handleSignUp(e: Event) {
@@ -32,10 +34,10 @@ export class SignUp extends BaseComponent {
 
     private getFormData(): SignUpBody {
         return {
-            username: (document.getElementById("username") as HTMLInputElement).value,
-            email: (document.getElementById("email") as HTMLInputElement).value,
-            password: (document.getElementById("password") as HTMLInputElement).value,
-            confirmPassword: (document.getElementById("confirmPassword") as HTMLInputElement).value,
+            username: this.signupForm.querySelector<HTMLInputElement>("#username")!.value,
+            email: this.signupForm.querySelector<HTMLInputElement>("#email")!.value,
+            password: this.signupForm.querySelector<HTMLInputElement>("#password")!.value,
+            confirmPassword: this.signupForm.querySelector<HTMLInputElement>("#confirmPassword")!.value,
         };
     }
 

@@ -3,18 +3,12 @@ import { BaseComponent } from "../BaseComponent";
 import loginTemplate from "./login.html?raw";
 
 export class Login extends BaseComponent {
-    private emailInput: HTMLInputElement;
-    private passwordInput: HTMLInputElement;
     private loginForm: HTMLFormElement;
 
     constructor() {
         super("div", "login-container");
         this.container.innerHTML = loginTemplate;
-
-        this.emailInput = this.container.querySelector<HTMLInputElement>("#email")!;
-        this.passwordInput = this.container.querySelector<HTMLInputElement>("#password")!;
         this.loginForm = this.container.querySelector<HTMLFormElement>("#login-form")!;
-
         this.setupEventListeners();
     }
 
@@ -27,10 +21,13 @@ export class Login extends BaseComponent {
 
         try {
             const authController = AuthController.getInstance();
-            await authController.login({ email: this.emailInput.value, password: this.passwordInput.value });
+            await authController.login({
+                email: this.loginForm.querySelector<HTMLInputElement>("#email")!.value,
+                password: this.loginForm.querySelector<HTMLInputElement>("#password")!.value,
+            });
         } catch (error) {
             console.error("Login attempt failed:", {
-                email: this.emailInput.value,
+                email: this.loginForm.querySelector<HTMLInputElement>("#email")!.value,
                 timestamp: new Date().toISOString(),
                 error: error instanceof Error ? error.message : "Unknown error",
                 stack: error instanceof Error ? error.stack : null,
