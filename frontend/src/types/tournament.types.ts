@@ -1,6 +1,6 @@
-export interface TournamentSignupBody { // TODO: better body
-	player1?: string,
-	player2?: string,
-	player3?: string,
-	player4?: string,
+export interface TournamentCreationBody { // TODO: better body
+	player1Id?: string,
+	player2Id?: string,
+	player3Id?: string,
+	player4Id?: string,
 }

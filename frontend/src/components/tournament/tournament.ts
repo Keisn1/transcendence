@@ -1,19 +1,42 @@
 // import { TournamentController } from "../../controllers/tournament.controller.ts";
 import { BaseComponent } from "../BaseComponent";
 import tournamentTemplate from "./tournament.html?raw";
-import type { TournamentSignupBody } from "../../types/tournament.types.ts";
-
+import type { TournamentCreationBody } from "../../types/tournament.types.ts";
+import playerTemplate from "./player.html?raw";
 
 export class TournamentSignup extends BaseComponent {
+    private playerContainer: HTMLElement;
+    private addedPlayersCount: number = 0;
+
     constructor() {
         super("div", "tournament-container");
         this.container.innerHTML = tournamentTemplate;
+        this.playerContainer = this.container.querySelector('#players-container')!;
         this.setupEventListeners();
     }
 
     private setupEventListeners() {
         const form = this.container.querySelector<HTMLFormElement>('#tournament-form')!;
         this.addEventListenerWithCleanup(form, 'submit', this.handleSubmit.bind(this));
+        const addPlayerBtn = this.container.querySelector<HTMLButtonElement>('#add-player')!;
+        addPlayerBtn.addEventListener('click', this.handleAddPlayer.bind(this));
+    }
+
+    private handleAddPlayer(e: Event) {
+        e.preventDefault();
+        if (this.addedPlayersCount >= 4) return;
+
+        const index = this.addedPlayersCount++;
+        const html = playerTemplate.replace(/{{index}}/g, `${index}`);
+        this.playerContainer.insertAdjacentHTML('beforeend', html);
+
+        const slot = this.playerContainer.querySelector<HTMLElement>(`#player-${index}`)!;
+        const removeBtn = slot.querySelector<HTMLButtonElement>('.remove-btn')!;
+
+        removeBtn.addEventListener('click', () => {
+            slot.remove();
+            this.addedPlayersCount--;
+        });
     }
 
     private async handleSubmit(e: Event) {
@@ -31,17 +54,17 @@ export class TournamentSignup extends BaseComponent {
         }
     }
 
-    private getFormData(): TournamentSignupBody {
+    private getFormData(): TournamentCreationBody {
         return {
-            player1: (this.container.querySelector('#player1') as HTMLInputElement).value,
-            player2: (this.container.querySelector('#player2') as HTMLInputElement).value,
-            player3: (this.container.querySelector('#player3') as HTMLInputElement).value,
-            player4: (this.container.querySelector('#player4') as HTMLInputElement).value,
+            player1Id: (this.container.querySelector('#player1') as HTMLInputElement).value,
+            player2Id: (this.container.querySelector('#player2') as HTMLInputElement).value,
+            player3Id: (this.container.querySelector('#player3') as HTMLInputElement).value,
+            player4Id: (this.container.querySelector('#player4') as HTMLInputElement).value,
         };
     }
 
-    private validate(data: TournamentSignupBody): boolean {
-        const names = [data.player1, data.player2, data.player3, data.player4]
+    private validate(data: TournamentCreationBody): boolean {
+        const names = [data.player1Id, data.player2Id, data.player3Id, data.player4Id]
             .map(name => name?.trim())
             .filter(Boolean);
 

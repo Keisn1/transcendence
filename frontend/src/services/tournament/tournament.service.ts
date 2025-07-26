@@ -1,4 +1,4 @@
-import type { TournamentSignupBody } from "../../types/tournament.types.ts";
+import type { TournamentCreationBody } from "../../types/tournament.types.ts";
 
 export class TournamentService {
 	private static instance: TournamentService;
@@ -14,7 +14,7 @@ export class TournamentService {
         return TournamentService.instance;
 	}
 
-	async register(usersCredentials: TournamentSignupBody): Promise<void> {
+	async register(usersCredentials: TournamentCreationBody): Promise<void> {
 		
 	}
 }
