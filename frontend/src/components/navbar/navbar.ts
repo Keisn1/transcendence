@@ -7,12 +7,32 @@ import type { User } from "../../types/auth.types.ts";
 export class Navbar extends BaseComponent {
     private authService: AuthService;
     private authCleanup: (() => void) | null = null;
+    private dashboardLink: HTMLAnchorElement;
+    private gameLink: HTMLAnchorElement;
+    private tournamentLink: HTMLAnchorElement;
+    private profileLink: HTMLAnchorElement;
+    private profileDropdown: HTMLElement;
+    private menu: HTMLElement;
+    private userMenuButton: HTMLElement;
+    private logoutLink: HTMLElement;
 
     constructor() {
         super("div", "navbar-container");
         this.authService = AuthService.getInstance();
 
         this.container.innerHTML = navbarTemplate;
+        // links
+        this.dashboardLink = this.container.querySelector<HTMLAnchorElement>("#link-1")!;
+        this.gameLink = this.container.querySelector<HTMLAnchorElement>("#link-2")!;
+        this.tournamentLink = this.container.querySelector<HTMLAnchorElement>("#link-3")!;
+        this.profileLink = this.container.querySelector<HTMLAnchorElement>("#profile-link")!;
+
+        // drowdown
+        this.profileDropdown = this.container.querySelector<HTMLAnchorElement>("#profile-dropdown-container")!;
+        this.menu = this.container.querySelector<HTMLElement>("#menu-container")!;
+        this.userMenuButton = this.container.querySelector<HTMLElement>("#user-menu-button")!;
+        this.logoutLink = this.container.querySelector<HTMLElement>("#logout-link")!;
+
         this.setupEvents();
         this.setupLinks();
         this.setupAuthListener();
@@ -31,15 +51,13 @@ export class Navbar extends BaseComponent {
         const isAuthenticated = this.authService.isAuthenticated();
         const user: User = this.authService.getCurrentUser()!;
 
-        const profileDropdown = this.container.querySelector(".relative.ml-3"); // TODO put it into a container with a better name
-        const menu = this.container.querySelector<HTMLElement>('[role="menu"]')!; // TODO put it into a container with a better name
         const authButtons = this.container.querySelector("#auth-buttons");
         const avatarImg = this.container.querySelector("#navbar-avatar") as HTMLImageElement;
 
-        menu.classList.add("hidden");
+        this.menu.classList.add("hidden");
 
         if (isAuthenticated && user) {
-            profileDropdown?.classList.remove("hidden");
+            this.profileDropdown.classList.remove("hidden");
             authButtons?.classList.add("hidden");
 
             // Update avatar if available
@@ -47,38 +65,28 @@ export class Navbar extends BaseComponent {
                 avatarImg.src = user.avatar;
             }
         } else {
-            profileDropdown?.classList.add("hidden");
+            this.profileDropdown.classList.add("hidden");
             authButtons?.classList.remove("hidden");
         }
     }
 
     setupLinks() {
-        this.container.querySelector<HTMLAnchorElement>("#link-1")!.href = "/";
-        this.container.querySelector<HTMLAnchorElement>("#link-2")!.href = "/game";
-        this.container.querySelector<HTMLAnchorElement>("#profile-link")!.href = "/profile";
-        this.container.querySelector<HTMLAnchorElement>("#link-3")!.href = "/tournament";
+        this.dashboardLink.href = "/";
+        this.gameLink.href = "/game";
+        this.tournamentLink.href = "/tournament";
+        this.profileLink.href = "/profile";
     }
 
     setupEvents() {
-        const button = this.container.querySelector<HTMLElement>("#user-menu-button");
-        const menu = this.container.querySelector<HTMLElement>('[role="menu"]');
+        const toggleMenu = () => this.menu.classList.toggle("hidden");
+        this.addEventListenerWithCleanup(this.userMenuButton, "click", toggleMenu);
 
-        if (button && menu) {
-            const toggleMenu = () => menu.classList.toggle("hidden");
-            this.addEventListenerWithCleanup(button, "click", toggleMenu);
-        }
-
-        // Setup logout handler
-        const logoutLink = this.container.querySelector<HTMLElement>("#logout-link");
-
-        if (logoutLink) {
-            const handleLogout = (e: Event) => {
-                e.preventDefault();
-                const authController = AuthController.getInstance();
-                authController.logout();
-            };
-            this.addEventListenerWithCleanup(logoutLink, "click", handleLogout);
-        }
+        const handleLogout = (e: Event) => {
+            e.preventDefault();
+            const authController = AuthController.getInstance();
+            authController.logout();
+        };
+        this.addEventListenerWithCleanup(this.logoutLink, "click", handleLogout);
     }
 
     destroy() {
