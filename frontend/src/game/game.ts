@@ -35,10 +35,10 @@ export class PongGame {
     private timePassed: number = 1000;
     private feedFrequency: number = 1000;
     private aiController: AiController | null = null;
-    private gameFont = { large: "200px monospace", normal: "42px monospace",};
+    private gameFont = { large: "200px monospace", normal: "42px monospace" };
     private paused: boolean = false;
     private justPaused = false;
-    private rafId: number | null = null; // TODO: rename to requestAnimationFrame
+    private requestAnimationFrame: number | null = null;
 
     constructor(canvas: HTMLCanvasElement, config: GameConfig = {}) {
         const defaultControls: ControlsConfig = {
@@ -100,7 +100,7 @@ export class PongGame {
 
     async start() {
         await this.startTimer();
-        this.rafId = requestAnimationFrame((t) => this.gameLoop(t, 0));
+        this.requestAnimationFrame = requestAnimationFrame((t) => this.gameLoop(t, 0));
     }
 
     private togglePause() {
@@ -110,9 +110,9 @@ export class PongGame {
 
     private setupControls() {
         const c = this.config.controls;
-        this.inputManager.bindKey(c.player1.up,   () => this.paddles.left.moveUp(this.canvas));
+        this.inputManager.bindKey(c.player1.up, () => this.paddles.left.moveUp(this.canvas));
         this.inputManager.bindKey(c.player1.down, () => this.paddles.left.moveDown(this.canvas));
-        this.inputManager.bindKey(c.player2.up,   () => this.paddles.right.moveUp(this.canvas));
+        this.inputManager.bindKey(c.player2.up, () => this.paddles.right.moveUp(this.canvas));
         this.inputManager.bindKey(c.player2.down, () => this.paddles.right.moveDown(this.canvas));
         this.inputManager.bindKey("p", () => this.togglePause(), "once");
     }
@@ -150,12 +150,12 @@ export class PongGame {
         const p2Score = this.scores.player2;
         const winScore = this.config.winningScore;
         let winMessage: string = p1Score > p2Score ? "player 1 wins" : "player 2 wins";
-        
+
         if (p1Score >= winScore || p2Score >= winScore) {
             this.destroy();
             this.ctx.font = this.gameFont.normal;
             this.ctx.fillStyle = "rgba(0, 0, 0, 0.42)";
-            this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
             this.ctx.fillStyle = "#fff";
             this.ctx.fillText(winMessage, this.canvas.width / 2, this.canvas.height / 2);
             return true;
@@ -183,31 +183,32 @@ export class PongGame {
         return null;
     }
 
-    private gameLoop(timestamp: number, lastTime: number) {
-        if (lastTime === 0) {
-            lastTime = timestamp;
+    private showPauseScreen() {
+        if (this.justPaused) {
+            this.ctx.fillStyle = "rgba(0,0,0,0.5)";
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            this.justPaused = false;
         }
-        const elapsed = timestamp - lastTime;
+        this.ctx.font = this.gameFont.normal;
+        this.ctx.fillStyle = "#fff";
+        this.ctx.fillText("Paused", this.canvas.width / 2, this.canvas.height / 2);
+    }
 
+    private gameLoop(timestamp: number, lastTime: number) {
         this.inputManager.processInput(this.paused);
+        if (this.paused) {
+            this.showPauseScreen();
+            requestAnimationFrame((t) => this.gameLoop(t, timestamp));
+            return;
+        }
+
+        if (lastTime === 0) lastTime = timestamp;
+        const elapsed = timestamp - lastTime;
 
         this.timePassed += elapsed;
         if (this.timePassed >= this.feedFrequency) {
             this.timePassed -= this.feedFrequency;
             if (this.aiController) this.aiController.feedAi(this.ball);
-        }
-
-        if (this.paused) { // TODO: is there a way of stopping the game loop
-            if (this.justPaused) {
-                this.ctx.fillStyle = "rgba(0,0,0,0.5)";
-                this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
-                this.justPaused = false;
-            }
-            this.ctx.font = this.gameFont.normal;
-            this.ctx.fillStyle = "#fff";
-            this.ctx.fillText("Paused", this.canvas.width / 2, this.canvas.height / 2);
-            requestAnimationFrame((t) => this.gameLoop(t, timestamp));
-            return;
         }
 
         let collisionPaddle = this.checkCollision();
@@ -222,13 +223,13 @@ export class PongGame {
             this.ball.reset(this.rallyCount);
         }
 
-        this.rafId = requestAnimationFrame((t) => this.gameLoop(t, timestamp));
+        this.requestAnimationFrame = requestAnimationFrame((t) => this.gameLoop(t, timestamp));
     }
 
     destroy() {
-         if (this.rafId !== null) {
-            cancelAnimationFrame(this.rafId);
-            this.rafId = null;
+        if (this.requestAnimationFrame !== null) {
+            cancelAnimationFrame(this.requestAnimationFrame);
+            this.requestAnimationFrame = null;
         }
         this.inputManager.destroy();
         this.aiController?.destroy();
