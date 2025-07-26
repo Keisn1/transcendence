@@ -7,19 +7,21 @@ import playerTemplate from "./player.html?raw";
 export class TournamentSignup extends BaseComponent {
     private playerContainer: HTMLElement;
     private addedPlayersCount: number = 0;
+    private tournamentForm: HTMLFormElement;
+    private addPlayerBtn: HTMLButtonElement;
 
     constructor() {
         super("div", "tournament-container");
         this.container.innerHTML = tournamentTemplate;
-        this.playerContainer = this.container.querySelector('#players-container')!;
+        this.playerContainer = this.container.querySelector("#players-container")!;
+        this.tournamentForm = this.container.querySelector<HTMLFormElement>("#tournament-form")!;
+        this.addPlayerBtn = this.container.querySelector<HTMLButtonElement>("#add-player")!;
         this.setupEventListeners();
     }
 
     private setupEventListeners() {
-        const form = this.container.querySelector<HTMLFormElement>('#tournament-form')!;
-        this.addEventListenerWithCleanup(form, 'submit', this.handleSubmit.bind(this));
-        const addPlayerBtn = this.container.querySelector<HTMLButtonElement>('#add-player')!;
-        addPlayerBtn.addEventListener('click', this.handleAddPlayer.bind(this));
+        this.addEventListenerWithCleanup(this.tournamentForm, "submit", this.handleSubmit.bind(this));
+        this.addEventListenerWithCleanup(this.addPlayerBtn, "click", this.handleAddPlayer.bind(this));
     }
 
     private handleAddPlayer(e: Event) {
@@ -28,12 +30,12 @@ export class TournamentSignup extends BaseComponent {
 
         const index = this.addedPlayersCount++;
         const html = playerTemplate.replace(/{{index}}/g, `${index}`);
-        this.playerContainer.insertAdjacentHTML('beforeend', html);
+        this.playerContainer.insertAdjacentHTML("beforeend", html);
 
         const slot = this.playerContainer.querySelector<HTMLElement>(`#player-${index}`)!;
-        const removeBtn = slot.querySelector<HTMLButtonElement>('.remove-btn')!;
+        const removeBtn = slot.querySelector<HTMLButtonElement>(".remove-btn")!;
 
-        removeBtn.addEventListener('click', () => {
+        removeBtn.addEventListener("click", () => {
             slot.remove();
             this.addedPlayersCount--;
         });
@@ -49,42 +51,41 @@ export class TournamentSignup extends BaseComponent {
             // const controller = TournamentController.getInstance();
             // await controller.registerPlayers(data);
         } catch (error) {
-            console.error('Tournament signup failed:', error);
-            this.showError('Signup failed. Please try again.');
+            console.error("Tournament signup failed:", error);
+            this.showError("Signup failed. Please try again.");
         }
     }
 
     private getFormData(): TournamentCreationBody {
         return {
-            player1Id: (this.container.querySelector('#player1') as HTMLInputElement).value,
-            player2Id: (this.container.querySelector('#player2') as HTMLInputElement).value,
-            player3Id: (this.container.querySelector('#player3') as HTMLInputElement).value,
-            player4Id: (this.container.querySelector('#player4') as HTMLInputElement).value,
+            player1Id: (this.container.querySelector("#player1") as HTMLInputElement).value,
+            player2Id: (this.container.querySelector("#player2") as HTMLInputElement).value,
+            player3Id: (this.container.querySelector("#player3") as HTMLInputElement).value,
+            player4Id: (this.container.querySelector("#player4") as HTMLInputElement).value,
         };
     }
 
     private validate(data: TournamentCreationBody): boolean {
         const names = [data.player1Id, data.player2Id, data.player3Id, data.player4Id]
-            .map(name => name?.trim())
+            .map((name) => name?.trim())
             .filter(Boolean);
 
         if (names.length < 2) {
-            this.showError('At least two players are required to start a tournament.');
+            this.showError("At least two players are required to start a tournament.");
             return false;
         }
         return true;
     }
 
     private showError(message: string) {
-        const existing = this.container.querySelector('.error-message');
+        const existing = this.container.querySelector(".error-message");
         existing?.remove();
 
-        const div = document.createElement('div');
-        div.className = 'error-message text-red-600 text-sm mt-2 text-center';
+        const div = document.createElement("div");
+        div.className = "error-message text-red-600 text-sm mt-2 text-center";
         div.textContent = message;
 
-        const form = this.container.querySelector('#tournament-form');
-        form?.insertAdjacentElement('afterend', div);
+        this.tournamentForm.insertAdjacentElement("afterend", div);
     }
 
     destroy(): void {
