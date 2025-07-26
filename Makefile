@@ -1,4 +1,4 @@
-up: tsc
+up:
 	docker compose up -d
 
 tsc:
@@ -7,7 +7,8 @@ tsc:
 down:
 	docker compose down --remove-orphans
 
-re: down tsc build up
+# re: down tsc build up
+re: down build up
 
 build:
 	docker compose build
@@ -42,13 +43,13 @@ clean-all:
 
 build-no-cache:
 	docker compose build --no-cache
-	
+
 modsec-logs:
 	docker exec nginx cat /var/log/modsec_audit.log
 
 sec-logs-live:
 	docker exec -it nginx tail -f /var/log/modsec_audit.log
-	
+
 modsec-report:
 	@docker exec nginx bash -c "\
 	if [ ! -f /var/log/modsec_audit.log ]; then \

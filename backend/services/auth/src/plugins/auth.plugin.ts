@@ -1,9 +1,17 @@
 import fp from "fastify-plugin";
 import { FastifyRequest, FastifyReply } from "fastify";
 
-export default fp(async (fastify) => {
+// resource: https://www.youtube.com/watch?v=FVJYlRvQom8
+
+export interface AuthPluginOptions {
+    jwtSecret: string;
+}
+
+export default fp<AuthPluginOptions>(async (fastify, opts: AuthPluginOptions) => {
+    const { jwtSecret } = opts;
+
     fastify.register(require("@fastify/jwt"), {
-        secret: process.env.JWT_SECRET,
+        secret: jwtSecret,
     });
 
     fastify.decorate("jwtAuth", async function (request: FastifyRequest, reply: FastifyReply) {
@@ -13,6 +21,6 @@ export default fp(async (fastify) => {
             reply.status(401).send({ message: "Unauthorized" });
         }
     });
-});
 
-// resource: https://www.youtube.com/watch?v=FVJYlRvQom8
+    fastify.log.info("✅ JWT plugin initialized with secret from server");
+});

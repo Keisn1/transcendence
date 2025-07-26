@@ -44,6 +44,14 @@ vault auth enable approle || echo "AppRole already enabled."
 echo "Enabling KV v2 secrets engine at 'secret/'..."
 vault secrets enable -path=secret kv-v2 || echo "KV secret engine already enabled at secret/."
 
+#JWT SECRET GENERATION
+# Generate a random key using Vault itself
+JWT_SECRET=$(vault write -field=random_bytes sys/tools/random bytes=64 | base64)
+
+# Store it in the KV store
+vault kv put secret/jwt key="$JWT_SECRET"
+echo "Stored JWT secret in Vault:"
+vault kv get -field=key secret/jwt
 
 # --- Create Vault policy for AppRole ---
 cat <<EOF > /vault/init/user-policy.hcl
@@ -58,6 +66,9 @@ path "sys/mounts" {
 }
 path "pki/roles/https-cert-role" {
   capabilities = ["read", "create", "update"]
+}
+path "secret/data/jwt" {
+  capabilities = ["read"]
 }
 EOF
 
