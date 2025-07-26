@@ -20,16 +20,37 @@
 	<div class="member-fields space-y-2">
 		<!-- <p class="text-sm">Logged in as <strong class="member-name"></strong></p>
 		<img class="h-10 w-10 rounded-full member-avatar" alt="Avatar" /> -->
+
+		<!-- Email -->
 		<div>
-			<label class="block text-sm">Email</label>
-			<input type="text" name="nickname-"
-				class="mt-1 block w-full rounded-md border-gray-300 focus:ring-indigo-600"
+			<label class="block text-sm font-medium text-gray-700">Email</label>
+			<input
+				type="email"
+				id="email-{{index}}"
+				name="email-{{index}}"
+				class="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
 				placeholder="Enter email" />
+		</div>
+
+		<!-- Password -->
+		<div>
+			<label class="block text-sm font-medium text-gray-700">Password</label>
+				<div class="mt-1 flex items-center">
+				<input
+					type="password"
+					id="password-{{index}}"
+					name="password-{{index}}"
+					class="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+					placeholder="Enter password" />
+				<button type="submit" class="ml-3 rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Save</button>
+
+											<!-- flex justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 -->
+			</div>
 		</div>
 	</div>
 
 	<!-- Guest fields -->
-	<div class="guest-fields hidden space-y-2">
+	<!-- <div class="guest-fields hidden space-y-2">
 		<div>
 			<label class="block text-sm">Guest Name</label>
 			<input type="text" name="guestName-"
@@ -39,5 +60,5 @@
 			<label class="block text-sm">Upload Avatar</label>
 			<input type="file" name="guestAvatar-" accept="image/*" class="mt-1" />
 		</div>
-	</div>
+	</div> -->
 </div>
