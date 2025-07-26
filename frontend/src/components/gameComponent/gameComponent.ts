@@ -13,7 +13,7 @@ export class GameComponent extends BaseComponent {
         super("div", "game-container");
 
         this.container.innerHTML = gameTemplate;
-        this.canvas = this.container.querySelector("#canvas")! as HTMLCanvasElement;
+        this.canvas = this.container.querySelector("#canvas")!;
         this.game = new PongGame(this.canvas);
 
         this.gameControls = new GameControlsComponent();

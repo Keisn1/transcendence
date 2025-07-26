@@ -1,6 +1,7 @@
 import { BaseComponent } from "../BaseComponent";
 import { AuthService } from "../../services/auth/auth.service";
 import { ProfileService } from "../../services/profile/profile.service";
+import avatarUploadTemplate from "./avatarUpload.html?raw";
 
 export class AvatarUpload extends BaseComponent {
     private authService: AuthService;
@@ -12,39 +13,18 @@ export class AvatarUpload extends BaseComponent {
 
     constructor(onAvatarChange?: (avatarUrl: string) => void) {
         super("div", "avatar-upload", ["flex", "flex-col", "items-center", "space-y-4"]);
+
         this.authService = AuthService.getInstance();
         this.profileService = ProfileService.getInstance();
         this.onAvatarChange = onAvatarChange;
 
+        this.container.innerHTML = avatarUploadTemplate;
+
         this.fileInput = this.container.querySelector("#avatar-input")!;
         this.preview = this.container.querySelector("#avatar-preview")!;
-        this.render();
-    }
 
-    private render() {
         const user = this.authService.getCurrentUser();
-        this.container.innerHTML = `
-            <div class="relative">
-                <img id="avatar-preview"
-                     src="${user?.avatar || "/images/default-pfp.png"}"
-                     alt="Avatar"
-                     class="w-32 h-32 rounded-full object-cover border-4 border-gray-300">
-                <label for="avatar-input"
-                       class="absolute bottom-0 right-0 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full p-2 cursor-pointer shadow-lg">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89L8.98 4.22A2 2 0 0110.645 3.5h2.71a2 2 0 011.664.72L16.405 6.11A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                </label>
-            </div>
-            <input type="file"
-                   id="avatar-input"
-                   accept="image/*"
-                   class="hidden">
-            <p class="text-sm text-gray-600">Click camera icon to upload new avatar</p>
-        `;
+        if (user?.avatar) this.preview.src = user.avatar;
 
         this.setupEvents();
     }
@@ -74,7 +54,7 @@ export class AvatarUpload extends BaseComponent {
             formData.append("avatar", file);
 
             const response = await fetch("/api/profile/avatar", {
-                method: "POST",
+                method: "PUT",
                 body: formData,
                 headers: {
                     Authorization: `Bearer ${this.authService.getAuthToken()}`,
