@@ -2,9 +2,11 @@ import { BaseComponent } from "../BaseComponent";
 import adLightboxTemplate from "./adLightbox.html?raw";
 
 export class AdLightBox extends BaseComponent {
+    private closeBtn: HTMLElement;
     constructor() {
         super("div", "ad-lightbox-container", ["hidden", "flex", "justify-center"]);
         this.container.innerHTML = adLightboxTemplate;
+        this.closeBtn = this.container.querySelector("#ad-close-btn")!;
         this.setupEvents();
     }
 
@@ -23,11 +25,9 @@ export class AdLightBox extends BaseComponent {
         });
 
         // For DOM elements, use the helper method
-        const closeBtn = this.container.querySelector("#ad-close-btn") as HTMLElement;
-        if (closeBtn) {
-            this.addEventListenerWithCleanup(closeBtn, "click", () => hideAd());
-        }
+        this.addEventListenerWithCleanup(this.closeBtn, "click", () => hideAd());
     }
+
     destroy(): void {
         super.destroy();
     }
