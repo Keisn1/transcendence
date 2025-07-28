@@ -11,9 +11,7 @@ services:
       - ./vault/init:/vault/init # Required for .env access
 
   nginx:
-    build:
-      context: .
-      dockerfile: ./nginx/Dockerfile
+    build: ./nginx
     container_name: nginx
     ports:
       - "80:80"
@@ -23,6 +21,7 @@ services:
       - ./nginx/modsecurity:/etc/nginx/modsec:ro
       - ./vault/init:/etc/nginx/certs
       - ./vault/init:/vault/init
+      - ./frontend/dist:/usr/share/nginx/html
 
   vault:
     container_name: vault
@@ -46,5 +45,6 @@ services:
       # VAULT_SECRET_ID: $VAULT_SECRET_ID
       #accessible through localhost:8200, token, pw: root
       #doesn't save shit in dev mode btw
+
 volumes:
   vault-data:

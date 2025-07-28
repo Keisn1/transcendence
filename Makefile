@@ -1,4 +1,4 @@
-up:
+up: build-frontend
 	docker compose up -d
 
 tsc:
@@ -12,6 +12,9 @@ re: down build up
 
 build:
 	docker compose build
+
+build-frontend:
+	cd frontend && npm run build
 
 status:
 	docker ps
