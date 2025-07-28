@@ -4,3 +4,8 @@ export interface TournamentCreationBody { // TODO: better body
 	player3Id?: string,
 	player4Id?: string,
 }
+
+export interface RegisterPlayerBody {
+	playerEmail: string,
+	playerPassword: string,
+}

@@ -116,6 +116,41 @@ export function setupMockApi() {
             );
         }
 
+        if (urlString === "/api/verify-player" && options?.method === "POST") {
+            const authHeader = options.headers
+                ? (options.headers as Record<string, string>)["Authorization"]
+                : null;
+            const token = authHeader || localStorage.getItem("authToken");
+            if (!token) {
+                return new Response("Unauthorized", { status: 401 });
+            }
+
+            const { playerEmail, playerPassword } = JSON.parse(options.body as string) as {
+                playerEmail: string;
+                playerPassword: string;
+            };
+
+            const user = mockUsers.find(
+                (u) => u.email === playerEmail && u.password === playerPassword
+            );
+
+            if (user) {
+                const { password, ...userWithoutPassword } = user;
+                return new Response(
+                JSON.stringify({
+                    user: userWithoutPassword,
+                }),
+                {
+                    status: 200,
+                    headers: { "Content-Type": "application/json" },
+                }
+                );
+            }
+
+            // 4b. On failure: 401
+            return new Response("Unauthorized", { status: 401 });
+        }
+
         return originalFetch(url, options);
     };
 }

@@ -3,6 +3,7 @@ import "./components/navbar/navbar.ts"; // Add this line
 import "./components/adLightbox/adLightbox.ts"; // Add this line
 import Router from "./router.ts";
 import { AuthController } from "./controllers/auth.controller.ts";
+import { TournamentController } from "./controllers/tournament.controller.ts";
 
 import { setupMockApi } from "./mocks/mockAPI.ts";
 
@@ -10,6 +11,7 @@ setupMockApi(); // Add this before other initialization
 
 const router = new Router();
 AuthController.getInstance(router);
+TournamentController.getInstance(router);
 
 document.addEventListener("DOMContentLoaded", () => {
     document.body.addEventListener("click", (e: MouseEvent) => {
