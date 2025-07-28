@@ -12,6 +12,7 @@ export class TournamentSignup extends BaseComponent {
     private addedPlayersCount: number = 0;
     private tournamentForm: HTMLFormElement;
     private addPlayerBtn: HTMLButtonElement;
+    private registeredPlayers: any[] = [];
 
     constructor() {
         super("div", "tournament-container");
@@ -43,9 +44,29 @@ export class TournamentSignup extends BaseComponent {
         try {
             const controller = TournamentController.getInstance();
             await controller.registerPlayer(body);
+            this.showMessage("User registered successfully");
         } catch (err: any) {
-            this.showError(err.message ?? "Player registration failed");
+            this.showMessage(err.message ?? "Player registration failed", "error");
         }
+    }
+
+    private showMessage(message: string, type: "success" | "error" = "success") { // borrowed from LLM
+        this.container.querySelectorAll(".info-message").forEach(el => el.remove());
+
+        const div = document.createElement("div");
+        if (type === "success") {
+            div.className = `info-message bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded mb-4`;
+        } else if (type === "error") {
+            div.className = `info-message bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-4`;
+        }
+        div.textContent = message;
+
+        this.tournamentForm.insertAdjacentElement("beforebegin", div);
+
+        setTimeout(() => {
+            div.classList.add("opacity-0", "transition", "duration-500");
+            setTimeout(() => div.remove(), 500);
+        }, 3000);
     }
 
     private handleAddPlayer(e: Event) {

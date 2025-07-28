@@ -26,7 +26,7 @@ export class TournamentService {
 				body: JSON.stringify(userCredentials),
 		});
 
-		if (!response.ok) throw new Error("Player Registration failed");
+		if (!response.ok) throw new Error("Player registration failed");
 	
 		// TODO: not sure of what to do with the user object
 		const data = await response.json();
