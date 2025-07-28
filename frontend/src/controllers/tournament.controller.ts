@@ -1,4 +1,4 @@
-import type { TournamentCreationBody, RegisterPlayerBody } from "../types/tournament.types.ts";
+import type { TournamentCreationBody, RegisterPlayerBody, User, Tournament } from "../types/tournament.types.ts";
 import { TournamentService } from "../services/tournament/tournament.service.ts"
 import Router from "../router";
 
@@ -19,13 +19,15 @@ export class TournamentController {
 		return TournamentController.instance;
 	}
 
-	public async registerPlayer(userCredentials: RegisterPlayerBody) {
-		await this.tournamentService.registerPlayer(userCredentials);
+	public async registerPlayer(userCredentials: RegisterPlayerBody): Promise<User> {
+		const user = await this.tournamentService.registerPlayer(userCredentials);
 		// this.router.navigateTo(""); // TODO: does it need to navigate to somewhere else?
+		return user;
 	}
 
-	public async registerPlayers(usersCredentials: TournamentCreationBody) {
-		await this.tournamentService.createTounament(usersCredentials);
-		this.router.navigateTo(""); // TODO: not implemented navigation
+	public async createTournament(userIds: TournamentCreationBody):Promise<Tournament> {
+		const tournament = await this.tournamentService.createTournament(userIds);
+		// this.router.navigateTo(""); // TODO: not implemented navigation
+		return tournament;
 	}
 }

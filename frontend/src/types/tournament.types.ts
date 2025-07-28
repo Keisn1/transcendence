@@ -1,11 +1,34 @@
-export interface TournamentCreationBody { // TODO: better body
-	player1Id?: string,
-	player2Id?: string,
-	player3Id?: string,
-	player4Id?: string,
-}
-
 export interface RegisterPlayerBody {
 	playerEmail: string,
 	playerPassword: string,
+}
+
+export interface User {
+	id: string;
+	username: string;
+	email: string;
+	avatar?: string;
+}
+
+export interface TournamentCreationBody {
+	userIds: string[];
+	// players?: User[];
+}
+
+export interface Tournament {
+	id: string;
+	name?: string;
+	playerIds: string[];
+	players?: User[];
+	bestOf?: number;
+	bracket: BracketMatch[];
+	createdAt: string;
+}
+
+export interface BracketMatch {
+	matchId:   string;
+	player1Id: string;
+	player2Id: string;
+	round:     number;
+	// result?:   string; 
 }

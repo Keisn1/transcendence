@@ -2,9 +2,8 @@
 import { BaseComponent } from "../BaseComponent";
 import playerTemplate from "./player.html?raw";
 import tournamentTemplate from "./tournament.html?raw";
-import type { TournamentCreationBody, RegisterPlayerBody } from "../../types/tournament.types.ts";
+import type { TournamentCreationBody, RegisterPlayerBody, User } from "../../types/tournament.types.ts";
 import { TournamentController } from "../../controllers/tournament.controller.ts";
-import Router from "../../router";
 
 
 export class TournamentSignup extends BaseComponent {
@@ -24,49 +23,8 @@ export class TournamentSignup extends BaseComponent {
     }
 
     private setupEventListeners() {
-        // this.addEventListenerWithCleanup(this.tournamentForm, "submit", this.handleSubmit.bind(this));
+        this.addEventListenerWithCleanup(this.tournamentForm, "submit", this.handleStartTournament.bind(this));
         this.addEventListenerWithCleanup(this.addPlayerBtn, "click", this.handleAddPlayer.bind(this));
-    }
-
-    private async registerPlayer(index: number, e: Event) {
-        e.preventDefault();
-
-        const emailEl = this.container.querySelector<HTMLInputElement>(`#email-${index}`);
-        const passwordEl = this.container.querySelector<HTMLInputElement>(`#password-${index}`);
-        
-        if (!emailEl || !passwordEl) return this.showError("Inputs not found");
-
-        const body: RegisterPlayerBody = {
-            playerEmail: emailEl.value,
-            playerPassword: passwordEl.value,
-        };
-
-        try {
-            const controller = TournamentController.getInstance();
-            await controller.registerPlayer(body);
-            this.showMessage("User registered successfully");
-        } catch (err: any) {
-            this.showMessage(err.message ?? "Player registration failed", "error");
-        }
-    }
-
-    private showMessage(message: string, type: "success" | "error" = "success") { // borrowed from LLM
-        this.container.querySelectorAll(".info-message").forEach(el => el.remove());
-
-        const div = document.createElement("div");
-        if (type === "success") {
-            div.className = `info-message bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded mb-4`;
-        } else if (type === "error") {
-            div.className = `info-message bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-4`;
-        }
-        div.textContent = message;
-
-        this.tournamentForm.insertAdjacentElement("beforebegin", div);
-
-        setTimeout(() => {
-            div.classList.add("opacity-0", "transition", "duration-500");
-            setTimeout(() => div.remove(), 500);
-        }, 3000);
     }
 
     private handleAddPlayer(e: Event) {
@@ -89,40 +47,71 @@ export class TournamentSignup extends BaseComponent {
         registerBtn.addEventListener("click", (ev) => this.registerPlayer(index, ev));
     }
 
-    // private async handleSubmit(e: Event) {
-    //     e.preventDefault();
-    //     const data = this.getFormData();
+    private async registerPlayer(index: number, e: Event) {
+        e.preventDefault();
 
-    //     if (!this.validate(data)) return;
+        const emailElement = this.container.querySelector<HTMLInputElement>(`#email-${index}`);
+        const passwordElement = this.container.querySelector<HTMLInputElement>(`#password-${index}`);
+        
+        if (!emailElement || !passwordElement) return this.showError("Inputs not found");
 
-    //     try {
-    //         // const controller = TournamentController.getInstance();
-    //         // await controller.registerPlayers(data);
-    //     } catch (error) {
-    //         console.error("Tournament signup failed:", error);
-    //         this.showError("Signup failed. Please try again.");
-    //     }
-    // }
+        const body: RegisterPlayerBody = {
+            playerEmail: emailElement.value,
+            playerPassword: passwordElement.value,
+        };
 
-    // private getFormData(): TournamentCreationBody {
-    //     return {
-    //         player1Id: (this.container.querySelector("#player1") as HTMLInputElement).value,
-    //         player2Id: (this.container.querySelector("#player2") as HTMLInputElement).value,
-    //         player3Id: (this.container.querySelector("#player3") as HTMLInputElement).value,
-    //         player4Id: (this.container.querySelector("#player4") as HTMLInputElement).value,
-    //     };
-    // }
-
-    private validate(data: TournamentCreationBody): boolean {
-        const names = [data.player1Id, data.player2Id, data.player3Id, data.player4Id]
-            .map((name) => name?.trim())
-            .filter(Boolean);
-
-        if (names.length < 2) {
-            this.showError("At least two players are required to start a tournament.");
-            return false;
+        try {
+            const controller = TournamentController.getInstance();
+            const user = await controller.registerPlayer(body);
+            console.log(user);
+            this.storePlayer(user);
+            this.showMessage("User registered successfully");
+        } catch (err: any) {
+            this.showMessage(err.message ?? "Player registration failed", "error");
         }
-        return true;
+    }
+
+    async handleStartTournament(e: Event) {
+        e.preventDefault();
+        if (this.registeredPlayers.length < 2) {
+            return this.showMessage("You need at least two players", "error");
+        }
+
+        const body: TournamentCreationBody = {
+            userIds: this.registeredPlayers.map((u) => u.id),
+        };
+
+        try {
+            const controller = TournamentController.getInstance();
+            const tournament = await controller.createTournament(body);
+            this.showMessage("Tournament was successfully created");
+            console.log(tournament);
+        } catch (err: any) {
+            this.showError(err.message || "Could not create tournament");
+        }
+    }
+
+    public storePlayer(user: User) {
+        this.registeredPlayers.push(user);
+    }
+
+    private showMessage(message: string, type: "success" | "error" = "success") {
+        this.container.querySelectorAll(".info-message").forEach(el => el.remove());
+
+        const div = document.createElement("div");
+        if (type === "success") {
+            div.className = `info-message bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded mb-4`;
+        } else if (type === "error") {
+            div.className = `info-message bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-4`;
+        }
+        div.textContent = message;
+
+        this.tournamentForm.insertAdjacentElement("beforebegin", div);
+
+        setTimeout(() => {
+            div.classList.add("opacity-0", "transition", "duration-500");
+            setTimeout(() => div.remove(), 500);
+        }, 3000);
     }
 
     private showError(message: string) {

@@ -147,9 +147,59 @@ export function setupMockApi() {
                 );
             }
 
-            // 4b. On failure: 401
             return new Response("Unauthorized", { status: 401 });
         }
+
+        if (urlString === "/api/tournament" && options?.method === "POST") {
+    		// console.log("enters mockAPI");
+            const authHeader = options.headers
+                ? (options.headers as Record<string, string>)["Authorization"]
+                : null;
+            const token = authHeader || localStorage.getItem("authToken");
+            if (!token) {
+                console.log("unauthorised");
+                return new Response("Unauthorized", { status: 401 });
+            }
+
+            const { userIds } = JSON.parse(options.body as string) as {
+                userIds: string[];
+            };
+
+            if (!userIds || userIds.length < 2) {
+                return new Response("Need at least two players", { status: 400 });
+            }
+
+            const players = userIds
+                .map((id) => mockUsers.find((u) => u.id === id))
+                .filter((u): u is typeof mockUsers[number] => !!u);
+
+            const bracket = [];
+            for (let i = 0; i < players.length; i += 2) {
+                const p1 = players[i];
+                const p2 = players[i + 1] ?? null; 
+                bracket.push({
+                matchId: `m${i / 2 + 1}`,
+                player1Id: p1.id,
+                player2Id: p2 ? p2.id : null,
+                round: 1,
+                // result: null,
+                });
+            }
+
+            const tournament = {
+                id: `t${Date.now()}`,
+                userIds,
+                players: players.map(({ password, ...u }) => u), 
+                bracket,
+                createdAt: new Date().toISOString(),
+            };
+
+            return new Response(JSON.stringify(tournament), {
+                status: 201,
+                headers: { "Content-Type": "application/json" },
+            });
+        }
+
 
         return originalFetch(url, options);
     };

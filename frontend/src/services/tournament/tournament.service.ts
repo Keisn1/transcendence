@@ -1,4 +1,4 @@
-import type { TournamentCreationBody, RegisterPlayerBody } from "../../types/tournament.types.ts";
+import type { TournamentCreationBody, RegisterPlayerBody, User, Tournament } from "../../types/tournament.types.ts";
 import { AuthService } from "../auth/auth.service";
 
 export class TournamentService {
@@ -16,24 +16,39 @@ export class TournamentService {
         return TournamentService.instance;
 	}
 
-	async registerPlayer(userCredentials: RegisterPlayerBody): Promise<void> {
+	async registerPlayer(userCredentials: RegisterPlayerBody): Promise<User> {
 		const response = await fetch("/api/verify-player", {
 			method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Bearer ${this.authService.getAuthToken()}`,
-				},
-				body: JSON.stringify(userCredentials),
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${this.authService.getAuthToken()}`,
+			},
+			body: JSON.stringify(userCredentials),
 		});
 
-		if (!response.ok) throw new Error("Player registration failed");
-	
-		// TODO: not sure of what to do with the user object
-		const data = await response.json();
-		console.log(data);
+		if (!response.ok) {
+			throw new Error("Player registration failed");
+		}
+
+		const { user } = await response.json() as { user: User };
+		return user;
 	}
 
-	async createTounament(usersCredentials: TournamentCreationBody): Promise<void> {
-		
+	async createTournament(body: TournamentCreationBody): Promise<Tournament> {
+		const res = await fetch("/api/tournament", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${this.authService.getAuthToken()}`,
+			},
+			body: JSON.stringify(body),
+		});
+		// console.log(body);
+		// console.log(res.ok);
+		// console.log("status:", res.status, "statusText:", res.statusText);
+		if (!res.ok) throw new Error("Couldn’t create tournament");
+
+		return res.json();
 	}
+
 }
