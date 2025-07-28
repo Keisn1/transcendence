@@ -26,7 +26,7 @@ export class AuthService {
     }
 
     async login(credentials: LoginBody): Promise<void> {
-        const response = await fetch("/api/user/login", {
+        const response = await fetch("/api/auth/login", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -47,7 +47,7 @@ export class AuthService {
     }
 
     async signUp(credentials: SignUpBody): Promise<void> {
-        const response = await fetch("/api/user/signup", {
+        const response = await fetch("/api/auth/signup", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

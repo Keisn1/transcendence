@@ -1,7 +1,8 @@
 import { AuthController } from "../../controllers/auth.controller.ts";
 import { BaseComponent } from "../BaseComponent";
 import signupTemplate from "./signup.html?raw";
-import type { SignUpBody } from "../../types/auth.types";
+// import type { SignUpBody } from "../../types/auth.types";
+const MIN_LEN = 8;
 
 export class SignUp extends BaseComponent {
     private signupForm: HTMLFormElement;
@@ -32,21 +33,21 @@ export class SignUp extends BaseComponent {
         }
     }
 
-    private getFormData(): SignUpBody {
+    private getFormData() {
         return {
             username: this.signupForm.querySelector<HTMLInputElement>("#username")!.value,
             email: this.signupForm.querySelector<HTMLInputElement>("#email")!.value,
             password: this.signupForm.querySelector<HTMLInputElement>("#password")!.value,
-            confirmPassword: this.signupForm.querySelector<HTMLInputElement>("#confirmPassword")!.value,
+            // confirmPassword: this.signupForm.querySelector<HTMLInputElement>("#confirmPassword")!.value,
         };
     }
 
-    private validateForm(data: SignUpBody): boolean {
-        if (data.password !== data.confirmPassword) {
-            this.showError("Passwords do not match");
-            return false;
-        }
-        if (data.password.length < 6) {
+    private validateForm(data: any): boolean {
+        // if (data.password !== data.confirmPassword) {
+        //     this.showError("Passwords do not match");
+        //     return false;
+        // }
+        if (data.password.length < MIN_LEN) {
             this.showError("Password must be at least 6 characters");
             return false;
         }

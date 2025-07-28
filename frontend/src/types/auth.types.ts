@@ -26,12 +26,11 @@ export interface RegisterResponse {
     user: User;
 }
 
-// Add these interfaces to your existing auth.types.ts
 export interface SignUpBody {
     username: string;
     email: string;
     password: string;
-    confirmPassword?: string; // for frontend validation
+    // confirmPassword?: string; // for frontend validation
 }
 
 export interface SignUpResponse {

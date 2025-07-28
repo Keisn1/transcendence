@@ -4,10 +4,6 @@ import "./components/adLightbox/adLightbox.ts"; // Add this line
 import Router from "./router.ts";
 import { AuthController } from "./controllers/auth.controller.ts";
 
-import { setupMockApi } from "./mocks/mockAPI.ts";
-
-setupMockApi(); // Add this before other initialization
-
 const router = new Router();
 AuthController.getInstance(router);
 
@@ -19,3 +15,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
+
+// Conditional mock setup
+if (import.meta.env.DEV) {
+    const { setupMockApi } = await import("./mocks/mockAPI.ts");
+    setupMockApi();
+}
