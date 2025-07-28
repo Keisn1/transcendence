@@ -25,7 +25,7 @@ export class TournamentController {
 	}
 
 	public async registerPlayers(usersCredentials: TournamentCreationBody) {
-		await this.tournamentService.register(usersCredentials);
+		await this.tournamentService.createTounament(usersCredentials);
 		this.router.navigateTo(""); // TODO: not implemented navigation
 	}
 }

@@ -16,7 +16,7 @@ export class TournamentService {
         return TournamentService.instance;
 	}
 
-	async registerPlayer(userCredentials: RegisterPlayerBody) {
+	async registerPlayer(userCredentials: RegisterPlayerBody): Promise<void> {
 		const response = await fetch("/api/verify-player", {
 			method: "POST",
 				headers: {
@@ -26,14 +26,14 @@ export class TournamentService {
 				body: JSON.stringify(userCredentials),
 		});
 
-		if (!response.ok) throw new Error("Player Reqistration failed");
+		if (!response.ok) throw new Error("Player Registration failed");
 	
 		// TODO: not sure of what to do with the user object
 		const data = await response.json();
 		console.log(data);
 	}
 
-	async register(usersCredentials: TournamentCreationBody): Promise<void> {
+	async createTounament(usersCredentials: TournamentCreationBody): Promise<void> {
 		
 	}
 }

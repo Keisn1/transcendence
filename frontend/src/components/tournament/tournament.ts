@@ -27,7 +27,7 @@ export class TournamentSignup extends BaseComponent {
         this.addEventListenerWithCleanup(this.addPlayerBtn, "click", this.handleAddPlayer.bind(this));
     }
 
-    private registerPlayer(index: number, e: Event) {
+    private async registerPlayer(index: number, e: Event) {
         e.preventDefault();
 
         const emailEl = this.container.querySelector<HTMLInputElement>(`#email-${index}`);
@@ -40,10 +40,12 @@ export class TournamentSignup extends BaseComponent {
             playerPassword: passwordEl.value,
         };
 
-        // …POST to /verify-player with JWT + body…
-
-        const tournamentController = TournamentController.getInstance();
-        tournamentController.registerPlayer(body);
+        try {
+            const controller = TournamentController.getInstance();
+            await controller.registerPlayer(body);
+        } catch (err: any) {
+            this.showError(err.message ?? "Player registration failed");
+        }
     }
 
     private handleAddPlayer(e: Event) {
