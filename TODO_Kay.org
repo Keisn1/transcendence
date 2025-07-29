@@ -1,0 +1,11 @@
+#+title: Todo Kay
+
+- [ ] Avatar usage
+- [ ] test frontend with backend but without "make re"
+  - [ ] just find a better way of having the two together for development
+- [ ] put health-route on root again
+- [ ] name the types the same in backend and frontend
+- [ ] integrate the tournament service
+- [ ] make the confirmPassword as in the backend (min_len = 8)
+- [ ] remove email from the login and register response
+- [ ] is not yet being called by the frontend
