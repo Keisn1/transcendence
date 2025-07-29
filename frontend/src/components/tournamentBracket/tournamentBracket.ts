@@ -34,8 +34,8 @@ export class TournamentBracket extends BaseComponent {
 			for (const m of tournament?.bracket) {
 				const status = m.result ? "Completed" : "Pending";
 				const html = matchTemplate
-					.replace(/{{player1}}/g, m.player1Id)
-					.replace(/{{player2}}/g, m.player2Id ?? "BYE")
+					.replace(/{{player1}}/g, m.player1.username)
+					.replace(/{{player2}}/g, m.player2.username ?? "BYE")
 					.replace(/{{status}}/g, status);
 				this.listElement.insertAdjacentHTML("beforeend", html);
 				if (!m.result && !next) next = m;
@@ -43,7 +43,7 @@ export class TournamentBracket extends BaseComponent {
 		}
 
 		if (next) {
-			this.nextDetailsEl.textContent = `${next.player1Id} vs ${next.player2Id ?? "BYE"}`;
+			this.nextDetailsEl.textContent = `${next.player1.username} vs ${next.player2.username ?? "BYE"}`;
 			this.startBtn.disabled = false;
 			// TODO: navigate to the next round
 			// this.startBtn.onclick = () => {

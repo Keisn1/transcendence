@@ -24,9 +24,11 @@ export interface Tournament {
 }
 
 export interface BracketMatch {
-	matchId:   string;
-	player1Id: string;
-	player2Id: string;
-	round:     number;
-	result?:   string;
+	matchId: string;
+	// player1Id: string;
+	// player2Id: string;
+	player1: User;
+	player2: User;
+	round: number;
+	result?: string;
 }

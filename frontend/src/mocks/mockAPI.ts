@@ -177,11 +177,11 @@ export function setupMockApi() {
                 const p1 = players[i];
                 const p2 = players[i + 1] ?? null; 
                 bracket.push({
-                matchId: `m${i / 2 + 1}`,
-                player1Id: p1.id,
-                player2Id: p2 ? p2.id : null,
-                round: 1,
-                // result: null,
+                    matchId: `m${i / 2 + 1}`,
+                    player1: p1,
+                    player2: p2,
+                    round: 1,
+                    // result: null,
                 });
             }
 
