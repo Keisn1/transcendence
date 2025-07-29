@@ -5,6 +5,7 @@ import type { TournamentCreationBody, RegisterPlayerBody, User, Tournament } fro
 export class TournamentController {
 	private static instance: TournamentController;
 	private tournamentService: TournamentService;
+	private currentTournament: Tournament | null = null;
 	private router: Router;
 
 	private constructor(router: Router) {
@@ -27,6 +28,11 @@ export class TournamentController {
 	public async createTournament(userIds: TournamentCreationBody):Promise<Tournament> {
 		const tournament = await this.tournamentService.createTournament(userIds);
 		this.router.navigateTo(`/tournament/${tournament.id}`, { state: { initial: tournament } });
+		this.currentTournament = tournament; // TODO: not sure of this approach
 		return tournament;
+	}
+
+	public async getTournament() {
+		return this.currentTournament;
 	}
 }
