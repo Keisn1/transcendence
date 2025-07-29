@@ -1,34 +1,33 @@
 import AbstractView from "./AbstractView.ts";
 import { Navbar } from "../components/navbar/navbar.ts";
-import { TournamentSignup } from "../components/tournament/tournament.ts";
+import { TournamentBracket } from "../components/tournamentBracket/tournamentBracket.ts";
 import type Router from "../router.ts";
 
-export default class TournamentBracketView extends AbstractView {
-    // private navbar: Navbar | null = null;
-	// private tournamentId: string;
-	// private tournamentService = TournamentService.getInstance();
+export default class extends AbstractView {
+	private navbar: Navbar | null = null;
+	private bracketComponent: TournamentBracket | null = null;
 
-	// constructor(router: Router) {
-	// 	super(router);
-	// 	this.tournamentId = this.router.currentParams.id;
-	// }
+	constructor(router?: Router) {
+		super(router);
+		this.setTitle("Tournament Bracket");
+	}
 
-	// async render() {
-	// 	this.navbar = new Navbar();
-    //     document.body.appendChild(this.navbar.getContainer());
+	render() {
+		this.navbar = new Navbar();
+		document.body.appendChild(this.navbar.getContainer());
 
-	// 	const tournament = await this.tournamentService.getTournament(this.tournamentId);
-	// 	this.container.innerHTML = bracketTemplate(tournament);
-	// }
+		this.bracketComponent = new TournamentBracket();
+		document.body.appendChild(this.bracketComponent.getContainer());
+	}
 
-	// destroy() {
-    //     this.navbar?.destroy();
-    //     // this.tournamentSignup?.destroy();
+	destroy() {
+		this.navbar?.destroy();
+		this.bracketComponent?.destroy();
 
-    //     document.getElementById("navbar-container")?.remove();
-    //     document.getElementById("tournament-container")?.remove();
+		document.getElementById("navbar-container")?.remove();
+		document.getElementById("tournament-bracket-container")?.remove();
 
-    //     this.navbar = null;
-    //     // this.tournamentSignup = null;
-    // }
+		this.navbar = null;
+		this.bracketComponent = null;
+  }
 }

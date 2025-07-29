@@ -26,7 +26,7 @@ export class TournamentController {
 
 	public async createTournament(userIds: TournamentCreationBody):Promise<Tournament> {
 		const tournament = await this.tournamentService.createTournament(userIds);
-		// this.router.navigateTo(""); // TODO: not implemented navigation
+		this.router.navigateTo(`/tournament/${tournament.id}`, { state: { initial: tournament } });
 		return tournament;
 	}
 }

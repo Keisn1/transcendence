@@ -16,8 +16,8 @@ export default class Router {
         this.routing();
     }
 
-    navigateTo = (url: string) => {
-        history.pushState(null, "", url);
+    navigateTo = (url: string, options?: { state?: any }) => {
+        history.pushState(options?.state ?? null, "", url);
         this.routing();
     };
 
@@ -55,7 +55,7 @@ export default class Router {
             },
             {
                 path: "/tournament/:id",
-                view: TournamentBracketView,   // new view you’ll create
+                view: TournamentBracketView,
             }
         ];
 

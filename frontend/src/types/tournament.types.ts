@@ -28,5 +28,5 @@ export interface BracketMatch {
 	player1Id: string;
 	player2Id: string;
 	round:     number;
-	// result?:   string;
+	result?:   string;
 }

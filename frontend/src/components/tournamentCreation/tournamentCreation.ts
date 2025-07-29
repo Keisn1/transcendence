@@ -1,12 +1,12 @@
 // import { TournamentController } from "../../controllers/tournament.controller.ts";
 import playerTemplate from "./player.html?raw";
-import tournamentTemplate from "./tournament.html?raw";
-import { BaseComponent } from "../BaseComponent";
+import tournamentTemplate from "./tournamentCreation.html?raw";
+import { BaseComponent } from "../BaseComponent.ts";
 import { TournamentController } from "../../controllers/tournament.controller.ts";
 import type { TournamentCreationBody, RegisterPlayerBody, User, Tournament } from "../../types/tournament.types.ts";
 
 
-export class TournamentSignup extends BaseComponent {
+export class TournamentCreation extends BaseComponent {
     private playerContainer: HTMLElement;
     private addedPlayersCount: number = 0;
     private tournamentForm: HTMLFormElement;
@@ -85,7 +85,8 @@ export class TournamentSignup extends BaseComponent {
             const controller = TournamentController.getInstance();
             const tournament = await controller.createTournament(body) as Tournament;
             this.showMessage("Tournament was successfully created");
-            // console.log(JSON.stringify(tournament));
+            console.log(JSON.stringify(tournament));
+            console.log("after redirection")
         } catch (err: any) {
             this.showMessage(err.message || "Could not create tournament", "error");
         }
