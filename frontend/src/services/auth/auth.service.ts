@@ -1,4 +1,11 @@
-import type { User, LoginResponse, LoginBody, SignUpBody, SignUpResponse } from "../../types/auth.types";
+import type {
+    User,
+    LoginResponse,
+    LoginBody,
+    SignupForm,
+    RegisterBody,
+    RegisterResponse,
+} from "../../types/auth.types";
 
 export class AuthService {
     private static instance: AuthService;
@@ -6,7 +13,6 @@ export class AuthService {
     private listeners: ((user: User | null) => void)[] = [];
 
     private constructor() {
-        // Check if user is already logged in (from localStorage/sessionStorage)
         this.loadUserFromStorage();
     }
 
@@ -46,20 +52,26 @@ export class AuthService {
         this.notifyListeners();
     }
 
-    async signUp(credentials: SignUpBody): Promise<void> {
+    async signUp(credentials: SignupForm): Promise<void> {
+        const requestBody: RegisterBody = {
+            username: credentials.username,
+            email: credentials.email,
+            password: credentials.password,
+        };
+
         const response = await fetch("/api/auth/signup", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(credentials),
+            body: JSON.stringify(requestBody),
         });
 
         if (!response.ok) {
             throw new Error("Sign up failed");
         }
 
-        const data: SignUpResponse = await response.json();
+        const data: RegisterResponse = await response.json();
         const user: User = data.user;
         this.currentUser = user;
         this.saveUserToStorage(user);

@@ -26,18 +26,6 @@ export interface RegisterResponse {
     user: User;
 }
 
-export interface SignUpBody {
-    username: string;
-    email: string;
-    password: string;
-    // confirmPassword?: string; // for frontend validation
-}
-
-export interface SignUpResponse {
-    token: string;
-    user: User;
-}
-
 export interface UpdateProfileBody {
     username?: string;
     email?: string;
@@ -46,4 +34,11 @@ export interface UpdateProfileBody {
 
 export interface UpdateProfileResponse {
     user: User;
+}
+
+export interface SignupForm {
+    username: string;
+    email: string;
+    password: string;
+    confirmPassword?: string; // for frontend validation
 }

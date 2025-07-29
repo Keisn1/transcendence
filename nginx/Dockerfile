@@ -21,7 +21,7 @@ COPY wait-for-certs.sh /wait-for-certs.sh
 RUN chmod +x /wait-for-certs.sh
 
 # Expose HTTP/S port
-EXPOSE 80 8443
+EXPOSE 80 443
 
 # Start Nginx only after certs are present
 CMD ["/wait-for-certs.sh"]

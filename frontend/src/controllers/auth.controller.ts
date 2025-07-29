@@ -1,6 +1,6 @@
 import { AuthService } from "../services/auth/auth.service.ts";
 import Router from "../router";
-import type { SignUpBody } from "../types/auth.types.ts";
+import { type SignupForm } from "../types/auth.types.ts";
 
 export class AuthController {
     private static instance: AuthController;
@@ -39,8 +39,8 @@ export class AuthController {
         this.router.navigateTo(this.previousRoute);
     }
 
-    public async signUp(credentials: SignUpBody): Promise<void> {
-        await this.authService.signUp(credentials);
+    public async signUp(formData: SignupForm): Promise<void> {
+        await this.authService.signUp(formData);
         this.router.navigateTo("/profile");
     }
 
