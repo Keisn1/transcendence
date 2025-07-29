@@ -44,7 +44,7 @@ export class TournamentService {
 
 		if (!response.ok) throw new Error("Couldn’t create tournament");
 
-		const { tournament } = await response.json() as { tournament: Tournament };
+		const tournament = await response.json() as Tournament;
 		return tournament;
 	}
 }

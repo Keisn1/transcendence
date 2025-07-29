@@ -17,10 +17,8 @@ export interface TournamentCreationBody {
 
 export interface Tournament {
 	id: string;
-	name?: string;
 	playerIds: string[];
 	players?: User[];
-	bestOf?: number;
 	bracket: BracketMatch[];
 	createdAt: string;
 }
@@ -30,5 +28,5 @@ export interface BracketMatch {
 	player1Id: string;
 	player2Id: string;
 	round:     number;
-	// result?:   string; 
+	// result?:   string;
 }

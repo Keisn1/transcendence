@@ -151,7 +151,6 @@ export function setupMockApi() {
         }
 
         if (urlString === "/api/tournament" && options?.method === "POST") {
-    		// console.log("enters mockAPI");
             const authHeader = options.headers
                 ? (options.headers as Record<string, string>)["Authorization"]
                 : null;
@@ -188,9 +187,9 @@ export function setupMockApi() {
 
             const tournament = {
                 id: `t${Date.now()}`,
-                userIds,
+                playerIds: userIds,
                 players: players.map(({ password, ...u }) => u), 
-                bracket,
+                bracket: bracket,
                 createdAt: new Date().toISOString(),
             };
 

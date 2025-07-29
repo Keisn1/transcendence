@@ -3,7 +3,7 @@ import playerTemplate from "./player.html?raw";
 import tournamentTemplate from "./tournament.html?raw";
 import { BaseComponent } from "../BaseComponent";
 import { TournamentController } from "../../controllers/tournament.controller.ts";
-import type { TournamentCreationBody, RegisterPlayerBody, User } from "../../types/tournament.types.ts";
+import type { TournamentCreationBody, RegisterPlayerBody, User, Tournament } from "../../types/tournament.types.ts";
 
 
 export class TournamentSignup extends BaseComponent {
@@ -83,9 +83,9 @@ export class TournamentSignup extends BaseComponent {
 
         try {
             const controller = TournamentController.getInstance();
-            const tournament = await controller.createTournament(body);
+            const tournament = await controller.createTournament(body) as Tournament;
             this.showMessage("Tournament was successfully created");
-            console.log(tournament);
+            // console.log(JSON.stringify(tournament));
         } catch (err: any) {
             this.showMessage(err.message || "Could not create tournament", "error");
         }
