@@ -1,11 +1,11 @@
-import type { TournamentCreationBody, RegisterPlayerBody, User, Tournament } from "../types/tournament.types.ts";
-import { TournamentService } from "../services/tournament/tournament.service.ts"
 import Router from "../router";
+import { TournamentService } from "../services/tournament/tournament.service.ts"
+import type { TournamentCreationBody, RegisterPlayerBody, User, Tournament } from "../types/tournament.types.ts";
 
 export class TournamentController {
+	private static instance: TournamentController;
 	private tournamentService: TournamentService;
 	private router: Router;
-	private static instance: TournamentController;
 
 	private constructor(router: Router) {
 		this.tournamentService = TournamentService.getInstance();
@@ -21,7 +21,6 @@ export class TournamentController {
 
 	public async registerPlayer(userCredentials: RegisterPlayerBody): Promise<User> {
 		const user = await this.tournamentService.registerPlayer(userCredentials);
-		// this.router.navigateTo(""); // TODO: does it need to navigate to somewhere else?
 		return user;
 	}
 

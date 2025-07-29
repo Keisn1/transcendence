@@ -1,5 +1,5 @@
-import type { TournamentCreationBody, RegisterPlayerBody, User, Tournament } from "../../types/tournament.types.ts";
 import { AuthService } from "../auth/auth.service";
+import type { TournamentCreationBody, RegisterPlayerBody, User, Tournament } from "../../types/tournament.types.ts";
 
 export class TournamentService {
 	private static instance: TournamentService;
@@ -26,16 +26,14 @@ export class TournamentService {
 			body: JSON.stringify(userCredentials),
 		});
 
-		if (!response.ok) {
-			throw new Error("Player registration failed");
-		}
+		if (!response.ok) throw new Error("Player registration failed");
 
 		const { user } = await response.json() as { user: User };
 		return user;
 	}
 
 	async createTournament(body: TournamentCreationBody): Promise<Tournament> {
-		const res = await fetch("/api/tournament", {
+		const response = await fetch("/api/tournament", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -43,12 +41,10 @@ export class TournamentService {
 			},
 			body: JSON.stringify(body),
 		});
-		// console.log(body);
-		// console.log(res.ok);
-		// console.log("status:", res.status, "statusText:", res.statusText);
-		if (!res.ok) throw new Error("Couldn’t create tournament");
 
-		return res.json();
+		if (!response.ok) throw new Error("Couldn’t create tournament");
+
+		const { tournament } = await response.json() as { tournament: Tournament };
+		return tournament;
 	}
-
 }

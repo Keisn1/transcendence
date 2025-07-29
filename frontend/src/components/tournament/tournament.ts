@@ -1,9 +1,9 @@
 // import { TournamentController } from "../../controllers/tournament.controller.ts";
-import { BaseComponent } from "../BaseComponent";
 import playerTemplate from "./player.html?raw";
 import tournamentTemplate from "./tournament.html?raw";
-import type { TournamentCreationBody, RegisterPlayerBody, User } from "../../types/tournament.types.ts";
+import { BaseComponent } from "../BaseComponent";
 import { TournamentController } from "../../controllers/tournament.controller.ts";
+import type { TournamentCreationBody, RegisterPlayerBody, User } from "../../types/tournament.types.ts";
 
 
 export class TournamentSignup extends BaseComponent {
@@ -41,6 +41,7 @@ export class TournamentSignup extends BaseComponent {
         removeBtn.addEventListener("click", () => {
             slot.remove();
             this.addedPlayersCount--;
+            this.registeredPlayers.splice(index - 1, 1);
         });
 
         const registerBtn = slot.querySelector<HTMLButtonElement>(".register-player-btn")!;
@@ -49,7 +50,6 @@ export class TournamentSignup extends BaseComponent {
 
     private async registerPlayer(index: number, e: Event) {
         e.preventDefault();
-
         const emailElement = this.container.querySelector<HTMLInputElement>(`#email-${index}`);
         const passwordElement = this.container.querySelector<HTMLInputElement>(`#password-${index}`);
         
@@ -87,7 +87,7 @@ export class TournamentSignup extends BaseComponent {
             this.showMessage("Tournament was successfully created");
             console.log(tournament);
         } catch (err: any) {
-            this.showError(err.message || "Could not create tournament");
+            this.showMessage(err.message || "Could not create tournament", "error");
         }
     }
 
