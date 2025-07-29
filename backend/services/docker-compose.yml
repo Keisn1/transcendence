@@ -1,0 +1,13 @@
+services:
+  file-service:
+    build:
+      context: ./file
+      dockerfile: Dockerfile.dev # Use dev dockerfile
+    container_name: file-service
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./file:/app
+      - /app/node_modules # Prevent overwriting
+      - ./file/uploads:/app/uploads
+    command: npm run dev

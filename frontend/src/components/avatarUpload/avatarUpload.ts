@@ -53,7 +53,7 @@ export class AvatarUpload extends BaseComponent {
             const formData = new FormData();
             formData.append("avatar", file);
 
-            const response = await fetch("/api/profile/avatar", {
+            const response = await fetch("/api/upload/avatar", {
                 method: "PUT",
                 body: formData,
                 headers: {

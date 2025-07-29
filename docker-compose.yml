@@ -10,6 +10,15 @@ services:
     volumes:
       - ./vault/init:/vault/init # Required for .env access
 
+  # file-service:
+  #   build:
+  #     context: ./backend/services/file
+  #   container_name: file-service
+  #   ports:
+  #     - "3001:3001"
+  # volumes:
+  #   - ./uploads:/app/uploads
+
   nginx:
     build: ./nginx
     container_name: nginx

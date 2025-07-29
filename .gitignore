@@ -1,5 +1,6 @@
 /roam/transcendence.db
 /node_modules/
+*node_modules*
 */node_modules/*
 .env
 .env.local
@@ -16,3 +17,4 @@
 !/vault/init/entrypoint.sh
 !/vault/init/vault-auto-init-unseal.sh
 !/vault/init/vault.hcl
+/backend/services/file/uploads/

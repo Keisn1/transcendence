@@ -6,7 +6,7 @@ export function setupMockApi() {
     (window as any).fetch = async (url: string | Request, options?: RequestInit): Promise<Response> => {
         const urlString = typeof url === "string" ? url : url.url;
 
-        if (urlString === "/api/profile/avatar" && options?.method === "POST") {
+        if (urlString === "/api/upload/avatar" && options?.method === "POST") {
             const authHeader = options.headers ? (options.headers as Record<string, string>)["Authorization"] : null;
             const token = authHeader || localStorage.getItem("authToken");
             if (!token) return new Response("Unauthorized", { status: 401 });
