@@ -1,4 +1,4 @@
-import AbstractView from "./views/AbstractView";
+import AbstractView from "./views/AbstractView.ts";
 import DashboardView from "./views/DashboardView.ts";
 import GameView from "./views/GameView.ts";
 import ProfileView from "./views/ProfileView.ts";

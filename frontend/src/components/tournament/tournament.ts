@@ -1,5 +1,5 @@
 // import { TournamentController } from "../../controllers/tournament.controller.ts";
-import { BaseComponent } from "../BaseComponent";
+import { BaseComponent } from "../BaseComponent.ts";
 import tournamentTemplate from "./tournament.html?raw";
 import type { TournamentCreationBody } from "../../types/tournament.types.ts";
 import playerTemplate from "./player.html?raw";

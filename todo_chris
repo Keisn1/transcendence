@@ -1,0 +1,35 @@
+currently fileservice is using same approle as auth.
+so, prolly specific tokens for that connection.
+
+gdpr:
+
+GDPR compliance:
+
+in user settings, privacy tab.
+
+user has the rights to know what data is stored, and for how long
+-username
+-email
+-passwordhash
+-2fa secret
+-stats of games played for example
+
+
+needs anonymization and deletion button
+
+upon click of anonymization:
+first confirm that the user really wants to do it, and be clear
+that the account will be unusable after anonymization,
+and that you will be logged out after clicking the button,
+after confirming, scramble all data completely.
+with no relation to the user at all. scramble it all.
+or rather, generate something random to replace it.
+then log the user out, and throw him back to homepage.
+
+
+for deletion, same info of it being unusable and unrecoverable,
+then wipe the database of every last bit of information we have of the user
+and then throw him back to the homepage logged out.
+
+
+

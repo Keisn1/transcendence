@@ -1,5 +1,5 @@
 import { AuthService } from "../services/auth/auth.service.ts";
-import Router from "../router";
+import Router from "../router.ts";
 import { type SignupForm } from "../types/auth.types.ts";
 
 export class AuthController {

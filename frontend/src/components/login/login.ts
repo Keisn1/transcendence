@@ -1,5 +1,5 @@
 import { AuthController } from "../../controllers/auth.controller.ts";
-import { BaseComponent } from "../BaseComponent";
+import { BaseComponent } from "../BaseComponent.ts";
 import loginTemplate from "./login.html?raw";
 
 export class Login extends BaseComponent {

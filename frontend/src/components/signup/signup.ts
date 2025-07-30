@@ -1,5 +1,5 @@
 import { AuthController } from "../../controllers/auth.controller.ts";
-import { BaseComponent } from "../BaseComponent";
+import { BaseComponent } from "../BaseComponent.ts";
 import signupTemplate from "./signup.html?raw";
 import { type SignupForm } from "../../types/auth.types.ts";
 

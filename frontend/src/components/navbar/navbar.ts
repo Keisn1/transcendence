@@ -1,5 +1,5 @@
 import navbarTemplate from "./navbar.html?raw";
-import { BaseComponent } from "../BaseComponent";
+import { BaseComponent } from "../BaseComponent.ts";
 import { AuthService } from "../../services/auth/auth.service.ts";
 import { AuthController } from "../../controllers/auth.controller.ts";
 import type { User } from "../../types/auth.types.ts";

@@ -1,6 +1,6 @@
 import type { TournamentCreationBody } from "../types/tournament.types.ts";
 import { TournamentService } from "../services/tournament/tournament.service.ts"
-import Router from "../router";
+import Router from "../router.ts";
 
 export class TournamentController {
 	private tournamentService: TournamentService;
