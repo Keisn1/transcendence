@@ -19,11 +19,11 @@ export interface Tournament {
 	id: string;
 	playerIds: string[];
 	players?: User[];
-	bracket: BracketMatch[];
-	createdAt: string;
+	bracket: Match[];
+	state: string;
 }
 
-export interface BracketMatch {
+export interface Match {
 	matchId: string;
 	// player1Id: string;
 	// player2Id: string;

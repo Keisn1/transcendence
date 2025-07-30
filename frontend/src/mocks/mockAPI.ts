@@ -190,7 +190,6 @@ export function setupMockApi() {
                 playerIds: userIds,
                 players: players.map(({ password, ...u }) => u), 
                 bracket: bracket,
-                createdAt: new Date().toISOString(),
             };
 
             return new Response(JSON.stringify(tournament), {

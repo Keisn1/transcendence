@@ -2,6 +2,8 @@ import AbstractView from "./AbstractView.ts";
 import { Navbar } from "../components/navbar/navbar.ts";
 import { TournamentBracket } from "../components/tournamentBracket/tournamentBracket.ts";
 import type Router from "../router.ts";
+// import type { Tournament } from "../types/tournament.types.ts";
+
 
 export default class extends AbstractView {
 	private navbar: Navbar | null = null;
@@ -15,6 +17,8 @@ export default class extends AbstractView {
 	render() {
 		this.navbar = new Navbar();
 		document.body.appendChild(this.navbar.getContainer());
+
+		// let tournament: Tournament | null = history.state?.initial ?? null; // TODO: 
 
 		this.bracketComponent = new TournamentBracket();
 		document.body.appendChild(this.bracketComponent.getContainer());

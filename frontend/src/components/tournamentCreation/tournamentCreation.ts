@@ -85,8 +85,7 @@ export class TournamentCreation extends BaseComponent {
             const controller = TournamentController.getInstance();
             const tournament = await controller.createTournament(body) as Tournament;
             this.showMessage("Tournament was successfully created");
-            console.log(JSON.stringify(tournament));
-            console.log("after redirection")
+            console.log(tournament);
         } catch (err: any) {
             this.showMessage(err.message || "Could not create tournament", "error");
         }

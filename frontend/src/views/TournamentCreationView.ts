@@ -2,6 +2,7 @@ import AbstractView from "./AbstractView.ts";
 import { Navbar } from "../components/navbar/navbar.ts";
 import { TournamentCreation } from "../components/tournamentCreation/tournamentCreation.ts";
 import type Router from "../router.ts";
+import { AuthService } from "../services/auth/auth.service.ts";
 
 export default class extends AbstractView {
     private navbar: Navbar | null = null;
@@ -13,6 +14,12 @@ export default class extends AbstractView {
     }
 
     render() {
+        const authService = AuthService.getInstance();
+        if (!authService.isAuthenticated()) {
+            this.router?.navigateTo("/login");
+            return;
+        }
+        
         this.navbar = new Navbar();
         document.body.appendChild(this.navbar.getContainer());
 

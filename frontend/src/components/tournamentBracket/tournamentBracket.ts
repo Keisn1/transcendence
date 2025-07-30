@@ -3,7 +3,7 @@ import bracketTemplate from "./tournamentBracket.html?raw";
 import matchTemplate from "./match.html?raw";
 import { TournamentController } from "../../controllers/tournament.controller.ts";
 import Router from "../../router.ts";
-import type { Tournament, BracketMatch } from "../../types/tournament.types.ts";
+import type { Tournament, Match } from "../../types/tournament.types.ts";
 
 export class TournamentBracket extends BaseComponent {
 	private listElement: HTMLUListElement;
@@ -29,7 +29,7 @@ export class TournamentBracket extends BaseComponent {
 		let tournament: Tournament | null = history.state?.initial ?? null;
 
 		this.listElement.innerHTML = "";
-		let next: BracketMatch | null = null;
+		let next: Match | null = null;
 		if (tournament?.bracket) {
 			for (const m of tournament?.bracket) {
 				const status = m.result ? "Completed" : "Pending";
