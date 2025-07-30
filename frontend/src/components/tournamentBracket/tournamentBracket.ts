@@ -3,13 +3,14 @@ import bracketTemplate from "./tournamentBracket.html?raw";
 import matchTemplate from "./match.html?raw";
 import type { Tournament, Match } from "../../types/tournament.types.ts";
 import { BracketMachine, BracketEvent, BracketState } from "./tournamentBracket.machine.ts";
-// import { TournamentService } from "../../services/tournament/tournament.service.ts";
+import { GameComponent } from "../gameComponent/gameComponent.ts";
 
 export class TournamentBracket extends BaseComponent {
     private listElement: HTMLUListElement;
     private nextDetailsElement: HTMLElement;
     private startBtn: HTMLButtonElement;
     private machine!: BracketMachine;
+    private gameComponent?: GameComponent;
 
     constructor() {
         super("div", "tournament-bracket-container");
@@ -47,7 +48,16 @@ export class TournamentBracket extends BaseComponent {
                 this.startBtn.textContent = "Finish Match";
                 this.startBtn.disabled = false;
                 this.nextDetailsElement.textContent = `Playing: ${this.nextMatchLabel(tournament)}`;
+
+                if (!this.gameComponent) {
+                    const placeholder = this.container.querySelector("#game-container-placeholder")!;
+                    this.gameComponent = new GameComponent();
+                    placeholder.appendChild(this.gameComponent.getContainer());
+                }
+
                 this.startBtn.onclick = () => {
+                    this.gameComponent?.destroy();
+                    this.gameComponent = undefined;
                     this.machine.send(BracketEvent.FINISH);
                     this.renderByState(tournament);
                 };
