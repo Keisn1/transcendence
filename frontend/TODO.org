@@ -115,3 +115,5 @@ As a registered user of the website, I want to be able to navigate to my profile
 ** TODO Loser's Game
 ** TODO Announce next game
 ** TODO Final
+* TODO build process
+- [ ] pack den build process in nen dockerfile
