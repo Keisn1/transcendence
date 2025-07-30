@@ -1,5 +1,9 @@
 currently fileservice is using same approle as auth.
 so, prolly specific tokens for that connection.
+does fileservice need secretid and vaultid?
+does it even need a approle for reading anything in the vault? if yes(only read)
+what approle am i using for backend right now
+is it the same for other services?
 
 gdpr:
 
