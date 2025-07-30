@@ -63,7 +63,7 @@ export function setupMockApi() {
             return new Response("User not found", { status: 404 });
         }
 
-        if (urlString === "/api/user/login" && options?.method === "POST") {
+        if (urlString === "/api/auth/login" && options?.method === "POST") {
             const body = JSON.parse(options.body as string);
             const user = mockUsers.find((u) => u.email === body.email && u.password === body.password);
 
@@ -84,7 +84,7 @@ export function setupMockApi() {
             }
         }
 
-        if (urlString === "/api/user/signup" && options?.method === "POST") {
+        if (urlString === "/api/auth/signup" && options?.method === "POST") {
             const body = JSON.parse(options.body as string);
 
             // Check if user already exists
@@ -114,6 +114,82 @@ export function setupMockApi() {
                     headers: { "Content-Type": "application/json" },
                 },
             );
+        }
+
+        if (urlString === "/api/verify-player" && options?.method === "POST") {
+            const authHeader = options.headers ? (options.headers as Record<string, string>)["Authorization"] : null;
+            const token = authHeader || localStorage.getItem("authToken");
+            if (!token) {
+                return new Response("Unauthorized", { status: 401 });
+            }
+
+            const { playerEmail, playerPassword } = JSON.parse(options.body as string) as {
+                playerEmail: string;
+                playerPassword: string;
+            };
+
+            const user = mockUsers.find((u) => u.email === playerEmail && u.password === playerPassword);
+
+            if (user) {
+                const { password, ...userWithoutPassword } = user;
+                return new Response(
+                    JSON.stringify({
+                        user: userWithoutPassword,
+                    }),
+                    {
+                        status: 200,
+                        headers: { "Content-Type": "application/json" },
+                    },
+                );
+            }
+
+            return new Response("Unauthorized", { status: 401 });
+        }
+
+        if (urlString === "/api/tournament" && options?.method === "POST") {
+            const authHeader = options.headers ? (options.headers as Record<string, string>)["Authorization"] : null;
+            const token = authHeader || localStorage.getItem("authToken");
+            if (!token) {
+                console.log("unauthorised");
+                return new Response("Unauthorized", { status: 401 });
+            }
+
+            const { userIds } = JSON.parse(options.body as string) as {
+                userIds: string[];
+            };
+
+            if (!userIds || userIds.length < 2) {
+                return new Response("Need at least two players", { status: 400 });
+            }
+
+            const players = userIds
+                .map((id) => mockUsers.find((u) => u.id === id))
+                .filter((u): u is (typeof mockUsers)[number] => !!u);
+
+            const bracket = [];
+            for (let i = 0; i < players.length; i += 2) {
+                const p1 = players[i];
+                const p2 = players[i + 1] ?? null;
+                bracket.push({
+                    matchId: `m${i / 2 + 1}`,
+                    player1: p1,
+                    player2: p2,
+                    round: 1,
+                    // result: null,
+                });
+            }
+
+            const tournament = {
+                id: `t${Date.now()}`,
+                playerIds: userIds,
+                players: players.map(({ password, ...u }) => u),
+                bracket: bracket,
+            };
+
+            return new Response(JSON.stringify(tournament), {
+                status: 201,
+                headers: { "Content-Type": "application/json" },
+            });
         }
 
         return originalFetch(url, options);

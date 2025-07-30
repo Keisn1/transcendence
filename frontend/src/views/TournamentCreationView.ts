@@ -1,11 +1,12 @@
 import AbstractView from "./AbstractView.ts";
 import { Navbar } from "../components/navbar/navbar.ts";
-import { TournamentSignup } from "../components/tournament/tournament.ts";
+import { TournamentCreation } from "../components/tournamentCreation/tournamentCreation.ts";
 import type Router from "../router.ts";
+import { AuthService } from "../services/auth/auth.service.ts";
 
 export default class extends AbstractView {
     private navbar: Navbar | null = null;
-    private tournamentSignup: TournamentSignup | null = null;
+    private tournamentSignup: TournamentCreation | null = null;
 
     constructor(router?: Router) {
         super(router);
@@ -13,10 +14,16 @@ export default class extends AbstractView {
     }
 
     render() {
+        const authService = AuthService.getInstance();
+        if (!authService.isAuthenticated()) {
+            this.router?.navigateTo("/login");
+            return;
+        }
+        
         this.navbar = new Navbar();
         document.body.appendChild(this.navbar.getContainer());
 
-        this.tournamentSignup = new TournamentSignup();
+        this.tournamentSignup = new TournamentCreation();
         document.body.appendChild(this.tournamentSignup.getContainer());
     }
 

@@ -3,9 +3,11 @@ import "./components/navbar/navbar.ts"; // Add this line
 import "./components/adLightbox/adLightbox.ts"; // Add this line
 import Router from "./router.ts";
 import { AuthController } from "./controllers/auth.controller.ts";
+import { TournamentController } from "./controllers/tournament.controller.ts";
 
 const router = new Router();
 AuthController.getInstance(router);
+TournamentController.getInstance(router);
 
 document.addEventListener("DOMContentLoaded", () => {
     document.body.addEventListener("click", (e: MouseEvent) => {
@@ -18,6 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Conditional mock setup
 if (import.meta.env.DEV) {
+    console.log("using mock");
     const { setupMockApi } = await import("./mocks/mockAPI.ts");
     setupMockApi();
 }
