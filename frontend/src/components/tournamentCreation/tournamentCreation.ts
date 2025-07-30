@@ -63,6 +63,7 @@ export class TournamentCreation extends BaseComponent {
         try {
             const controller = TournamentController.getInstance();
             const user = await controller.registerPlayer(body);
+            if (this.isPlayerAlreadyRegistered(user)) throw Error("Player already registered");
             console.log(user);
             this.storePlayer(user);
             this.showMessage("User registered successfully");
@@ -91,7 +92,11 @@ export class TournamentCreation extends BaseComponent {
         }
     }
 
-    public storePlayer(user: User) {
+    private isPlayerAlreadyRegistered(user: User): boolean {
+        return this.registeredPlayers.some(p => p.id === user.id);
+    }
+
+    private storePlayer(user: User) {
         this.registeredPlayers.push(user);
     }
 
