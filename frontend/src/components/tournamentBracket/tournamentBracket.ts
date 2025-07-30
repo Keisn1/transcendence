@@ -3,7 +3,7 @@ import bracketTemplate from "./tournamentBracket.html?raw";
 import matchTemplate from "./match.html?raw";
 import type { Tournament, Match } from "../../types/tournament.types.ts";
 import { BracketMachine, BracketEvent, BracketState } from "./tournamentBracket.machine.ts";
-import { TournamentService } from "../../services/tournament/tournament.service.ts";
+// import { TournamentService } from "../../services/tournament/tournament.service.ts";
 
 export class TournamentBracket extends BaseComponent {
     private listElement: HTMLUListElement;
@@ -66,7 +66,6 @@ export class TournamentBracket extends BaseComponent {
                 this.nextDetailsElement.textContent = "Tournament Complete!";
                 break;
             default:
-                // uninitialized or unknown
                 break;                
         }
     }
