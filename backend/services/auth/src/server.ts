@@ -2,6 +2,8 @@ import Fastify from "fastify";
 import { routes } from "./routes/routes";
 import jwtPlugin from "./plugins/auth.plugin";
 import dbPlugin from "./plugins/db.plugin";
+import gdprPlugin from "./plugins/gdpr.plugin";
+
 
 // //THIS IS NEW SHIT THAT CHRIS PUT HERE TO MAKE HTTPS WORK
 import fs from "fs";
@@ -28,6 +30,7 @@ if (process.env.ENV === "production") {
         vault.token = result.auth.client_token;
     };
 
+
     const start = async () => {
         try {
             await loginWithAppRole();
@@ -37,6 +40,7 @@ if (process.env.ENV === "production") {
             server.register(jwtPlugin, { jwtSecret });
             server.register(dbPlugin);
             server.register(routes, { prefix: "api" });
+            // await server.register(gdprPlugin, { vault }); // GDPR PLUGIN FOR .5
 
             await server.listen({ port: 3000, host: "0.0.0.0" });
             console.log("✅ Production server started");
@@ -58,7 +62,7 @@ if (process.env.ENV === "production") {
     server.register(jwtPlugin, { jwtSecret }); // jwtAuth decorator only
     server.register(dbPlugin);
     server.register(routes, { prefix: "api" });
-
+    
     server.listen({ port: 3000 }, (err, address) => {
         if (err) {
             console.error(err);

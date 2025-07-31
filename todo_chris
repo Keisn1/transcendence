@@ -1,17 +1,19 @@
-currently fileservice is using same approle as auth.
-so, prolly specific tokens for that connection.
-does fileservice need secretid and vaultid?
-does it even need a approle for reading anything in the vault? if yes(only read)
-what approle am i using for backend right now
-is it the same for other services?
-
 gdpr:
+
+made a template for gdpr plugin.
+it still needs
+ - 2fa check
+ - frontend
+ - db connection
+ - actual testing
+
 
 GDPR compliance:
 
 in user settings, privacy tab.
 
-user has the rights to know what data is stored, and for how long
+user has the rights to know what data is stored, and for how long // read up on it.
+
 -username
 -email
 -passwordhash
