@@ -23,6 +23,10 @@ export class GameControlsComponent extends BaseComponent {
         }
     }
 
+    onFinish(fn: () => void) {
+        // this.finishCallbacks.push(fn);
+    }
+
     private handleStart() {
         const level = this.aiSelect.value as AiLevel;
         this.setStarting();

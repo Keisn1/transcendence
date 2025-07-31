@@ -4,7 +4,7 @@ import matchTemplate from "./match.html?raw";
 import type { Tournament, Match } from "../../types/tournament.types.ts";
 import { BracketMachine, BracketEvent, BracketState } from "./tournamentBracket.machine.ts";
 import { GameComponent } from "../gameComponent/gameComponent.ts";
-import { GameControlsTournamentComponent } from "../gameControlsTournament/gameControls.ts"
+import { GameControlsTournamentComponent } from "../gameControlsTournament/gameControlsTournament.ts"
 
 export class TournamentBracket extends BaseComponent {
     // elements
@@ -44,6 +44,7 @@ export class TournamentBracket extends BaseComponent {
         const state = this.machine.getState();
 
         this.headerElement.style.display = "none";
+        this.startBtnElement.style.display = "none";
         this.nextWrapperElement.style.display = "none";
         this.allMatchesWrapperElement.style.display = "none";
 
@@ -71,6 +72,7 @@ export class TournamentBracket extends BaseComponent {
 
     private handleReadyState(tournament: Tournament): void {
         this.headerElement.style.display = "";
+        this.startBtnElement.style.display = "";
         this.nextWrapperElement.style.display = "";
         this.allMatchesWrapperElement.style.display = "";
         this.renderList(tournament.bracket);
@@ -83,27 +85,26 @@ export class TournamentBracket extends BaseComponent {
     }
     
     private handleInProgressState(tournament: Tournament): void {
-        this.nextWrapperElement.style.display = "";
-        this.startBtnElement.textContent = "Finish Match";
-        this.startBtnElement.disabled = false;
+        // this.nextWrapperElement.style.display = "";
         this.nextDetailsElement.textContent = `Playing: ${this.nextMatchLabel(tournament)}`;
 
         if (!this.gameComponent) {
             const placeholder = this.container.querySelector("#game-container-placeholder")!;
             this.gameComponent = new GameComponent(GameControlsTournamentComponent);
             placeholder.appendChild(this.gameComponent.getContainer());
-        }
 
-        this.startBtnElement.onclick = () => {
-            this.gameComponent?.destroy();
-            this.gameComponent = undefined;
-            this.machine.send(BracketEvent.FINISH);
-            this.renderByState(tournament);
-        };
+            this.gameComponent.gameControls.onFinish(() => {
+                this.gameComponent?.destroy();
+                this.gameComponent = undefined;
+                this.machine.send(BracketEvent.FINISH);
+                this.renderByState(tournament);
+            });
+        }
     }
 
     private handleMatchDoneState(tournament: Tournament): void {
         this.headerElement.style.display = "";
+        this.startBtnElement.style.display = "";
         this.nextWrapperElement.style.display = "";
         this.allMatchesWrapperElement.style.display = "";
         this.startBtnElement.textContent = this.machine.hasMoreMatches() ? "Next Match" : "See Results";

@@ -3,23 +3,25 @@ import { PongGame } from "../../game/game";
 import { BaseComponent } from "../BaseComponent";
 import { type AiLevel } from "../../game/game";
 import { GameControlsComponent } from "../gameControls/gameControls";
-import { GameControlsTournamentComponent } from "../gameControlsTournament/gameControls";
+import { GameControlsTournamentComponent } from "../gameControlsTournament/gameControlsTournament";
 
 interface IGameControls {
+    startBtn: HTMLButtonElement;
     onStart(fn: (level?: AiLevel) => void): void;
+    onFinish(fn: () => void): void;
     offStart(fn: (level?: AiLevel) => void): void;
     getContainer(): HTMLElement;
     reset(): void;
 }
 
-type ControlsCtor = (new () => GameControlsComponent) | (new () => GameControlsTournamentComponent);
+type ControlsConstructor = (new () => GameControlsComponent) | (new () => GameControlsTournamentComponent);
 
 export class GameComponent extends BaseComponent {
     private canvas: HTMLCanvasElement;
     private game: PongGame;
-    private gameControls: IGameControls;
+    public gameControls: IGameControls;
 
-    constructor(ControlsClass: ControlsCtor) {
+    constructor(ControlsClass: ControlsConstructor) {
         super("div", "game-container");
 
         this.container.innerHTML = gameTemplate;
