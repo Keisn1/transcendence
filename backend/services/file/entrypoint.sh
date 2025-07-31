@@ -21,8 +21,8 @@ done
 
 echo "✅ Vault is responding and /vault/init/.env exists."
 . /vault/init/.env
-export VAULT_ROLE_ID
-export VAULT_SECRET_ID
+export VAULT_FILESERVICE_ID
+export VAULT_FILESERVICESECRET_ID
 
 ## Securely shred the .env file after loading secrets
 #if [ -f /vault/init/.env ]; then

@@ -32,8 +32,8 @@ if (process.env.ENV === "production") {
 
     const loginWithAppRole = async () => {
         const result = await vault.write("auth/approle/login", {
-            role_id: process.env.VAULT_ROLE_ID,
-            secret_id: process.env.VAULT_SECRET_ID,
+            role_id: process.env.VAULT_FILESERVICE_ID,
+            secret_id: process.env.VAULT_FILESERVICESECRET_ID,
         });
         vault.token = result.auth.client_token;
     };
