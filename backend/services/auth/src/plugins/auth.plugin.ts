@@ -16,7 +16,13 @@ export default fp<AuthPluginOptions>(async (fastify, opts: AuthPluginOptions) =>
 
     fastify.decorate("jwtAuth", async function (request: FastifyRequest, reply: FastifyReply) {
         try {
-            await request.jwtVerify();
+            const decoded = await request.jwtVerify();
+            request.user = {
+                id: decoded.id,
+                username: decoded.username,
+                email: decoded.email,
+                avatar: decoded.avatar,
+            };
         } catch (err) {
             reply.status(401).send({ message: "Unauthorized" });
         }

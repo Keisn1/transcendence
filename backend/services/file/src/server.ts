@@ -11,7 +11,7 @@ server.register(import("@fastify/multipart"), {
 
 server.register(import("@fastify/static"), {
     root: "/app/uploads",
-    prefix: "/uploads/",
+    prefix: "/uploads",
 });
 
 // Routes

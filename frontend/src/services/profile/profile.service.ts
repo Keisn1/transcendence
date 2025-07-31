@@ -17,7 +17,7 @@ export class ProfileService {
     }
 
     async updateProfile(updates: UpdateProfileBody): Promise<void> {
-        const response = await fetch("/api/profile", {
+        const response = await fetch("/api/user", {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",

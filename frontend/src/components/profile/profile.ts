@@ -21,8 +21,8 @@ export class Profile extends BaseComponent {
 
         this.usernameEl = this.container.querySelector("#profile-username")!;
         this.emailEl = this.container.querySelector("#profile-email")!;
-        this.avatarEl = this.container.querySelector("#profile-avatar")!;
         this.avatarContainer = this.container.querySelector("#avatar-container")!;
+        this.avatarEl = this.container.querySelector("#profile-avatar")!;
 
         this.setupAvatarUpload();
         this.populateUserData();
@@ -33,8 +33,10 @@ export class Profile extends BaseComponent {
 
         if (this.usernameEl) this.usernameEl.textContent = this.user.username;
         if (this.emailEl) this.emailEl.textContent = this.user.email;
+        console.log(this.user.avatar);
         if (this.avatarEl && this.user.avatar) {
-            (this.avatarEl as HTMLImageElement).src = this.user.avatar;
+            console.log("setting source")(this.avatarEl as HTMLImageElement).src =
+                "/api/file/uploads/" + this.user.avatar;
         }
     }
 

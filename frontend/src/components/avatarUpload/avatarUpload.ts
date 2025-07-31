@@ -24,7 +24,7 @@ export class AvatarUpload extends BaseComponent {
         this.preview = this.container.querySelector("#avatar-preview")!;
 
         const user = this.authService.getCurrentUser();
-        if (user?.avatar) this.preview.src = user.avatar;
+        this.preview.src = "uploads/" + user.avatar;
 
         this.setupEvents();
     }
@@ -53,8 +53,9 @@ export class AvatarUpload extends BaseComponent {
             const formData = new FormData();
             formData.append("avatar", file);
 
-            const response = await fetch("/api/upload/avatar", {
-                method: "PUT",
+            console.log("we are uploading");
+            const response = await fetch("/api/file/upload/avatar", {
+                method: "POST",
                 body: formData,
                 headers: {
                     Authorization: `Bearer ${this.authService.getAuthToken()}`,
@@ -66,7 +67,7 @@ export class AvatarUpload extends BaseComponent {
             const data = await response.json();
 
             // Step 2: Update profile with new avatar URL
-            await this.profileService.updateProfile({ avatar: data.avatarUrl });
+            await this.profileService.updateProfile({ avatar: "/file" + data.avatarUrl });
 
             // Notify parent component
             if (this.onAvatarChange) {
@@ -76,7 +77,7 @@ export class AvatarUpload extends BaseComponent {
             console.error("Avatar upload failed:", error);
             // Reset preview on error
             const user = this.authService.getCurrentUser();
-            this.preview.src = user?.avatar || "/images/default-pfp.png";
+            this.preview.src = user?.avatar || "/uploads/default-pfp.png";
         }
     }
 }

@@ -18,9 +18,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// Conditional mock setup
-if (import.meta.env.DEV) {
-    console.log("using mock");
-    const { setupMockApi } = await import("./mocks/mockAPI.ts");
-    setupMockApi();
-}
+// // Conditional mock setup
+// if (import.meta.env.DEV) {
+//     console.log("using mock");
+//     const { setupMockApi } = await import("./mocks/mockAPI.ts");
+//     setupMockApi();
+// }

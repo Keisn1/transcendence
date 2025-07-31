@@ -7,6 +7,7 @@
 3. [X] redo the password confirmation
 4. [X] make the confirmPassword as in the backend (min_len = 8)
 5. [ ] Avatar usage
+   - [ ] rename signup route to register
 6. [ ] remove email from the login and register response
 7. [ ] integrate the tournament service
 8. [ ] test frontend with backend but without "make re"

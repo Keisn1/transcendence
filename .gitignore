@@ -18,3 +18,4 @@
 !/vault/init/vault-auto-init-unseal.sh
 !/vault/init/vault.hcl
 /backend/services/file/uploads/
+/backend/services/auth/db/

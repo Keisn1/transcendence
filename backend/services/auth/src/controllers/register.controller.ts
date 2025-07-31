@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { genSaltSync, hashSync } from "bcrypt";
-import { RegisterBody, RegisterResponse } from "../types/auth.types";
+import { RegisterBody, RegisterResponse, User } from "../types/auth.types";
 
 export default async function register(
     request: FastifyRequest<{ Body: RegisterBody }>,
@@ -15,29 +15,25 @@ export default async function register(
 
         // Store only user_id and password_hash in auth service
         const result = await request.server.db.run(
-            "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)",
-            [username, email, passwordHash],
+            "INSERT INTO users (username, email, password_hash, avatar) VALUES (?, ?, ?, ?)",
+            [username, email, passwordHash, "default-pfp.png"],
         );
 
-        const userId = result.lastID;
-
-        // Generate JWT
-        const token = request.server.jwt.sign({
-            id: userId,
+        const user: User = {
+            id: String(result.lastID),
             username: username,
             email: email,
-        });
-
-        const response: RegisterResponse = {
-            token,
-            user: {
-                id: String(userId),
-                username: username,
-                email: email,
-            },
+            avatar: "default-pfp.png",
         };
 
-        return response;
+        // Generate JWT
+        const token = request.server.jwt.sign(user);
+        const response: RegisterResponse = {
+            token,
+            user,
+        };
+
+        return reply.status(201).send(response);
     } catch (err) {
         const error = err as Error;
         console.error("Registration error:", error);
@@ -70,12 +66,15 @@ export const registerSchema = {
                 user: {
                     type: "object",
                     properties: {
-                        id: { type: "number" },
+                        id: { type: "string" },
                         username: { type: "string" },
                         email: { type: "string" },
+                        avatar: { type: "string", format: "uri-reference" },
                     },
+                    required: ["id", "username", "email", "avatar"],
                 },
             },
+            additionalProperties: false,
         },
     },
 } as const;
