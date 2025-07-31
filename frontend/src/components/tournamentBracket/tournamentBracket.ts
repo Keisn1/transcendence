@@ -6,95 +6,110 @@ import { BracketMachine, BracketEvent, BracketState } from "./tournamentBracket.
 import { GameComponent } from "../gameComponent/gameComponent.ts";
 
 export class TournamentBracket extends BaseComponent {
-    private listElement: HTMLUListElement;
+    // elements
+    private headerElement: HTMLElement;
+    private nextWrapperElement: HTMLElement;
     private nextDetailsElement: HTMLElement;
-    private startBtn: HTMLButtonElement;
+    private startBtnElement: HTMLButtonElement;
+    private allMatchesWrapperElement: HTMLElement;
+    private listElement: HTMLUListElement;
+    // states
     private machine!: BracketMachine;
     private gameComponent?: GameComponent;
-
-    private headerEl: HTMLElement;
-    private nextWrapperEl: HTMLElement;
-    private allMatchesWrapperEl: HTMLElement;
 
     constructor() {
         super("div", "tournament-bracket-container");
         this.container.innerHTML = bracketTemplate;
 
-        this.listElement = this.container.querySelector("#matches-list")!;
+        this.headerElement = this.container.querySelector("#bracket-header")!;
+        this.nextWrapperElement = this.container.querySelector("#next-match-wrapper")!;
         this.nextDetailsElement = this.container.querySelector("#next-match-details")!;
-        this.startBtn = this.container.querySelector("#start-match-btn")!;
-
-        this.headerEl = this.container.querySelector("#bracket-header")!;
-        this.nextWrapperEl = this.container.querySelector("#next-match-wrapper")!;
-        this.allMatchesWrapperEl = this.container.querySelector("#all-matches-wrapper")!;
+        this.startBtnElement = this.container.querySelector("#start-match-btn")!;
+        this.allMatchesWrapperElement = this.container.querySelector("#all-matches-wrapper")!;
+        this.listElement = this.container.querySelector("#matches-list")!;
 
         this.loadAndRender();
     }
 
     private async loadAndRender() {
         const tournament = history.state.initial as Tournament;
-
         this.machine = new BracketMachine(tournament.bracket);
-        this.machine.send(BracketEvent.LOAD);
 
+        this.machine.send(BracketEvent.LOAD);
         this.renderByState(tournament);
     }
 
-    private async renderByState(tournament: Tournament){
+    private async renderByState(tournament: Tournament): Promise<void> {
         const state = this.machine.getState();
 
-        this.headerEl.style.display = "";
-        this.nextWrapperEl.style.display = "";
-        this.allMatchesWrapperEl.style.display = "";
+        this.headerElement.style.display = "";
+        this.nextWrapperElement.style.display = "";
+        this.allMatchesWrapperElement.style.display = "";
 
         switch (state) {
             case BracketState.READY:
-                this.renderList(tournament.bracket);
-                this.nextDetailsElement.textContent = "Ready to start first match";
-                this.startBtn.disabled = false;
-                this.startBtn.onclick = () => {
-                    this.machine.send(BracketEvent.START);
-                    this.renderByState(tournament);
-                };
+                this.handleReadyState(tournament);
                 break;
             case BracketState.IN_PROGRESS:
-                this.headerEl.style.display = "none";
-                this.allMatchesWrapperEl.style.display = "none";
-                // this.nextWrapperEl.style.display = "none";
-
-                this.startBtn.textContent = "Finish Match";
-                this.startBtn.disabled = false;
-                this.nextDetailsElement.textContent = `Playing: ${this.nextMatchLabel(tournament)}`;
-
-                if (!this.gameComponent) {
-                    const placeholder = this.container.querySelector("#game-container-placeholder")!;
-                    this.gameComponent = new GameComponent();
-                    placeholder.appendChild(this.gameComponent.getContainer());
-                }
-
-                this.startBtn.onclick = () => {
-                    this.gameComponent?.destroy();
-                    this.gameComponent = undefined;
-                    this.machine.send(BracketEvent.FINISH);
-                    this.renderByState(tournament);
-                };
+                this.handleInProgressState(tournament);
                 break;
             case BracketState.MATCH_DONE:
-                this.startBtn.textContent = this.machine.hasMoreMatches() ? "Next Match" : "See Results";
-                this.startBtn.disabled = false;
-                this.nextDetailsElement.textContent = "Last result recorded";
-                this.startBtn.onclick = () => {
-                    this.machine.send(BracketEvent.NEXT);
-                    this.renderByState(tournament);
-                };
+                this.handleMatchDoneState(tournament);
                 break;
             case BracketState.COMPLETED:
-                this.renderList(tournament.bracket);
-                this.nextDetailsElement.textContent = "Tournament Complete!";
+                this.handleCompletedState(tournament);
                 break;
             default:
                 break;                
         }
+    }
+
+    private handleReadyState(tournament: Tournament): void {
+        this.renderList(tournament.bracket);
+        this.nextDetailsElement.textContent = "Ready to start first match";
+        this.startBtnElement.disabled = false;
+        this.startBtnElement.onclick = () => {
+            this.machine.send(BracketEvent.START);
+            this.renderByState(tournament);
+        };
+    }
+    
+    private handleInProgressState(tournament: Tournament): void {
+        this.headerElement.style.display = "none";
+        this.allMatchesWrapperElement.style.display = "none";
+        // this.nextWrapperEl.style.display = "none";
+
+        this.startBtnElement.textContent = "Finish Match";
+        this.startBtnElement.disabled = false;
+        this.nextDetailsElement.textContent = `Playing: ${this.nextMatchLabel(tournament)}`;
+
+        if (!this.gameComponent) {
+            const placeholder = this.container.querySelector("#game-container-placeholder")!;
+            this.gameComponent = new GameComponent();
+            placeholder.appendChild(this.gameComponent.getContainer());
+        }
+
+        this.startBtnElement.onclick = () => {
+            this.gameComponent?.destroy();
+            this.gameComponent = undefined;
+            this.machine.send(BracketEvent.FINISH);
+            this.renderByState(tournament);
+        };
+    }
+
+    private handleMatchDoneState(tournament: Tournament): void {
+        this.startBtnElement.textContent = this.machine.hasMoreMatches() ? "Next Match" : "See Results";
+        this.startBtnElement.disabled = false;
+        this.nextDetailsElement.textContent = "Last result recorded";
+        this.startBtnElement.onclick = () => {
+            this.machine.send(BracketEvent.NEXT);
+            this.renderByState(tournament);
+        };
+    }
+
+    private handleCompletedState(tournament: Tournament): void {
+        this.renderList(tournament.bracket);
+        this.nextDetailsElement.textContent = "Tournament Complete!";
     }
 
     private renderList(bracket: Match[]) {
