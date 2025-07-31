@@ -12,6 +12,10 @@ export class TournamentBracket extends BaseComponent {
     private machine!: BracketMachine;
     private gameComponent?: GameComponent;
 
+    private headerEl: HTMLElement;
+    private nextWrapperEl: HTMLElement;
+    private allMatchesWrapperEl: HTMLElement;
+
     constructor() {
         super("div", "tournament-bracket-container");
         this.container.innerHTML = bracketTemplate;
@@ -19,6 +23,10 @@ export class TournamentBracket extends BaseComponent {
         this.listElement = this.container.querySelector("#matches-list")!;
         this.nextDetailsElement = this.container.querySelector("#next-match-details")!;
         this.startBtn = this.container.querySelector("#start-match-btn")!;
+
+        this.headerEl = this.container.querySelector("#bracket-header")!;
+        this.nextWrapperEl = this.container.querySelector("#next-match-wrapper")!;
+        this.allMatchesWrapperEl = this.container.querySelector("#all-matches-wrapper")!;
 
         this.loadAndRender();
     }
@@ -34,6 +42,11 @@ export class TournamentBracket extends BaseComponent {
 
     private async renderByState(tournament: Tournament){
         const state = this.machine.getState();
+
+        this.headerEl.style.display = "";
+        this.nextWrapperEl.style.display = "";
+        this.allMatchesWrapperEl.style.display = "";
+
         switch (state) {
             case BracketState.READY:
                 this.renderList(tournament.bracket);
@@ -45,6 +58,10 @@ export class TournamentBracket extends BaseComponent {
                 };
                 break;
             case BracketState.IN_PROGRESS:
+                this.headerEl.style.display = "none";
+                this.allMatchesWrapperEl.style.display = "none";
+                // this.nextWrapperEl.style.display = "none";
+
                 this.startBtn.textContent = "Finish Match";
                 this.startBtn.disabled = false;
                 this.nextDetailsElement.textContent = `Playing: ${this.nextMatchLabel(tournament)}`;
