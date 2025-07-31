@@ -3,13 +3,14 @@ import { PongGame } from "../../game/game";
 import { BaseComponent } from "../BaseComponent";
 import { type AiLevel } from "../../game/game";
 import { GameControlsComponent } from "../gameControls/gameControls";
+import { GameControlsTournamentComponent } from "../gameControlsTournament/gameControls";
 
 export class GameComponent extends BaseComponent {
     private canvas: HTMLCanvasElement;
     private game: PongGame;
-    private gameControls: GameControlsComponent;
+    private gameControls: GameControlsComponent | GameControlsTournamentComponent;
 
-    constructor() {
+    constructor(GameControlsComponent: new () => GameControlsComponent | GameControlsTournamentComponent) {
         super("div", "game-container");
 
         this.container.innerHTML = gameTemplate;
