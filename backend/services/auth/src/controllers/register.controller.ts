@@ -16,14 +16,14 @@ export default async function register(
         // Store only user_id and password_hash in auth service
         const result = await request.server.db.run(
             "INSERT INTO users (username, email, password_hash, avatar) VALUES (?, ?, ?, ?)",
-            [username, email, passwordHash, "default-pfp.png"],
+            [username, email, passwordHash, "/uploads/default-pfp.png"],
         );
 
         const user: User = {
             id: String(result.lastID),
             username: username,
             email: email,
-            avatar: "default-pfp.png",
+            avatar: "/uploads/default-pfp.png",
         };
 
         // Generate JWT

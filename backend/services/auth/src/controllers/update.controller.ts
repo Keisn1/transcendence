@@ -4,7 +4,7 @@ import { UpdateUserBody, UpdateUserResponse } from "../types/auth.types";
 
 export default async function update(request: FastifyRequest, reply: FastifyReply): Promise<UpdateUserResponse> {
     const id = request.user.id;
-    const { username, email, password } = request.body as UpdateUserBody;
+    const { username, email, password, avatar } = request.body as UpdateUserBody;
 
     const fields: string[] = [];
     const values: any[] = [];
@@ -23,6 +23,10 @@ export default async function update(request: FastifyRequest, reply: FastifyRepl
         fields.push("password_hash = ?");
         values.push(passwordHash);
     }
+    if (avatar) {
+        fields.push("avatar = ?");
+        values.push(avatar);
+    }
 
     if (fields.length === 0) {
         return reply.status(400).send({ error: "No valid fields to update" });
@@ -37,10 +41,10 @@ export default async function update(request: FastifyRequest, reply: FastifyRepl
         if (result.changes === 0) {
             return reply.status(404).send({ error: "User not found" });
         }
-
-        const [updated] = await request.server.db.query("SELECT id, username, email FROM users WHERE id = ?", [id]);
-
-        return updated;
+        const [updated] = await request.server.db.query("SELECT id, username, email, avatar FROM users WHERE id = ?", [
+            id,
+        ]);
+        return reply.status(200).send(updated);
     } catch (err: any) {
         request.log.error(err);
         if (err.message.includes("UNIQUE constraint failed")) {
@@ -68,6 +72,7 @@ export const updateUserSchema = {
                 id: { type: "number" },
                 username: { type: "string" },
                 email: { type: "string" },
+                avatar: { type: "string", format: "uri-reference" },
             },
         },
     },

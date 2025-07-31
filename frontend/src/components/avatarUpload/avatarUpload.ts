@@ -23,8 +23,8 @@ export class AvatarUpload extends BaseComponent {
         this.fileInput = this.container.querySelector("#avatar-input")!;
         this.preview = this.container.querySelector("#avatar-preview")!;
 
-        const user = this.authService.getCurrentUser();
-        this.preview.src = "uploads/" + user.avatar;
+        const user = this.authService.getCurrentUser()!;
+        this.preview.src = user.avatar;
 
         this.setupEvents();
     }
@@ -75,9 +75,6 @@ export class AvatarUpload extends BaseComponent {
             }
         } catch (error) {
             console.error("Avatar upload failed:", error);
-            // Reset preview on error
-            const user = this.authService.getCurrentUser();
-            this.preview.src = user?.avatar || "/uploads/default-pfp.png";
         }
     }
 }

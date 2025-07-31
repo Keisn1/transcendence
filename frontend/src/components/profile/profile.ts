@@ -10,7 +10,6 @@ export class Profile extends BaseComponent {
     private avatarUpload: AvatarUpload | null = null;
     private usernameEl: HTMLElement;
     private emailEl: HTMLElement;
-    private avatarEl: HTMLImageElement;
     private avatarContainer: HTMLElement;
 
     constructor() {
@@ -22,7 +21,6 @@ export class Profile extends BaseComponent {
         this.usernameEl = this.container.querySelector("#profile-username")!;
         this.emailEl = this.container.querySelector("#profile-email")!;
         this.avatarContainer = this.container.querySelector("#avatar-container")!;
-        this.avatarEl = this.container.querySelector("#profile-avatar")!;
 
         this.setupAvatarUpload();
         this.populateUserData();
@@ -30,14 +28,8 @@ export class Profile extends BaseComponent {
 
     private populateUserData() {
         if (!this.user) return;
-
         if (this.usernameEl) this.usernameEl.textContent = this.user.username;
         if (this.emailEl) this.emailEl.textContent = this.user.email;
-        console.log(this.user.avatar);
-        if (this.avatarEl && this.user.avatar) {
-            console.log("setting source")(this.avatarEl as HTMLImageElement).src =
-                "/api/file/uploads/" + this.user.avatar;
-        }
     }
 
     private setupAvatarUpload() {

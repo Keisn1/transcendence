@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { compareSync } from "bcrypt";
-import { User, LoginBody, LoginResponse } from "../types/auth.types";
+import { LoginBody, LoginResponse } from "../types/auth.types";
 
 export default async function login(
     request: FastifyRequest<{ Body: LoginBody }>,
