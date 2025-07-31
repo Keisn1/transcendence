@@ -2,17 +2,9 @@ import gameTemplate from "./game.html?raw";
 import { PongGame } from "../../game/game";
 import { BaseComponent } from "../BaseComponent";
 import { type AiLevel } from "../../game/game";
-import { GameControlsComponent } from "../gameControls/gameControls";
-import { GameControlsTournamentComponent } from "../gameControlsTournament/gameControlsTournament";
-
-interface IGameControls {
-    startBtn: HTMLButtonElement;
-    onStart(fn: (level?: AiLevel) => void): void;
-    onFinish(fn: () => void): void;
-    offStart(fn: (level?: AiLevel) => void): void;
-    getContainer(): HTMLElement;
-    reset(): void;
-}
+import { GameControlsComponent } from "../gameControls/gameControlsGame/gameControls";
+import { GameControlsTournamentComponent } from "../gameControls/gameControlsTournament/gameControlsTournament";
+import type IGameControls from "../gameControls/IGameControls";
 
 type ControlsConstructor = (new () => GameControlsComponent) | (new () => GameControlsTournamentComponent);
 

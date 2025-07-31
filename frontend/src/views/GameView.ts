@@ -2,7 +2,7 @@ import AbstractView from "./AbstractView.ts";
 import { Navbar } from "../components/navbar/navbar.ts";
 import { GameComponent } from "../components/gameComponent/gameComponent.ts";
 import Router from "../router.ts";
-import { GameControlsComponent } from "../components/gameControls/gameControls.ts";
+import { GameControlsComponent } from "../components/gameControls/gameControlsGame/gameControls.ts";
 
 export default class extends AbstractView {
     private navbar: Navbar | null = null;

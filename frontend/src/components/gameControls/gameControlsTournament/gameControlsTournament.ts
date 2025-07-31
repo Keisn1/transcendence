@@ -1,11 +1,11 @@
-import { BaseComponent } from "../BaseComponent";
-import gameControlsTemplate from "./gameControls.html?raw";
+import { BaseComponent } from "../../BaseComponent";
+import gameControlsTemplate from "./gameControlsTournament.html?raw";
+import type IGameControls from "../IGameControls";
 
-export class GameControlsTournamentComponent extends BaseComponent {
+export class GameControlsTournamentComponent extends BaseComponent implements IGameControls {
     public startBtn: HTMLButtonElement;
     private started = false;
-
-    private startCallbacks:  Array<() => void> = [];
+    private startCallbacks: Array<() => void> = [];
     private finishCallbacks: Array<() => void> = [];
 
     constructor() {
@@ -15,19 +15,27 @@ export class GameControlsTournamentComponent extends BaseComponent {
         this.startBtn.addEventListener("click", this.handleClick.bind(this));
     }
 
-    onStart(fn: () => void) {
-        this.startCallbacks.push(fn);
+    onStart(fn: (level?: any) => void) {
+        this.startCallbacks.push(() => fn());
+    }
+
+    offStart(fn: (level?: any) => void) {
+        this.startCallbacks = this.startCallbacks.filter(cb => cb !== fn);
     }
 
     onFinish(fn: () => void) {
         this.finishCallbacks.push(fn);
     }
 
+    offFinish(fn: () => void) {
+        this.finishCallbacks = this.finishCallbacks.filter(cb => cb !== fn);
+    }
+
     private handleClick() {
         if (!this.started) {
             this.started = true;
             this.startBtn.textContent = "Finish Match";
-            this.startCallbacks.forEach(fn => fn());
+        this.startCallbacks.forEach(fn => fn());
         } else {
             this.finishCallbacks.forEach(fn => fn());
             this.reset();
@@ -38,15 +46,5 @@ export class GameControlsTournamentComponent extends BaseComponent {
         this.started = false;
         this.startBtn.disabled = false;
         this.startBtn.textContent = "Start Game";
-    }
-
-    offStart(fn: () => void) {
-        const i = this.startCallbacks.indexOf(fn);
-        if (i >= 0) this.startCallbacks.splice(i, 1);
-    }
-
-    offFinish(fn: () => void) {
-        const i = this.finishCallbacks.indexOf(fn);
-        if (i >= 0) this.finishCallbacks.splice(i, 1);
     }
 }

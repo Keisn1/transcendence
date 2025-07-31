@@ -4,7 +4,7 @@ import matchTemplate from "./match.html?raw";
 import type { Tournament, Match } from "../../types/tournament.types.ts";
 import { BracketMachine, BracketEvent, BracketState } from "./tournamentBracket.machine.ts";
 import { GameComponent } from "../gameComponent/gameComponent.ts";
-import { GameControlsTournamentComponent } from "../gameControlsTournament/gameControlsTournament.ts"
+import { GameControlsTournamentComponent } from "../gameControls/gameControlsTournament/gameControlsTournament.ts"
 
 export class TournamentBracket extends BaseComponent {
     // elements
@@ -93,12 +93,14 @@ export class TournamentBracket extends BaseComponent {
             this.gameComponent = new GameComponent(GameControlsTournamentComponent);
             placeholder.appendChild(this.gameComponent.getContainer());
 
-            this.gameComponent.gameControls.onFinish(() => {
-                this.gameComponent?.destroy();
-                this.gameComponent = undefined;
-                this.machine.send(BracketEvent.FINISH);
-                this.renderByState(tournament);
-            });
+            if (this.gameComponent.gameControls.onFinish) {
+                this.gameComponent.gameControls.onFinish(() => {
+                    this.gameComponent?.destroy();
+                    this.gameComponent = undefined;
+                    this.machine.send(BracketEvent.FINISH);
+                    this.renderByState(tournament);
+                });
+            }
         }
     }
 

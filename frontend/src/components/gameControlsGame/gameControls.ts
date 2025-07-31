@@ -1,6 +1,6 @@
-import { BaseComponent } from "../BaseComponent";
+import { BaseComponent } from "../../BaseComponent";
 import gameControlsTemplate from "./gameControls.html?raw";
-import { type AiLevel } from "../../game/game";
+import { type AiLevel } from "../../../game/game";
 
 export class GameControlsComponent extends BaseComponent {
     private startBtn: HTMLButtonElement;
