@@ -42,29 +42,36 @@ export class TournamentBracket extends BaseComponent {
     private async renderByState(tournament: Tournament): Promise<void> {
         const state = this.machine.getState();
 
-        this.headerElement.style.display = "";
-        this.nextWrapperElement.style.display = "";
-        this.allMatchesWrapperElement.style.display = "";
+        this.headerElement.style.display = "none";
+        this.nextWrapperElement.style.display = "none";
+        this.allMatchesWrapperElement.style.display = "none";
 
         switch (state) {
             case BracketState.READY:
                 this.handleReadyState(tournament);
                 break;
+
             case BracketState.IN_PROGRESS:
                 this.handleInProgressState(tournament);
                 break;
+
             case BracketState.MATCH_DONE:
                 this.handleMatchDoneState(tournament);
                 break;
+
             case BracketState.COMPLETED:
                 this.handleCompletedState(tournament);
                 break;
+
             default:
                 break;                
         }
     }
 
     private handleReadyState(tournament: Tournament): void {
+        this.headerElement.style.display = "";
+        this.nextWrapperElement.style.display = "";
+        this.allMatchesWrapperElement.style.display = "";
         this.renderList(tournament.bracket);
         this.nextDetailsElement.textContent = "Ready to start first match";
         this.startBtnElement.disabled = false;
@@ -75,10 +82,7 @@ export class TournamentBracket extends BaseComponent {
     }
     
     private handleInProgressState(tournament: Tournament): void {
-        this.headerElement.style.display = "none";
-        this.allMatchesWrapperElement.style.display = "none";
-        // this.nextWrapperEl.style.display = "none";
-
+        this.nextWrapperElement.style.display = "";
         this.startBtnElement.textContent = "Finish Match";
         this.startBtnElement.disabled = false;
         this.nextDetailsElement.textContent = `Playing: ${this.nextMatchLabel(tournament)}`;
@@ -98,6 +102,9 @@ export class TournamentBracket extends BaseComponent {
     }
 
     private handleMatchDoneState(tournament: Tournament): void {
+        this.headerElement.style.display = "";
+        this.nextWrapperElement.style.display = "";
+        this.allMatchesWrapperElement.style.display = "";
         this.startBtnElement.textContent = this.machine.hasMoreMatches() ? "Next Match" : "See Results";
         this.startBtnElement.disabled = false;
         this.nextDetailsElement.textContent = "Last result recorded";
