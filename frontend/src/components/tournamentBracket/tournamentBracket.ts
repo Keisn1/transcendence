@@ -85,7 +85,6 @@ export class TournamentBracket extends BaseComponent {
     }
     
     private handleInProgressState(tournament: Tournament): void {
-        // this.nextWrapperElement.style.display = "";
         this.nextDetailsElement.textContent = `Playing: ${this.nextMatchLabel(tournament)}`;
 
         if (!this.gameComponent) {
@@ -95,6 +94,13 @@ export class TournamentBracket extends BaseComponent {
 
             if (this.gameComponent.gameControls.onFinish) {
                 this.gameComponent.gameControls.onFinish(() => {
+                    const winner = this.gameComponent!.getResult();
+                    const matchIndex = tournament.bracket.findIndex(m => !m.result)!;
+                    tournament.bracket[matchIndex].result = winner;
+                    
+                    console.log(winner);
+                    console.log(tournament.bracket[matchIndex].result);
+
                     this.gameComponent?.destroy();
                     this.gameComponent = undefined;
                     this.machine.send(BracketEvent.FINISH);

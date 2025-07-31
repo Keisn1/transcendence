@@ -1,7 +1,7 @@
 import gameTemplate from "./game.html?raw";
 import { PongGame } from "../../game/game";
 import { BaseComponent } from "../BaseComponent";
-import { type AiLevel } from "../../game/game";
+import { type AiLevel, type Winner } from "../../game/game";
 import { GameControlsComponent } from "../gameControls/gameControlsGame/gameControls";
 import { GameControlsTournamentComponent } from "../gameControls/gameControlsTournament/gameControlsTournament";
 import type IGameControls from "../gameControls/IGameControls";
@@ -39,6 +39,10 @@ export class GameComponent extends BaseComponent {
 
     async play() {
         await this.game.start();
+    }
+
+    public getResult(): Winner {
+        return this.game.getResult();
     }
 
     destroy() {
