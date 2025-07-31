@@ -4,7 +4,6 @@ import uploadAvatar from "./controllers/upload.controller";
 import { routes } from "./routes/routes";
 import jwtPlugin from "./plugins/auth.plugin";
 
-
 // //THIS IS NEW SHIT THAT CHRIS PUT HERE TO MAKE HTTPS WORK
 import fs from "fs";
 import vaultLib from "node-vault";
@@ -17,8 +16,6 @@ import vaultLib from "node-vault";
 //     root: "/app/uploads",
 //     prefix: "/uploads/",
 // });
-
-
 
 if (process.env.ENV === "production") {
     const server = Fastify({
@@ -44,14 +41,19 @@ if (process.env.ENV === "production") {
     const start = async () => {
         try {
             await loginWithAppRole();
-            const secretData = await waitForVaultSecret(vault, "/secret/data/jwt", 60, 2000);
+            const secretData = await waitForVaultSecret(
+                vault,
+                "/secret/data/jwt",
+                60,
+                2000,
+            );
             const jwtSecret = secretData.key;
 
-            server.register(jwtPlugin, { jwtSecret });
-            server.register(routes, { prefix: "api" });
             server.register(import("@fastify/multipart"), {
                 limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
             });
+            server.register(jwtPlugin, { jwtSecret });
+            server.register(routes, { prefix: "api" });
 
             server.register(import("@fastify/static"), {
                 root: "/app/uploads",
@@ -72,13 +74,14 @@ if (process.env.ENV === "production") {
     const server = Fastify({ logger: true });
     const jwtSecret = process.env.JWT_SECRET;
 
-    if (!jwtSecret) throw new Error("JWT_SECRET environment variable is required");
+    if (!jwtSecret)
+        throw new Error("JWT_SECRET environment variable is required");
 
     server.register(jwtPlugin, { jwtSecret }); // jwtAuth decorator only
     server.register(routes, { prefix: "api" });
     server.register(import("@fastify/multipart"), {
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
-});
+        limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+    });
 
     server.register(import("@fastify/static"), {
         root: "/app/uploads",
@@ -90,25 +93,31 @@ if (process.env.ENV === "production") {
             process.exit(1);
         }
         console.log(`🚀 Dev server listening at ${address}`);
-        });
-    }
+    });
+}
 
 // Utility to wait for Vault secret
 type VaultClient = ReturnType<typeof vaultLib>;
 
-async function waitForVaultSecret(vault: VaultClient, path: string, maxRetries = 30, delayMs = 2000): Promise<any> {
+async function waitForVaultSecret(
+    vault: VaultClient,
+    path: string,
+    maxRetries = 30,
+    delayMs = 2000,
+): Promise<any> {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
             const res = await vault.read(path);
             return res.data.data;
         } catch (err) {
-            console.log(`Waiting for Vault secret at "${path}" (attempt ${attempt}/${maxRetries})...`);
+            console.log(
+                `Waiting for Vault secret at "${path}" (attempt ${attempt}/${maxRetries})...`,
+            );
             await new Promise((resolve) => setTimeout(resolve, delayMs));
         }
     }
 
-    throw new Error(`Secret at path "${path}" was not available after ${maxRetries} attempts.`);
+    throw new Error(
+        `Secret at path "${path}" was not available after ${maxRetries} attempts.`,
+    );
 }
-
-
-
