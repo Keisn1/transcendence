@@ -19,7 +19,7 @@ export interface Tournament {
 	id: string;
 	playerIds: string[];
 	players?: User[];
-	bracket: Match[];
+	matches: Match[];
 	state: string;
 }
 

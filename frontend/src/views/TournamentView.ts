@@ -31,5 +31,5 @@ export default class extends AbstractView {
 
 		this.navbar = null;
 		this.tournamentComponent = null;
-  }
+  	}
 }

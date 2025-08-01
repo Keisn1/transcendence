@@ -34,13 +34,13 @@ export class TournamentComponent extends BaseComponent {
 
     private async loadAndRender() {
         const tournament = history.state.tournament as Tournament;
-        this.machine = new TournamentMachine(tournament.bracket);
+        this.machine = new TournamentMachine(tournament.matches);
 
         this.machine.send(TournamentEvent.LOAD);
         this.renderByState(tournament);
     }
 
-    private async renderByState(tournament: Tournament): Promise<void> {
+    private async renderByState(tournament: Tournament): Promise<void> { 
         const state = this.machine.getState();
 
         this.headerElement.style.display = "none";
@@ -75,7 +75,7 @@ export class TournamentComponent extends BaseComponent {
         this.startBtnElement.style.display = "";
         this.nextWrapperElement.style.display = "";
         this.allMatchesWrapperElement.style.display = "";
-        this.renderList(tournament.bracket);
+        this.renderList(tournament.matches);
         this.nextDetailsElement.textContent = "Ready to start first match";
         this.startBtnElement.disabled = false;
         this.startBtnElement.onclick = () => {
@@ -95,11 +95,11 @@ export class TournamentComponent extends BaseComponent {
             if (this.gameComponent.gameControls.onFinish) {
                 this.gameComponent.gameControls.onFinish(() => {
                     const winner = this.gameComponent!.getResult();
-                    const matchIndex = tournament.bracket.findIndex(m => !m.result)!;
-                    tournament.bracket[matchIndex].result = winner;
+                    const matchIndex = tournament.matches.findIndex(m => !m.result)!;
+                    tournament.matches[matchIndex].result = winner;
                     
                     console.log(winner);
-                    console.log(tournament.bracket[matchIndex].result);
+                    console.log(tournament.matches[matchIndex].result);
 
                     this.gameComponent?.destroy();
                     this.gameComponent = undefined;
@@ -125,13 +125,13 @@ export class TournamentComponent extends BaseComponent {
     }
 
     private handleCompletedState(tournament: Tournament): void {
-        this.renderList(tournament.bracket);
+        this.renderList(tournament.matches);
         this.nextDetailsElement.textContent = "Tournament Complete!";
     }
 
-    private renderList(bracket: Match[]) {
+    private renderList(matches: Match[]) {
         this.listElement.innerHTML = "";
-        bracket.forEach(m => {
+        matches.forEach(m => {
             const status = m.result ?? "Pending";
             const html = matchTemplate
                 .replace(/{{player1}}/g, m.player1.username)
@@ -142,7 +142,7 @@ export class TournamentComponent extends BaseComponent {
     }
 
     private nextMatchLabel(tournament: Tournament) {
-        const next = tournament.bracket.find(m => !m.result)!;
+        const next = tournament.matches.find(m => !m.result)!;
         return `${next.player1.username} vs ${next.player2.username ?? "BYE"}`;
     }
 

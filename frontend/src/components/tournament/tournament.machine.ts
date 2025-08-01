@@ -32,10 +32,10 @@ const transitions: Transition[] = [
 
 export class TournamentMachine {
 	private state: TournamentState = TournamentState.UNINITIALIZED;
-	private bracket: Match[];
+	private matches: Match[];
 
-	constructor(bracket: Match[]) {
-		this.bracket = bracket;
+	constructor(matches: Match[]) { // TODO: not sharing the same match
+		this.matches = matches;
 	}
 
 	public send(event: TournamentEvent): void {
@@ -61,6 +61,6 @@ export class TournamentMachine {
 	}
 
 	public hasMoreMatches(): boolean {
-		return this.bracket.some(m => !m.result);
+		return this.matches.some(m => !m.result);
 	}
 }
