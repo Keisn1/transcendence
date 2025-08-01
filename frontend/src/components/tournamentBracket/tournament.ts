@@ -1,8 +1,8 @@
 import { BaseComponent } from "../BaseComponent.ts";
-import bracketTemplate from "./tournamentBracket.html?raw";
+import bracketTemplate from "./tournament.html?raw";
 import matchTemplate from "./match.html?raw";
 import type { Tournament, Match } from "../../types/tournament.types.ts";
-import { BracketMachine, BracketEvent, BracketState } from "./tournamentBracket.machine.ts";
+import { BracketMachine, BracketEvent, BracketState } from "./tournament.machine.ts";
 import { GameComponent } from "../gameComponent/gameComponent.ts";
 import { GameControlsTournamentComponent } from "../gameControls/gameControlsTournament/gameControlsTournament.ts"
 
@@ -33,7 +33,7 @@ export class TournamentBracket extends BaseComponent {
     }
 
     private async loadAndRender() {
-        const tournament = history.state.initial as Tournament;
+        const tournament = history.state.tournament as Tournament;
         this.machine = new BracketMachine(tournament.bracket);
 
         this.machine.send(BracketEvent.LOAD);

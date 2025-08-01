@@ -64,4 +64,3 @@ export class BracketMachine {
 		return this.bracket.some(m => !m.result);
 	}
 }
-

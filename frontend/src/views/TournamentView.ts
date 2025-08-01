@@ -1,6 +1,6 @@
 import AbstractView from "./AbstractView.ts";
 import { Navbar } from "../components/navbar/navbar.ts";
-import { TournamentBracket } from "../components/tournamentBracket/tournamentBracket.ts";
+import { TournamentBracket } from "../components/tournamentBracket/tournament.ts";
 import type Router from "../router.ts";
 // import type { Tournament } from "../types/tournament.types.ts";
 
