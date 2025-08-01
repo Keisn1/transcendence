@@ -1,6 +1,6 @@
 import type { Match } from "../../types/tournament.types.ts";
 
-export enum BracketState {
+export enum TournamentState {
 	UNINITIALIZED = "uninitialized",
 	READY = "ready",					// bracket is loaded, before any match
 	IN_PROGRESS = "in_progress",		// a match is live
@@ -8,7 +8,7 @@ export enum BracketState {
 	COMPLETED = "completed",			// all matches finished
 }
 
-export enum BracketEvent {
+export enum TournamentEvent {
 	LOAD = "LOAD",			// tournament data arrives
 	START = "START",		// user clicks “Start match”
 	FINISH = "FINISH",		// match finishes (service/event)
@@ -16,29 +16,29 @@ export enum BracketEvent {
 }
 
 type Transition = {
-	from: BracketState;
-	on: BracketEvent;
-	to: BracketState;
+	from: TournamentState;
+	on: TournamentEvent;
+	to: TournamentState;
 };
 
 const transitions: Transition[] = [
-	{ from: BracketState.UNINITIALIZED,	on: BracketEvent.LOAD,		to: BracketState.READY },
-	{ from: BracketState.READY,			on: BracketEvent.START,		to: BracketState.IN_PROGRESS },
-	{ from: BracketState.IN_PROGRESS,	on: BracketEvent.FINISH,	to: BracketState.MATCH_DONE },
-	{ from: BracketState.MATCH_DONE,	on: BracketEvent.NEXT,		to: BracketState.IN_PROGRESS },
-	{ from: BracketState.MATCH_DONE,	on: BracketEvent.NEXT, 		to: BracketState.COMPLETED },
+	{ from: TournamentState.UNINITIALIZED,	on: TournamentEvent.LOAD,		to: TournamentState.READY },
+	{ from: TournamentState.READY,			on: TournamentEvent.START,		to: TournamentState.IN_PROGRESS },
+	{ from: TournamentState.IN_PROGRESS,	on: TournamentEvent.FINISH,		to: TournamentState.MATCH_DONE },
+	{ from: TournamentState.MATCH_DONE,		on: TournamentEvent.NEXT,		to: TournamentState.IN_PROGRESS },
+	{ from: TournamentState.MATCH_DONE,		on: TournamentEvent.NEXT, 		to: TournamentState.COMPLETED },
 ];
 
 
-export class BracketMachine {
-	private state: BracketState = BracketState.UNINITIALIZED;
+export class TournamentMachine {
+	private state: TournamentState = TournamentState.UNINITIALIZED;
 	private bracket: Match[];
 
 	constructor(bracket: Match[]) {
 		this.bracket = bracket;
 	}
 
-	public send(event: BracketEvent): void {
+	public send(event: TournamentEvent): void {
 		const tx = transitions.find(t => t.from === this.state && t.on === event);
 		if (!tx) {
 			console.warn(`Invalid transition from ${this.state} on ${event}`);
@@ -46,11 +46,11 @@ export class BracketMachine {
 		}
 
 		if (
-			tx.from === BracketState.MATCH_DONE &&
-			event === BracketEvent.NEXT &&
+			tx.from === TournamentState.MATCH_DONE &&
+			event === TournamentEvent.NEXT &&
 			!this.hasMoreMatches()
 		) {
-			this.state = BracketState.COMPLETED;
+			this.state = TournamentState.COMPLETED;
 		} else {
 			this.state = tx.to;
 		}

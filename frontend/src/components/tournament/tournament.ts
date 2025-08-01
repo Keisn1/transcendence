@@ -1,12 +1,12 @@
 import { BaseComponent } from "../BaseComponent.ts";
-import bracketTemplate from "./tournament.html?raw";
+import tournamentTemplate from "./tournament.html?raw";
 import matchTemplate from "./match.html?raw";
 import type { Tournament, Match } from "../../types/tournament.types.ts";
-import { BracketMachine, BracketEvent, BracketState } from "./tournament.machine.ts";
+import { TournamentMachine, TournamentEvent, TournamentState } from "./tournament.machine.ts";
 import { GameComponent } from "../gameComponent/gameComponent.ts";
 import { GameControlsTournamentComponent } from "../gameControls/gameControlsTournament/gameControlsTournament.ts"
 
-export class TournamentBracket extends BaseComponent {
+export class TournamentComponent extends BaseComponent {
     // elements
     private headerElement: HTMLElement;
     private nextWrapperElement: HTMLElement;
@@ -15,14 +15,14 @@ export class TournamentBracket extends BaseComponent {
     private allMatchesWrapperElement: HTMLElement;
     private listElement: HTMLUListElement;
     // states
-    private machine!: BracketMachine;
+    private machine!: TournamentMachine;
     private gameComponent?: GameComponent;
 
     constructor() {
-        super("div", "tournament-bracket-container");
-        this.container.innerHTML = bracketTemplate;
+        super("div", "tournament-container");
+        this.container.innerHTML = tournamentTemplate;
 
-        this.headerElement = this.container.querySelector("#bracket-header")!;
+        this.headerElement = this.container.querySelector("#tournament-header")!;
         this.nextWrapperElement = this.container.querySelector("#next-match-wrapper")!;
         this.nextDetailsElement = this.container.querySelector("#next-match-details")!;
         this.startBtnElement = this.container.querySelector("#start-match-btn")!;
@@ -34,9 +34,9 @@ export class TournamentBracket extends BaseComponent {
 
     private async loadAndRender() {
         const tournament = history.state.tournament as Tournament;
-        this.machine = new BracketMachine(tournament.bracket);
+        this.machine = new TournamentMachine(tournament.bracket);
 
-        this.machine.send(BracketEvent.LOAD);
+        this.machine.send(TournamentEvent.LOAD);
         this.renderByState(tournament);
     }
 
@@ -49,19 +49,19 @@ export class TournamentBracket extends BaseComponent {
         this.allMatchesWrapperElement.style.display = "none";
 
         switch (state) {
-            case BracketState.READY:
+            case TournamentState.READY:
                 this.handleReadyState(tournament);
                 break;
 
-            case BracketState.IN_PROGRESS:
+            case TournamentState.IN_PROGRESS:
                 this.handleInProgressState(tournament);
                 break;
 
-            case BracketState.MATCH_DONE:
+            case TournamentState.MATCH_DONE:
                 this.handleMatchDoneState(tournament);
                 break;
 
-            case BracketState.COMPLETED:
+            case TournamentState.COMPLETED:
                 this.handleCompletedState(tournament);
                 break;
 
@@ -79,7 +79,7 @@ export class TournamentBracket extends BaseComponent {
         this.nextDetailsElement.textContent = "Ready to start first match";
         this.startBtnElement.disabled = false;
         this.startBtnElement.onclick = () => {
-            this.machine.send(BracketEvent.START);
+            this.machine.send(TournamentEvent.START);
             this.renderByState(tournament);
         };
     }
@@ -103,7 +103,7 @@ export class TournamentBracket extends BaseComponent {
 
                     this.gameComponent?.destroy();
                     this.gameComponent = undefined;
-                    this.machine.send(BracketEvent.FINISH);
+                    this.machine.send(TournamentEvent.FINISH);
                     this.renderByState(tournament);
                 });
             }
@@ -119,7 +119,7 @@ export class TournamentBracket extends BaseComponent {
         this.startBtnElement.disabled = false;
         this.nextDetailsElement.textContent = "Last result recorded";
         this.startBtnElement.onclick = () => {
-            this.machine.send(BracketEvent.NEXT);
+            this.machine.send(TournamentEvent.NEXT);
             this.renderByState(tournament);
         };
     }

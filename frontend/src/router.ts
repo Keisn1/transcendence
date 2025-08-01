@@ -6,7 +6,7 @@ import LoginView from "./views/LoginView.ts";
 import { AuthController } from "./controllers/auth.controller.ts";
 import SignUpView from "./views/SignUpView.ts";
 import TournamentCreationView from "./views/TournamentCreationView.ts"
-import TournamentBracketView from "./views/TournamentView.ts"
+import TournamentView from "./views/TournamentView.ts"
 
 export default class Router {
     private currentView: AbstractView | null = null;
@@ -55,7 +55,7 @@ export default class Router {
             },
             {
                 path: "/tournament/:id",
-                view: TournamentBracketView,
+                view: TournamentView,
             }
         ];
 
