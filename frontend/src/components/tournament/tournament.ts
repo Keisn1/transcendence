@@ -1,10 +1,72 @@
 import { BaseComponent } from "../BaseComponent.ts";
 import tournamentTemplate from "./tournament.html?raw";
+import tournamentBracketTemplate from "./tournamentBracket.html?raw";
 import matchTemplate from "./match.html?raw";
 import type { Tournament, Match } from "../../types/tournament.types.ts";
 import { TournamentMachine, TournamentEvent, TournamentState } from "./tournament.machine.ts";
 import { GameComponent } from "../gameComponent/gameComponent.ts";
-import { GameControlsTournamentComponent } from "../gameControls/gameControlsTournament/gameControlsTournament.ts"
+import { GameControlsTournamentComponent } from "../gameControls/gameControlsTournament/gameControlsTournament.ts";
+
+export class TournamentBracketComponent extends BaseComponent {
+    private tournament: Tournament;
+    private machine!: TournamentMachine;
+    private matchList: HTMLUListElement;
+    private nextMatchDetails: HTMLElement;
+
+    constructor(tournament: Tournament, machine: TournamentMachine) {
+        super("div", "tournament-container");
+        console.log("constructing bracket component");
+        this.container.innerHTML = tournamentBracketTemplate;
+        this.tournament = tournament;
+        this.machine = machine;
+
+        this.matchList = this.container.querySelector("#matches-list")!;
+        this.nextMatchDetails = this.container.querySelector("#next-match-details")!;
+
+        this.populateData();
+    }
+    private populateData() {
+        this.fillMatchList();
+        this.fillNextMatchDetails();
+    }
+
+    private fillMatchList() {
+        this.tournament.matches.forEach((m) => {
+            const status = m.result ?? "Pending";
+            const html = matchTemplate
+                .replace(/{{player1}}/g, m.player1.username)
+                .replace(/{{player2}}/g, m.player2.username)
+                .replace(/{{status}}/g, status);
+            this.matchList.insertAdjacentHTML("beforeend", html);
+        });
+    }
+    private fillNextMatchDetails() {
+        switch (this.machine.getState()) {
+            case TournamentState.READY:
+                this.nextMatchDetails.textContent = "Ready to start first match";
+                break;
+            case TournamentState.IN_PROGRESS:
+                this.nextMatchDetails.textContent = `Playing: ${this.nextMatchLabel()}`;
+                break;
+            case TournamentState.MATCH_DONE:
+                this.nextMatchDetails.textContent = "Last result recorded";
+                break;
+            case TournamentState.COMPLETED:
+                this.nextMatchDetails.textContent = "Tournament Complete!";
+                break;
+        }
+    }
+
+    private nextMatchLabel() {
+        // TODO: bit strange, maybe a method on the tournament itself
+        const next = this.tournament.matches.find((m) => !m.result)!;
+        return `${next.player1.username} vs ${next.player2.username ?? "BYE"}`;
+    }
+
+    destroy(): void {
+        super.destroy();
+    }
+}
 
 export class TournamentComponent extends BaseComponent {
     // elements
@@ -36,11 +98,11 @@ export class TournamentComponent extends BaseComponent {
         const tournament = history.state.tournament as Tournament;
         this.machine = new TournamentMachine(tournament.matches);
 
-        this.machine.send(TournamentEvent.LOAD);
+        this.machine.update(TournamentEvent.LOAD);
         this.renderByState(tournament);
     }
 
-    private async renderByState(tournament: Tournament): Promise<void> { 
+    private async renderByState(tournament: Tournament): Promise<void> {
         const state = this.machine.getState();
 
         this.headerElement.style.display = "none";
@@ -66,7 +128,7 @@ export class TournamentComponent extends BaseComponent {
                 break;
 
             default:
-                break;                
+                break;
         }
     }
 
@@ -79,11 +141,11 @@ export class TournamentComponent extends BaseComponent {
         this.nextDetailsElement.textContent = "Ready to start first match";
         this.startBtnElement.disabled = false;
         this.startBtnElement.onclick = () => {
-            this.machine.send(TournamentEvent.START);
+            this.machine.update(TournamentEvent.START);
             this.renderByState(tournament);
         };
     }
-    
+
     private handleInProgressState(tournament: Tournament): void {
         this.nextDetailsElement.textContent = `Playing: ${this.nextMatchLabel(tournament)}`;
 
@@ -95,15 +157,15 @@ export class TournamentComponent extends BaseComponent {
             if (this.gameComponent.gameControls.onFinish) {
                 this.gameComponent.gameControls.onFinish(() => {
                     const winner = this.gameComponent!.getResult();
-                    const matchIndex = tournament.matches.findIndex(m => !m.result)!;
+                    const matchIndex = tournament.matches.findIndex((m) => !m.result)!;
                     tournament.matches[matchIndex].result = winner;
-                    
+
                     console.log(winner);
                     console.log(tournament.matches[matchIndex].result);
 
                     this.gameComponent?.destroy();
                     this.gameComponent = undefined;
-                    this.machine.send(TournamentEvent.FINISH);
+                    this.machine.update(TournamentEvent.FINISH);
                     this.renderByState(tournament);
                 });
             }
@@ -119,7 +181,7 @@ export class TournamentComponent extends BaseComponent {
         this.startBtnElement.disabled = false;
         this.nextDetailsElement.textContent = "Last result recorded";
         this.startBtnElement.onclick = () => {
-            this.machine.send(TournamentEvent.NEXT);
+            this.machine.update(TournamentEvent.NEXT);
             this.renderByState(tournament);
         };
     }
@@ -131,7 +193,7 @@ export class TournamentComponent extends BaseComponent {
 
     private renderList(matches: Match[]) {
         this.listElement.innerHTML = "";
-        matches.forEach(m => {
+        matches.forEach((m) => {
             const status = m.result ?? "Pending";
             const html = matchTemplate
                 .replace(/{{player1}}/g, m.player1.username)
@@ -142,7 +204,7 @@ export class TournamentComponent extends BaseComponent {
     }
 
     private nextMatchLabel(tournament: Tournament) {
-        const next = tournament.matches.find(m => !m.result)!;
+        const next = tournament.matches.find((m) => !m.result)!;
         return `${next.player1.username} vs ${next.player2.username ?? "BYE"}`;
     }
 
