@@ -1,4 +1,4 @@
-import type { Match } from "../../types/tournament.types.ts";
+import type { GameResult as Match } from "../../types/tournament.types.ts";
 
 export enum TournamentState {
     UNINITIALIZED = "uninitialized",
@@ -57,6 +57,6 @@ export class TournamentMachine {
     }
 
     public hasMoreMatches(): boolean {
-        return this.matches.some((m) => !m.result);
+        return this.matches.some((m: Match) => !m.result);
     }
 }

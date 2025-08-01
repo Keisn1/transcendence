@@ -16,21 +16,21 @@ export class GameControlsComponent extends BaseComponent implements IGameControl
         this.startBtn.addEventListener("click", this.handleStart.bind(this));
     }
 
-    onStart(fn: (level?: AiLevel) => void) {
-        this.startCallbacks.push(level => fn(level));
+    addToStartCallbacks(fn: (level?: AiLevel) => void) {
+        this.startCallbacks.push((level) => fn(level));
     }
 
-    offStart(fn: (level?: AiLevel) => void) {
-        this.startCallbacks = this.startCallbacks.filter(cb => cb !== fn);
+    removeFromStartCallbacks(fn: (level?: AiLevel) => void) {
+        this.startCallbacks = this.startCallbacks.filter((cb) => cb !== fn);
     }
 
-    onFinish?(_: () => void): void {}
-    offFinish?(_: () => void): void {}
+    addToFinishCallbacks(_: () => void): void {}
+    removeFromFinishCallbacks(_: () => void): void {}
 
     private handleStart() {
         const level = this.aiSelect.value as AiLevel;
         this.startBtn.textContent = "Restart Game";
-        this.startCallbacks.forEach(cb => cb(level));
+        this.startCallbacks.forEach((cb) => cb(level));
     }
 
     reset() {

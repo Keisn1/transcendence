@@ -1,6 +1,7 @@
 import AbstractView from "./AbstractView.ts";
 import { Navbar } from "../components/navbar/navbar.ts";
-import { TournamentBracketComponent, TournamentComponent } from "../components/tournament/tournament.ts";
+import { TournamentBracketComponent } from "../components/tournament/tournamentBracket.ts";
+import { TournamentComponent } from "../components/tournament/tournament.ts";
 import type Router from "../router.ts";
 import { TournamentController } from "../controllers/tournament.controller.ts";
 import type { Tournament } from "../types/tournament.types.ts";
@@ -23,16 +24,15 @@ export default class extends AbstractView {
         this.navbar = new Navbar();
         document.body.appendChild(this.navbar.getContainer());
 
-        const tournament = history.state.tournament as Tournament;
         const machine = this.tournamentController.getTournamentMachine();
         if (machine) {
-            this.renderByState(tournament, machine);
+            this.renderByState(machine);
         } else {
             console.log("ERROR: no tournament machine initialized");
         }
     }
 
-    private renderByState(tournament: Tournament, machine: TournamentMachine) {
+    private renderByState(machine: TournamentMachine) {
         // Clean up previous component
         console.log("render tournamentView by state");
         this.currentComponent?.destroy();
@@ -41,11 +41,11 @@ export default class extends AbstractView {
         switch (state) {
             case TournamentState.READY:
                 console.log("rendering BracketComponent");
-                this.currentComponent = new TournamentBracketComponent(tournament, machine);
+                this.currentComponent = new TournamentBracketComponent();
                 break;
-            // case TournamentState.IN_PROGRESS:
-            //     this.currentComponent = new TournamentMatchComponent(tournament, machine);
-            //     break;
+            case TournamentState.IN_PROGRESS:
+                this.currentComponent = new TournamentMatchComponent();
+                break;
             // case TournamentState.COMPLETED:
             //     this.currentComponent = new TournamentResultsComponent(tournament);
             //     break;

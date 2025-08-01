@@ -6,7 +6,7 @@ import type { TournamentCreationBody, RegisterPlayerBody, User, Tournament } fro
 export class TournamentController {
     private static instance: TournamentController;
     private tournamentService: TournamentService;
-    private currentTournament: Tournament | null = null;
+    private tournament: Tournament | null = null;
     private tournamentMachine: TournamentMachine | null = null; // Controller manages state
     private router: Router;
 
@@ -36,14 +36,14 @@ export class TournamentController {
         this.tournamentMachine = new TournamentMachine(tournament.matches);
         this.tournamentMachine.update(TournamentEvent.LOAD);
 
-        this.currentTournament = tournament;
-        this.router.navigateTo(`/tournament/${tournament.id}`, { state: { tournament } });
+        this.tournament = tournament;
+        this.router.navigateTo(`/tournament/${tournament.id}`);
 
         return tournament;
     }
 
-    public async getTournament() {
-        return this.currentTournament;
+    public getTournament() {
+        return this.tournament;
     }
 
     getTournamentMachine(): TournamentMachine | null {
@@ -53,17 +53,19 @@ export class TournamentController {
     // Controller handles state transitions
     startMatch(): void {
         this.tournamentMachine?.update(TournamentEvent.START);
+        this.router.navigateTo(`/tournament/${this.tournament?.id}`);
     }
 
     finishMatch(result: string): void {
         // Update tournament data
-        if (this.currentTournament) {
-            const matchIndex = this.currentTournament.matches.findIndex((m) => !m.result);
+        if (this.tournament) {
+            const matchIndex = this.tournament.matches.findIndex((m) => !m.result);
             if (matchIndex >= 0) {
-                this.currentTournament.matches[matchIndex].result = result;
+                this.tournament.matches[matchIndex].result = result;
             }
         }
         // Update state machine
         this.tournamentMachine?.update(TournamentEvent.FINISH);
+        this.router.navigateTo(`/tournament/${this.tournament?.id}`);
     }
 }

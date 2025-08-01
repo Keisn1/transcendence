@@ -1,7 +1,7 @@
 import gameTemplate from "./game.html?raw";
 import { PongGame } from "../../game/game";
 import { BaseComponent } from "../BaseComponent";
-import { type AiLevel, type Winner } from "../../game/game";
+import { type AiLevel, type GameResult } from "../../game/game";
 import { GameControlsComponent } from "../gameControls/gameControlsGame/gameControls";
 import { GameControlsTournamentComponent } from "../gameControls/gameControlsTournament/gameControlsTournament";
 import type IGameControls from "../gameControls/IGameControls";
@@ -21,7 +21,7 @@ export class GameComponent extends BaseComponent {
         this.game = new PongGame(this.canvas);
 
         this.gameControls = new ControlsClass() as IGameControls;
-        this.gameControls.onStart(this.startCallback);
+        this.gameControls.addToStartCallbacks(this.startCallback);
         this.container.appendChild(this.gameControls.getContainer());
     }
 
@@ -41,15 +41,14 @@ export class GameComponent extends BaseComponent {
         await this.game.start();
     }
 
-    public getResult(): Winner {
+    public getResult(): GameResult {
         return this.game.getResult();
     }
 
     destroy() {
         super.destroy();
-        this.gameControls.offStart(this.startCallback);
+        this.gameControls.removeFromStartCallbacks(this.startCallback);
         this.game.destroy();
         document.getElementById("game-container")?.remove();
     }
 }
-

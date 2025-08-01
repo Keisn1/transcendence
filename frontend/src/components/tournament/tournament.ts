@@ -1,69 +1,38 @@
 import { BaseComponent } from "../BaseComponent.ts";
 import tournamentTemplate from "./tournament.html?raw";
-import tournamentBracketTemplate from "./tournamentBracket.html?raw";
 import matchTemplate from "./match.html?raw";
-import type { Tournament, Match } from "../../types/tournament.types.ts";
+import type { Tournament, GameResult } from "../../types/tournament.types.ts";
 import { TournamentMachine, TournamentEvent, TournamentState } from "./tournament.machine.ts";
 import { GameComponent } from "../gameComponent/gameComponent.ts";
 import { GameControlsTournamentComponent } from "../gameControls/gameControlsTournament/gameControlsTournament.ts";
+import { TournamentController } from "../../controllers/tournament.controller.ts";
 
-export class TournamentBracketComponent extends BaseComponent {
+export class TournamentMatchComponent extends BaseComponent {
+    private gameComponent: GameComponent;
+    private tournamentController: TournamentController;
     private tournament: Tournament;
-    private machine!: TournamentMachine;
-    private matchList: HTMLUListElement;
-    private nextMatchDetails: HTMLElement;
 
-    constructor(tournament: Tournament, machine: TournamentMachine) {
+    constructor() {
         super("div", "tournament-container");
-        console.log("constructing bracket component");
-        this.container.innerHTML = tournamentBracketTemplate;
-        this.tournament = tournament;
-        this.machine = machine;
+        this.tournamentController = TournamentController.getInstance();
+        this.tournament = this.tournamentController.getTournament()!;
 
-        this.matchList = this.container.querySelector("#matches-list")!;
-        this.nextMatchDetails = this.container.querySelector("#next-match-details")!;
+        this.gameComponent = new GameComponent(GameControlsTournamentComponent);
+        this.container.appendChild(this.gameComponent.getContainer());
 
-        this.populateData();
-    }
-    private populateData() {
-        this.fillMatchList();
-        this.fillNextMatchDetails();
-    }
+        this.gameComponent.gameControls.addToFinishCallbacks(() => {
+            const result = this.gameComponent!.getResult();
+            const matchIndex = this.tournament.matches.findIndex((m: GameResult) => !m.result)!;
+            this.tournament.matches[matchIndex].result = result;
 
-    private fillMatchList() {
-        this.tournament.matches.forEach((m) => {
-            const status = m.result ?? "Pending";
-            const html = matchTemplate
-                .replace(/{{player1}}/g, m.player1.username)
-                .replace(/{{player2}}/g, m.player2.username)
-                .replace(/{{status}}/g, status);
-            this.matchList.insertAdjacentHTML("beforeend", html);
+            console.log(result);
+            console.log(this.tournament.matches[matchIndex].result);
+
+            this.tournamentController.finishMatch(result);
         });
     }
-    private fillNextMatchDetails() {
-        switch (this.machine.getState()) {
-            case TournamentState.READY:
-                this.nextMatchDetails.textContent = "Ready to start first match";
-                break;
-            case TournamentState.IN_PROGRESS:
-                this.nextMatchDetails.textContent = `Playing: ${this.nextMatchLabel()}`;
-                break;
-            case TournamentState.MATCH_DONE:
-                this.nextMatchDetails.textContent = "Last result recorded";
-                break;
-            case TournamentState.COMPLETED:
-                this.nextMatchDetails.textContent = "Tournament Complete!";
-                break;
-        }
-    }
-
-    private nextMatchLabel() {
-        // TODO: bit strange, maybe a method on the tournament itself
-        const next = this.tournament.matches.find((m) => !m.result)!;
-        return `${next.player1.username} vs ${next.player2.username ?? "BYE"}`;
-    }
-
     destroy(): void {
+        this.gameComponent.destroy();
         super.destroy();
     }
 }
@@ -154,8 +123,8 @@ export class TournamentComponent extends BaseComponent {
             this.gameComponent = new GameComponent(GameControlsTournamentComponent);
             placeholder.appendChild(this.gameComponent.getContainer());
 
-            if (this.gameComponent.gameControls.onFinish) {
-                this.gameComponent.gameControls.onFinish(() => {
+            if (this.gameComponent.gameControls.addToFinishCallbacks) {
+                this.gameComponent.gameControls.addToFinishCallbacks(() => {
                     const winner = this.gameComponent!.getResult();
                     const matchIndex = tournament.matches.findIndex((m) => !m.result)!;
                     tournament.matches[matchIndex].result = winner;
@@ -191,7 +160,7 @@ export class TournamentComponent extends BaseComponent {
         this.nextDetailsElement.textContent = "Tournament Complete!";
     }
 
-    private renderList(matches: Match[]) {
+    private renderList(matches: GameResult[]) {
         this.listElement.innerHTML = "";
         matches.forEach((m) => {
             const status = m.result ?? "Pending";
