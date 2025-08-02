@@ -1,0 +1,5 @@
+#+title: Todo
+
+[[file:~/workspace/transcendence/frontend/src/controllers/utils.ts::// TODO: find a better way, maybe tournament class]]
+
+put tournament components into tournament

@@ -13,11 +13,12 @@ export class TournamentController {
     private static instance: TournamentController;
     private tournamentService: TournamentService;
     private tournament: Tournament | null = null;
-    private tournamentMachine: TournamentMachine | null = null; // Controller manages state
+    private tournamentMachine: TournamentMachine; // Controller manages state
     private router: Router;
 
     private constructor(router: Router) {
         this.tournamentService = TournamentService.getInstance();
+        this.tournamentMachine = new TournamentMachine();
         this.router = router;
     }
 
@@ -39,9 +40,7 @@ export class TournamentController {
         console.log(tournament.matches);
 
         // Controller initializes and manages the state machine
-        this.tournamentMachine = new TournamentMachine(tournament.matches);
-        this.tournamentMachine.update(TournamentEvent.LOAD);
-
+        this.tournamentMachine.update(TournamentEvent.LOAD, tournament);
         this.tournament = tournament;
         this.router.navigateTo(`/tournament/${tournament.id}`);
 
@@ -52,13 +51,13 @@ export class TournamentController {
         return this.tournament;
     }
 
-    getTournamentMachine(): TournamentMachine | null {
+    getTournamentMachine(): TournamentMachine {
         return this.tournamentMachine;
     }
 
     // Controller handles state transitions
     startMatch(): void {
-        this.tournamentMachine?.update(TournamentEvent.START);
+        this.tournamentMachine?.update(TournamentEvent.START, this.tournament!);
         this.router.navigateTo(`/tournament/${this.tournament?.id}`);
     }
 
@@ -70,8 +69,16 @@ export class TournamentController {
                 this.tournament.matches[matchIndex].result = result;
             }
         }
+
+        console.log("Finished match");
         // Update state machine
-        this.tournamentMachine?.update(TournamentEvent.FINISH);
+        this.tournamentMachine?.update(TournamentEvent.FINISH, this.tournament!);
         this.router.navigateTo(`/tournament/${this.tournament?.id}`);
+    }
+
+    exitTournament(): void {
+        this.tournament = null;
+        this.tournamentMachine = new TournamentMachine();
+        this.router.navigateTo("/tournament");
     }
 }
