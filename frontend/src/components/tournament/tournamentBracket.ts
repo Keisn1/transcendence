@@ -1,14 +1,11 @@
 import { BaseComponent } from "../BaseComponent.ts";
 import tournamentBracketTemplate from "./tournamentBracket.html?raw";
 import matchTemplate from "./match.html?raw";
-import type { Tournament } from "../../types/tournament.types.ts";
-import { TournamentMachine, TournamentState } from "./tournament.machine.ts";
+import { TournamentState } from "../../controllers/tournament.machine.ts";
 import { TournamentController } from "../../controllers/tournament.controller.ts";
 
 export class TournamentBracketComponent extends BaseComponent {
     private tournamentController: TournamentController;
-    private tournament: Tournament;
-    private machine: TournamentMachine;
     private matchList: HTMLUListElement;
     private nextMatchDetails: HTMLElement;
     private startBtn: HTMLButtonElement;
@@ -18,8 +15,6 @@ export class TournamentBracketComponent extends BaseComponent {
         console.log("constructing bracket component");
         this.container.innerHTML = tournamentBracketTemplate;
         this.tournamentController = TournamentController.getInstance();
-        this.tournament = this.tournamentController.getTournament()!;
-        this.machine = this.tournamentController.getTournamentMachine()!;
 
         this.matchList = this.container.querySelector("#matches-list")!;
         this.nextMatchDetails = this.container.querySelector("#next-match-details")!;
@@ -37,8 +32,8 @@ export class TournamentBracketComponent extends BaseComponent {
     }
 
     private fillMatchList() {
-        this.tournament.matches.forEach((m) => {
-            const status = m.result ?? "Pending";
+        this.tournamentController.getTournament()!.matches.forEach((m) => {
+            const status: string = `${m.result?.player1Score} : ${m.result?.player2Score}`;
             const html = matchTemplate
                 .replace(/{{player1}}/g, m.player1.username)
                 .replace(/{{player2}}/g, m.player2.username)
@@ -47,7 +42,7 @@ export class TournamentBracketComponent extends BaseComponent {
         });
     }
     private fillNextMatchDetails() {
-        switch (this.machine.getState()) {
+        switch (this.tournamentController.getTournamentMachine()!.getState()) {
             case TournamentState.READY:
                 this.nextMatchDetails.textContent = "Ready to start first match";
                 break;
@@ -65,7 +60,7 @@ export class TournamentBracketComponent extends BaseComponent {
 
     private nextMatchLabel() {
         // TODO: bit strange, maybe a method on the tournament itself
-        const next = this.tournament.matches.find((m) => !m.result)!;
+        const next = this.tournamentController.getTournament()!.matches.find((m) => !m.result)!;
         return `${next.player1.username} vs ${next.player2.username ?? "BYE"}`;
     }
 

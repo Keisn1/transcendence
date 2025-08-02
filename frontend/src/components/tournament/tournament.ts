@@ -1,8 +1,8 @@
 import { BaseComponent } from "../BaseComponent.ts";
 import tournamentTemplate from "./tournament.html?raw";
 import matchTemplate from "./match.html?raw";
-import type { Tournament, GameResult } from "../../types/tournament.types.ts";
-import { TournamentMachine, TournamentEvent, TournamentState } from "./tournament.machine.ts";
+import type { Tournament, Match } from "../../types/tournament.types.ts";
+import { TournamentMachine, TournamentEvent, TournamentState } from "../../controllers/tournament.machine";
 import { GameComponent } from "../gameComponent/gameComponent.ts";
 import { GameControlsTournamentComponent } from "../gameControls/gameControlsTournament/gameControlsTournament.ts";
 import { TournamentController } from "../../controllers/tournament.controller.ts";
@@ -22,7 +22,7 @@ export class TournamentMatchComponent extends BaseComponent {
 
         this.gameComponent.gameControls.addToFinishCallbacks(() => {
             const result = this.gameComponent!.getResult();
-            const matchIndex = this.tournament.matches.findIndex((m: GameResult) => !m.result)!;
+            const matchIndex = this.tournament.matches.findIndex((m: Match) => !m.result)!;
             this.tournament.matches[matchIndex].result = result;
 
             console.log(result);
@@ -160,10 +160,10 @@ export class TournamentComponent extends BaseComponent {
         this.nextDetailsElement.textContent = "Tournament Complete!";
     }
 
-    private renderList(matches: GameResult[]) {
+    private renderList(matches: Match[]) {
         this.listElement.innerHTML = "";
-        matches.forEach((m) => {
-            const status = m.result ?? "Pending";
+        matches.forEach((m: Match) => {
+            const status: string = `${m.result?.player1Score} : ${m.result?.player2Score}`;
             const html = matchTemplate
                 .replace(/{{player1}}/g, m.player1.username)
                 .replace(/{{player2}}/g, m.player2.username)

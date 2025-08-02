@@ -1,11 +1,10 @@
 import AbstractView from "./AbstractView.ts";
 import { Navbar } from "../components/navbar/navbar.ts";
 import { TournamentBracketComponent } from "../components/tournament/tournamentBracket.ts";
-import { TournamentComponent } from "../components/tournament/tournament.ts";
+import { TournamentComponent, TournamentMatchComponent } from "../components/tournament/tournament.ts";
 import type Router from "../router.ts";
 import { TournamentController } from "../controllers/tournament.controller.ts";
-import type { Tournament } from "../types/tournament.types.ts";
-import { TournamentMachine, TournamentState } from "../components/tournament/tournament.machine.ts";
+import { TournamentMachine, TournamentState } from "../controllers/tournament.machine.ts";
 import type { BaseComponent } from "../components/BaseComponent.ts";
 
 export default class extends AbstractView {
@@ -51,10 +50,9 @@ export default class extends AbstractView {
             //     break;
         }
 
-        document.body.appendChild(this.currentComponent.getContainer());
-
-        // this.tournamentComponent = new TournamentComponent();
-        // document.body.appendChild(this.tournamentComponent.getContainer());
+        if (this.currentComponent) {
+            document.body.appendChild(this.currentComponent.getContainer());
+        }
     }
 
     destroy() {

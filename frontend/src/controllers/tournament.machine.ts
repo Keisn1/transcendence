@@ -1,4 +1,4 @@
-import type { GameResult as Match } from "../../types/tournament.types.ts";
+import { type Match } from "../types/tournament.types";
 
 export enum TournamentState {
     UNINITIALIZED = "uninitialized",

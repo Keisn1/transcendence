@@ -1,7 +1,8 @@
 import gameTemplate from "./game.html?raw";
 import { PongGame } from "../../game/game";
 import { BaseComponent } from "../BaseComponent";
-import { type AiLevel, type GameResult } from "../../game/game";
+import { type AiLevel } from "../../game/game";
+import { type GameResult } from "../../types/tournament.types";
 import { GameControlsComponent } from "../gameControls/gameControlsGame/gameControls";
 import { GameControlsTournamentComponent } from "../gameControls/gameControlsTournament/gameControlsTournament";
 import type IGameControls from "../gameControls/IGameControls";

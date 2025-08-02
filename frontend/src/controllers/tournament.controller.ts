@@ -1,7 +1,13 @@
-import { TournamentEvent, TournamentMachine } from "../components/tournament/tournament.machine.ts";
+import { TournamentEvent, TournamentMachine } from "./tournament.machine.ts";
 import Router from "../router";
 import { TournamentService } from "../services/tournament/tournament.service.ts";
-import type { TournamentCreationBody, RegisterPlayerBody, User, Tournament } from "../types/tournament.types.ts";
+import type {
+    TournamentCreationBody,
+    RegisterPlayerBody,
+    User,
+    Tournament,
+    GameResult,
+} from "../types/tournament.types.ts";
 
 export class TournamentController {
     private static instance: TournamentController;
@@ -56,7 +62,7 @@ export class TournamentController {
         this.router.navigateTo(`/tournament/${this.tournament?.id}`);
     }
 
-    finishMatch(result: string): void {
+    finishMatch(result: GameResult): void {
         // Update tournament data
         if (this.tournament) {
             const matchIndex = this.tournament.matches.findIndex((m) => !m.result);
