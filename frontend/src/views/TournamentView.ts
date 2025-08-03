@@ -1,15 +1,16 @@
 import AbstractView from "./AbstractView.ts";
 import { Navbar } from "../components/navbar/navbar.ts";
-import { TournamentBracketComponent } from "../components/tournamentBracket/tournamentBracket.ts";
-import { TournamentMatchComponent } from "../components/tournamentMatch/tournamentMatch.ts";
+import { TournamentBracketComponent } from "../components/tournament/tournamentBracket/tournamentBracket.ts";
+import { TournamentMatchComponent } from "../components/tournament/tournamentMatch/tournamentMatch.ts";
 import type Router from "../router.ts";
 import { TournamentController } from "../controllers/tournament.controller.ts";
 import { TournamentState } from "../controllers/tournament.machine.ts";
-import type { BaseComponent } from "../components/BaseComponent.ts";
-import { TournamentCreation } from "../components/tournamentCreation/tournamentCreation.ts";
-import { TournamentFinalComponent } from "../components/tournamentFinal/tournamentFinal.ts";
+import { type BaseComponent } from "../components/BaseComponent.ts";
+import { TournamentCreation } from "../components/tournament/tournamentCreation/tournamentCreation.ts";
+import { TournamentFinalComponent } from "../components/tournament/tournamentFinal/tournamentFinal.ts";
 import { AuthService } from "../services/auth/auth.service.ts";
 import { AuthController } from "../controllers/auth.controller.ts";
+import { MatchList } from "../components/tournament/matchList/matchList.ts";
 
 export default class extends AbstractView {
     private currentComponent: BaseComponent | null = null;

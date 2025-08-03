@@ -1,8 +1,8 @@
-import { BaseComponent } from "../BaseComponent.ts";
+import { BaseComponent } from "../../BaseComponent.ts";
 import tournamentBracketTemplate from "./tournamentFinal.html?raw";
 import matchTemplate from "./match.html?raw";
-import { TournamentState } from "../../controllers/tournament.machine.ts";
-import { TournamentController } from "../../controllers/tournament.controller.ts";
+import { TournamentState } from "../../../controllers/tournament.machine.ts";
+import { TournamentController } from "../../../controllers/tournament.controller.ts";
 
 export class TournamentFinalComponent extends BaseComponent {
     private tournamentController: TournamentController;

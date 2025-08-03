@@ -1,5 +1,6 @@
 import { AuthService } from "../auth/auth.service";
-import type { RegisterPlayerBody, User } from "../../types/tournament.types.ts";
+import type { RegisterPlayerBody } from "../../types/tournament.types.ts";
+import { type User } from "../../types/auth.types.ts";
 import { Tournament } from "../../controllers/tournament.controller.ts";
 
 export class TournamentService {

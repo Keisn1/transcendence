@@ -1,7 +1,7 @@
-import { BaseComponent } from "../BaseComponent.ts";
-import { GameComponent } from "../gameComponent/gameComponent.ts";
-import { GameControlsTournamentComponent } from "../gameControls/gameControlsTournament/gameControlsTournament.ts";
-import { TournamentController } from "../../controllers/tournament.controller.ts";
+import { BaseComponent } from "../../BaseComponent.ts";
+import { GameComponent } from "../../gameComponent/gameComponent.ts";
+import { GameControlsTournamentComponent } from "../../gameControls/gameControlsTournament/gameControlsTournament.ts";
+import { TournamentController } from "../../../controllers/tournament.controller.ts";
 
 export class TournamentMatchComponent extends BaseComponent {
     private gameComponent: GameComponent;

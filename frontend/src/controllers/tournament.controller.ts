@@ -1,7 +1,8 @@
 import { TournamentEvent, TournamentMachine, TournamentState } from "./tournament.machine.ts";
 import Router from "../router";
 import { TournamentService } from "../services/tournament/tournament.service.ts";
-import type { RegisterPlayerBody, User, GameResult, Match } from "../types/tournament.types.ts";
+import type { RegisterPlayerBody, GameResult, Match } from "../types/tournament.types.ts";
+import type { User } from "../types/auth.types.ts";
 
 export class Tournament {
     id: string = "";

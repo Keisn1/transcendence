@@ -1,9 +1,10 @@
 // import { TournamentController } from "../../controllers/tournament.controller.ts";
 import playerTemplate from "./player.html?raw";
 import tournamentTemplate from "./tournamentCreation.html?raw";
-import { BaseComponent } from "../BaseComponent.ts";
-import { TournamentController } from "../../controllers/tournament.controller.ts";
-import type { RegisterPlayerBody, User } from "../../types/tournament.types.ts";
+import { BaseComponent } from "../../BaseComponent.ts";
+import { TournamentController } from "../../../controllers/tournament.controller.ts";
+import type { RegisterPlayerBody } from "../../../types/tournament.types.ts";
+import type { User } from "../../../types/auth.types.ts";
 
 export class TournamentCreation extends BaseComponent {
     private playerContainer: HTMLElement;

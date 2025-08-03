@@ -1,18 +1,8 @@
+import { type User } from "./auth.types";
+
 export interface RegisterPlayerBody {
     playerEmail: string;
     playerPassword: string;
-}
-
-export interface User {
-    id: string;
-    username: string;
-    email: string;
-    avatar?: string;
-}
-
-export interface TournamentCreationBody {
-    userIds: string[];
-    // players?: User[];
 }
 
 export interface Match {

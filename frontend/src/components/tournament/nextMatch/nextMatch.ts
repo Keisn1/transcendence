@@ -1,25 +1,21 @@
-import { BaseComponent } from "../BaseComponent.ts";
-import tournamentBracketTemplate from "./tournamentBracket.html?raw";
-import matchTemplate from "./match.html?raw";
-import { TournamentState } from "../../controllers/tournament.machine.ts";
-import { TournamentController } from "../../controllers/tournament.controller.ts";
+import { BaseComponent } from "../../BaseComponent.ts";
+import nextMatchTemplate from "./nextMatch.html?raw";
+import { TournamentState } from "../../../controllers/tournament.machine.ts";
+import { TournamentController } from "../../../controllers/tournament.controller.ts";
 
-export class TournamentBracketComponent extends BaseComponent {
+export class NextMatch extends BaseComponent {
     private tournamentController: TournamentController;
-    private matchList: HTMLUListElement;
     private nextMatchDetails: HTMLElement;
     private startBtn: HTMLButtonElement;
 
     constructor() {
-        super("div", "tournament-container");
+        super("div", "next-match-container");
         console.log("constructing bracket component");
-        this.container.innerHTML = tournamentBracketTemplate;
+        this.container.innerHTML = nextMatchTemplate;
         this.tournamentController = TournamentController.getInstance();
 
-        this.matchList = this.container.querySelector("#matches-list")!;
         this.nextMatchDetails = this.container.querySelector("#next-match-details")!;
         this.startBtn = this.container.querySelector("#start-match-btn")!;
-
         this.startBtn.onclick = () => {
             this.tournamentController.startMatch();
         };
@@ -27,20 +23,9 @@ export class TournamentBracketComponent extends BaseComponent {
         this.populateData();
     }
     private populateData() {
-        this.fillMatchList();
         this.fillNextMatchDetails();
     }
 
-    private fillMatchList() {
-        this.tournamentController.getTournament()!.matches.forEach((m) => {
-            const status: string = `${m.result?.player1Score} : ${m.result?.player2Score}`;
-            const html = matchTemplate
-                .replace(/{{player1}}/g, m.player1.username)
-                .replace(/{{player2}}/g, m.player2.username)
-                .replace(/{{status}}/g, status);
-            this.matchList.insertAdjacentHTML("beforeend", html);
-        });
-    }
     private fillNextMatchDetails() {
         switch (this.tournamentController.getTournamentMachine()!.getState()) {
             case TournamentState.READY:
