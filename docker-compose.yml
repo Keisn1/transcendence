@@ -19,7 +19,7 @@ services:
     environment:
       - ENV=production
     volumes:
-      - ./uploads:/app/uploads
+      - ./backend/services/file/uploads:/app/uploads
       - ./vault/init:/vault/init
 
   nginx:
