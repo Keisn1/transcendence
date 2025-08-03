@@ -4,7 +4,7 @@ import adLightboxTemplate from "./adLightbox.html?raw";
 export class AdLightBox extends BaseComponent {
     private closeBtn: HTMLElement;
     constructor() {
-        super("div", "ad-lightbox-container", ["hidden", "flex", "justify-center"]);
+        super("div", "ad-lightbox-container", "hidden flex justify-center");
         this.container.innerHTML = adLightboxTemplate;
         this.closeBtn = this.container.querySelector("#ad-close-btn")!;
         this.setupEvents();

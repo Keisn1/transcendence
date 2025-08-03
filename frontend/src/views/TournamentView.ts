@@ -10,13 +10,14 @@ import { TournamentCreation } from "../components/tournament/tournamentCreation/
 import { TournamentFinalComponent } from "../components/tournament/tournamentFinal/tournamentFinal.ts";
 import { AuthService } from "../services/auth/auth.service.ts";
 import { AuthController } from "../controllers/auth.controller.ts";
-import { MatchList } from "../components/tournament/matchList/matchList.ts";
 
 export default class extends AbstractView {
     private currentComponent: BaseComponent | null = null;
     private navbar: Navbar | null = null;
     private tournamentController: TournamentController;
-    private unloadHandler = (e: BeforeUnloadEvent) => { e.preventDefault() };
+    private unloadHandler = (e: BeforeUnloadEvent) => {
+        e.preventDefault();
+    };
 
     constructor(router?: Router) {
         super(router);
