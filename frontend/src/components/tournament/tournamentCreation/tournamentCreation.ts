@@ -1,17 +1,17 @@
 // import { TournamentController } from "../../controllers/tournament.controller.ts";
 import playerTemplate from "./player.html?raw";
 import tournamentTemplate from "./tournamentCreation.html?raw";
-import { BaseComponent } from "../BaseComponent.ts";
-import { TournamentController } from "../../controllers/tournament.controller.ts";
-import type { TournamentCreationBody, RegisterPlayerBody, User, Tournament } from "../../types/tournament.types.ts";
-
+import { BaseComponent } from "../../BaseComponent.ts";
+import { TournamentController } from "../../../controllers/tournament.controller.ts";
+import type { RegisterPlayerBody } from "../../../types/tournament.types.ts";
+import type { User } from "../../../types/auth.types.ts";
 
 export class TournamentCreation extends BaseComponent {
     private playerContainer: HTMLElement;
     private addedPlayersCount: number = 0;
     private tournamentForm: HTMLFormElement;
     private addPlayerBtn: HTMLButtonElement;
-    private registeredPlayers: any[] = [];
+    private registeredPlayers: User[] = [];
 
     constructor() {
         super("div", "tournament-container");
@@ -52,7 +52,7 @@ export class TournamentCreation extends BaseComponent {
         e.preventDefault();
         const emailElement = this.container.querySelector<HTMLInputElement>(`#email-${index}`);
         const passwordElement = this.container.querySelector<HTMLInputElement>(`#password-${index}`);
-        
+
         if (!emailElement || !passwordElement) return this.showError("Inputs not found");
 
         const body: RegisterPlayerBody = {
@@ -63,6 +63,7 @@ export class TournamentCreation extends BaseComponent {
         try {
             const controller = TournamentController.getInstance();
             const user = await controller.registerPlayer(body);
+            if (this.isPlayerAlreadyRegistered(user)) throw Error("Player already registered");
             console.log(user);
             this.storePlayer(user);
             this.showMessage("User registered successfully");
@@ -77,26 +78,24 @@ export class TournamentCreation extends BaseComponent {
             return this.showMessage("You need at least two players", "error");
         }
 
-        const body: TournamentCreationBody = {
-            userIds: this.registeredPlayers.map((u) => u.id),
-        };
-
         try {
-            const controller = TournamentController.getInstance();
-            const tournament = await controller.createTournament(body) as Tournament;
+            TournamentController.getInstance().createTournament(this.registeredPlayers);
             this.showMessage("Tournament was successfully created");
-            console.log(tournament);
         } catch (err: any) {
             this.showMessage(err.message || "Could not create tournament", "error");
         }
     }
 
-    public storePlayer(user: User) {
+    private isPlayerAlreadyRegistered(user: User): boolean {
+        return this.registeredPlayers.some((p) => p.id === user.id);
+    }
+
+    private storePlayer(user: User) {
         this.registeredPlayers.push(user);
     }
 
     private showMessage(message: string, type: "success" | "error" = "success") {
-        this.container.querySelectorAll(".info-message").forEach(el => el.remove());
+        this.container.querySelectorAll(".info-message").forEach((el) => el.remove());
 
         const div = document.createElement("div");
         if (type === "success") {

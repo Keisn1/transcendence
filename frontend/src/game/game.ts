@@ -2,6 +2,7 @@ import { Ball, type BallConfig } from "./ball";
 import { Paddle, type Paddles, type PaddleConfig } from "./paddle";
 import { InputManager } from "./inputManager";
 import { AiController } from "./aiController";
+import { type GameResult } from "../types/tournament.types";
 
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
@@ -23,6 +24,8 @@ export interface GameConfig {
 
 export type AiLevel = "none" | "easy" | "hard";
 
+// export type Winner = "player1" | "player2" | "none";
+
 export class PongGame {
     private inputManager: InputManager;
     private canvas: HTMLCanvasElement;
@@ -39,6 +42,7 @@ export class PongGame {
     private paused: boolean = false;
     private justPaused = false;
     private requestAnimationFrame: number | null = null;
+    private result: GameResult;
 
     constructor(canvas: HTMLCanvasElement, config: GameConfig = {}) {
         const defaultControls: ControlsConfig = {
@@ -81,6 +85,7 @@ export class PongGame {
 
         this.ctx.textAlign = "center";
         this.ctx.textBaseline = "middle";
+        this.result = { player1Score: 0, player2Score: 0 };
     }
 
     public setAiLevel(level: AiLevel) {
@@ -158,6 +163,7 @@ export class PongGame {
             this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
             this.ctx.fillStyle = "#fff";
             this.ctx.fillText(winMessage, this.canvas.width / 2, this.canvas.height / 2);
+            this.result = { player1Score: p1Score, player2Score: p2Score };
             return true;
         }
         return false;
@@ -224,6 +230,10 @@ export class PongGame {
         }
 
         this.requestAnimationFrame = requestAnimationFrame((t) => this.gameLoop(t, timestamp));
+    }
+
+    public getResult(): GameResult {
+        return this.result;
     }
 
     destroy() {

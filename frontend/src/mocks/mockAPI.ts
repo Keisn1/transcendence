@@ -166,11 +166,11 @@ export function setupMockApi() {
                 .map((id) => mockUsers.find((u) => u.id === id))
                 .filter((u): u is (typeof mockUsers)[number] => !!u);
 
-            const bracket = [];
+            const matches = [];
             for (let i = 0; i < players.length; i += 2) {
                 const p1 = players[i];
                 const p2 = players[i + 1] ?? null;
-                bracket.push({
+                matches.push({
                     matchId: `m${i / 2 + 1}`,
                     player1: p1,
                     player2: p2,
@@ -183,7 +183,8 @@ export function setupMockApi() {
                 id: `t${Date.now()}`,
                 playerIds: userIds,
                 players: players.map(({ password, ...u }) => u),
-                bracket: bracket,
+                matches: matches,
+                nextMatchIdx: 0,
             };
 
             return new Response(JSON.stringify(tournament), {

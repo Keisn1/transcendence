@@ -12,7 +12,7 @@ export class AvatarUpload extends BaseComponent {
     private preview!: HTMLImageElement;
 
     constructor(onAvatarChange?: (avatarUrl: string) => void) {
-        super("div", "avatar-upload", ["flex", "flex-col", "items-center", "space-y-4"]);
+        super("div", "avatar-upload", "flex flex-col items-center space-y-4");
 
         this.authService = AuthService.getInstance();
         this.profileService = ProfileService.getInstance();

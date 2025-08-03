@@ -7,13 +7,56 @@ import type {
     RegisterResponse,
 } from "../../types/auth.types";
 
+class AuthStorage {
+    private static readonly USER_KEY = "user";
+    private static readonly TOKEN_KEY = "authToken";
+
+    static saveUser(user: User): void {
+        try {
+            localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+        } catch (error) {
+            console.error("Failed to save user data to localStorage:", error);
+        }
+    }
+
+    static loadUser(): User | null {
+        try {
+            const userData = localStorage.getItem(this.USER_KEY);
+            if (userData && userData !== "undefined" && userData !== "null") {
+                return JSON.parse(userData);
+            }
+            return null;
+        } catch (error) {
+            console.warn("Failed to parse user data from localStorage, clearing it:", error);
+            localStorage.removeItem(this.USER_KEY);
+            return null;
+        }
+    }
+
+    static clearUser(): void {
+        localStorage.removeItem(this.USER_KEY);
+    }
+
+    static saveToken(token: string): void {
+        localStorage.setItem(this.TOKEN_KEY, token);
+    }
+
+    static getToken(): string | null {
+        return localStorage.getItem(this.TOKEN_KEY);
+    }
+
+    static clearToken(): void {
+        localStorage.removeItem(this.TOKEN_KEY);
+    }
+}
+
 export class AuthService {
     private static instance: AuthService;
     private currentUser: User | null = null;
     private listeners: ((user: User | null) => void)[] = [];
 
     private constructor() {
-        this.loadUserFromStorage();
+        this.currentUser = AuthStorage.loadUser();
     }
 
     static getInstance(): AuthService {
@@ -47,8 +90,8 @@ export class AuthService {
         const data: LoginResponse = await response.json();
         const user: User = data.user;
         this.currentUser = user;
-        this.saveUserToStorage(user);
-        this.saveTokenToStorage(data.token);
+        AuthStorage.saveUser(user);
+        AuthStorage.saveToken(data.token);
         this.notifyListeners();
     }
 
@@ -82,8 +125,8 @@ export class AuthService {
     logout(): void {
         console.log("logging out");
         this.currentUser = null;
-        this.clearUserFromStorage();
-        this.clearTokenFromStorage();
+        AuthStorage.clearUser();
+        AuthStorage.clearToken();
         this.notifyListeners();
     }
 
@@ -91,12 +134,8 @@ export class AuthService {
         localStorage.setItem("authToken", token);
     }
 
-    private clearTokenFromStorage(): void {
-        localStorage.removeItem("authToken");
-    }
-
     getAuthToken(): string | null {
-        return localStorage.getItem("authToken");
+        return AuthStorage.getToken();
     }
 
     // methods that control User Data in localStorage
@@ -108,26 +147,7 @@ export class AuthService {
         }
     }
 
-    private loadUserFromStorage(): void {
-        try {
-            const userData = localStorage.getItem("user");
-            if (userData && userData !== "undefined" && userData !== "null") {
-                this.currentUser = JSON.parse(userData);
-            }
-        } catch (error) {
-            console.warn("Failed to parse user data from localStorage, clearing it:", error);
-            localStorage.removeItem("user");
-            this.currentUser = null;
-        }
-    }
-
-    private clearUserFromStorage(): void {
-        localStorage.removeItem("user");
-    }
-
-    // setup listeners and notifications
-    // register a callback to this.listeners
-    // returns a cleanup function that can be called to remove the callback from the listener
+    // way of consumer to subscribe to changes in the AuthService
     onAuthChange(callback: (user: User | null) => void): () => void {
         this.listeners.push(callback);
         // Return cleanup function
@@ -143,7 +163,7 @@ export class AuthService {
 
     updateCurrentUser(user: User): void {
         this.currentUser = user;
-        this.saveUserToStorage(user);
+        AuthStorage.saveUser(user);
         this.notifyListeners();
     }
 }

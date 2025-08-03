@@ -1,5 +1,7 @@
 import { AuthService } from "../auth/auth.service";
-import type { TournamentCreationBody, RegisterPlayerBody, User, Tournament } from "../../types/tournament.types.ts";
+import type { RegisterPlayerBody } from "../../types/tournament.types.ts";
+import { type User } from "../../types/auth.types.ts";
+import { Tournament } from "../../controllers/tournament.controller.ts";
 
 export class TournamentService {
     private static instance: TournamentService;
@@ -32,19 +34,7 @@ export class TournamentService {
         return user;
     }
 
-    async createTournament(body: TournamentCreationBody): Promise<Tournament> {
-        const response = await fetch("/api/tournament", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${this.authService.getAuthToken()}`,
-            },
-            body: JSON.stringify(body),
-        });
-
-        if (!response.ok) throw new Error("Couldn’t create tournament");
-
-        const tournament = (await response.json()) as Tournament;
+    async createTournament(tournament: Tournament): Promise<Tournament> {
         return tournament;
     }
 }

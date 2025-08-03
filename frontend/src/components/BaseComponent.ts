@@ -8,10 +8,12 @@ export abstract class BaseComponent implements Component {
     protected container: HTMLElement;
     protected eventListenerCleanups: (() => void)[] = [];
 
-    constructor(elementType: string = "div", id?: string, classes?: string[]) {
+    constructor(elementType: string = "div", id?: string, classes?: string) {
         this.container = document.createElement(elementType);
         if (id) this.container.id = id;
-        if (classes) this.container.classList.add(...classes);
+        if (classes?.length) {
+            this.container.classList.add(...classes.split(" "));
+        }
     }
 
     getContainer(): HTMLElement {

@@ -6,7 +6,6 @@ export class AuthController {
     private static instance: AuthController;
     private authService: AuthService;
     private router: Router;
-    private previousRoute: string = "/"; // Default fallback
 
     private constructor(router: Router) {
         this.authService = AuthService.getInstance();
@@ -36,18 +35,11 @@ export class AuthController {
 
     public async login(credentials: { email: string; password: string }): Promise<void> {
         await this.authService.login(credentials);
-        this.router.navigateTo(this.previousRoute);
+        this.router.navigateTo("/");
     }
 
     public async signUp(formData: SignupForm): Promise<void> {
         await this.authService.signUp(formData);
         this.router.navigateTo("/profile");
-    }
-
-    public setPreviousRoute(route: string): void {
-        this.previousRoute = route;
-        if (route !== "/login" && route !== "/signout") {
-            this.previousRoute = route;
-        }
     }
 }
