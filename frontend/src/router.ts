@@ -53,10 +53,6 @@ export default class Router {
                 path: "/tournament",
                 view: TournamentView,
             },
-            {
-                path: "/tournament/:id",
-                view: TournamentView,
-            },
         ];
 
         let potentialMatches = routes.map((route) => {

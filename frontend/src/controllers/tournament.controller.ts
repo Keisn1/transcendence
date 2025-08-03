@@ -42,7 +42,7 @@ export class TournamentController {
         // Controller initializes and manages the state machine
         this.tournamentMachine.update(TournamentEvent.LOAD, tournament);
         this.tournament = tournament;
-        this.router.navigateTo(`/tournament/${tournament.id}`);
+        this.router.navigateTo(`/tournament`);
 
         return tournament;
     }
@@ -58,7 +58,7 @@ export class TournamentController {
     // Controller handles state transitions
     startMatch(): void {
         this.tournamentMachine?.update(TournamentEvent.START, this.tournament!);
-        this.router.navigateTo(`/tournament/${this.tournament?.id}`);
+        this.router.navigateTo(`/tournament`);
     }
 
     finishMatch(result: GameResult): void {
@@ -73,7 +73,7 @@ export class TournamentController {
         console.log("Finished match");
         // Update state machine
         this.tournamentMachine?.update(TournamentEvent.FINISH, this.tournament!);
-        this.router.navigateTo(`/tournament/${this.tournament?.id}`);
+        this.router.navigateTo("/tournament");
     }
 
     exitTournament(): void {

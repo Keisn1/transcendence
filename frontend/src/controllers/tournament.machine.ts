@@ -1,5 +1,5 @@
 import { type Tournament } from "../types/tournament.types";
-// import { tournamentHasMoreMatches } from "./utils";
+import { tournamentHasMoreMatches } from "./utils";
 
 export enum TournamentState {
     UNINITIALIZED = "uninitialized",
@@ -25,6 +25,7 @@ type Transition = {
 const transitions: Transition[] = [
     { from: TournamentState.UNINITIALIZED, on: TournamentEvent.LOAD, to: TournamentState.READY },
     { from: TournamentState.READY, on: TournamentEvent.START, to: TournamentState.IN_PROGRESS },
+    { from: TournamentState.IN_PROGRESS, on: TournamentEvent.FINISH, to: TournamentState.READY },
     { from: TournamentState.IN_PROGRESS, on: TournamentEvent.FINISH, to: TournamentState.COMPLETED },
     // { from: TournamentState.IN_PROGRESS, on: TournamentEvent.FINISH, to: TournamentState.MATCH_DONE },
     // { from: TournamentState.MATCH_DONE, on: TournamentEvent.NEXT, to: TournamentState.IN_PROGRESS },
@@ -40,20 +41,17 @@ export class TournamentMachine {
             console.warn(`Invalid transition from ${this.state} on ${event}`);
             return;
         }
-        console.log("Tx: ", tx);
 
-        this.state = tx.to;
-        console.log("tournament: ", tournament);
-
-        // if (
-        //     tx.from === TournamentState.MATCH_DONE &&
-        //     event === TournamentEvent.NEXT &&
-        //     !tournamentHasMoreMatches(tournament)
-        // ) {
-        //     this.state = TournamentState.COMPLETED;
-        // } else {
-        //     this.state = tx.to;
-        // }
+        console.log("here: ", tournamentHasMoreMatches(tournament));
+        if (
+            tx.from === TournamentState.IN_PROGRESS &&
+            event === TournamentEvent.FINISH &&
+            !tournamentHasMoreMatches(tournament)
+        ) {
+            this.state = TournamentState.COMPLETED;
+        } else {
+            this.state = tx.to;
+        }
     }
 
     public getState() {

@@ -8,6 +8,8 @@ import { TournamentState } from "../controllers/tournament.machine.ts";
 import type { BaseComponent } from "../components/BaseComponent.ts";
 import { TournamentCreation } from "../components/tournamentCreation/tournamentCreation.ts";
 import { TournamentFinalComponent } from "../components/tournamentFinal/tournamentFinal.ts";
+import { AuthService } from "../services/auth/auth.service.ts";
+import { AuthController } from "../controllers/auth.controller.ts";
 
 export default class extends AbstractView {
     private currentComponent: BaseComponent | null = null;
@@ -17,10 +19,17 @@ export default class extends AbstractView {
     constructor(router?: Router) {
         super(router);
         this.setTitle("Tournament");
-        this.tournamentController = TournamentController.getInstance();
+        this.tournamentController = TournamentController.getInstance(router);
     }
 
     render() {
+        const authService = AuthService.getInstance();
+        if (!authService.isAuthenticated()) {
+            AuthController.getInstance().setPreviousRoute("/tournament");
+            this.router?.navigateTo("/login");
+            return;
+        }
+
         this.navbar = new Navbar();
         document.body.appendChild(this.navbar.getContainer());
 
@@ -32,13 +41,14 @@ export default class extends AbstractView {
         console.log("render tournamentView by state");
         this.currentComponent?.destroy();
 
+        console.log("Tournament being rendered with tournament: ", this.tournamentController.getTournament());
+        console.log("matches results", this.tournamentController.getTournament()?.matches[0].result);
         const state = this.tournamentController.getTournamentMachine().getState();
         switch (state) {
             case TournamentState.UNINITIALIZED:
                 this.currentComponent = new TournamentCreation();
                 break;
             case TournamentState.READY:
-                console.log("rendering BracketComponent");
                 this.currentComponent = new TournamentBracketComponent();
                 break;
             case TournamentState.IN_PROGRESS:
