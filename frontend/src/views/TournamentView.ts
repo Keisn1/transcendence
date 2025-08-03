@@ -16,6 +16,7 @@ export default class extends AbstractView {
     private currentComponent: BaseComponent | null = null;
     private navbar: Navbar | null = null;
     private tournamentController: TournamentController;
+    private unloadHandler = (e: BeforeUnloadEvent) => { e.preventDefault() };
 
     constructor(router?: Router) {
         super(router);
@@ -33,6 +34,8 @@ export default class extends AbstractView {
 
         this.navbar = new Navbar();
         document.body.appendChild(this.navbar.getContainer());
+
+        window.addEventListener("beforeunload", this.unloadHandler);
 
         this.renderByState();
     }
@@ -74,5 +77,7 @@ export default class extends AbstractView {
 
         this.navbar = null;
         this.currentComponent = null;
+
+        window.removeEventListener("beforeunload", this.unloadHandler);
     }
 }
