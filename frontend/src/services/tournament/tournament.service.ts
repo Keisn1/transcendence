@@ -35,18 +35,6 @@ export class TournamentService {
     }
 
     async createTournament(tournament: Tournament): Promise<Tournament> {
-        // const response = await fetch("/api/tournament", {
-        //     method: "POST",
-        //     headers: {
-        //         "Content-Type": "application/json",
-        //         Authorization: `Bearer ${this.authService.getAuthToken()}`,
-        //     },
-        //     body: JSON.stringify(body),
-        // });
-
-        // if (!response.ok) throw new Error("Couldn’t create tournament");
-
-        // const tournament = (await response.json()) as Tournament;
         return tournament;
     }
 }

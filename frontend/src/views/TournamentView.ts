@@ -9,7 +9,6 @@ import { type BaseComponent } from "../components/BaseComponent.ts";
 import { TournamentCreation } from "../components/tournament/tournamentCreation/tournamentCreation.ts";
 import { TournamentFinalComponent } from "../components/tournament/tournamentFinal/tournamentFinal.ts";
 import { AuthService } from "../services/auth/auth.service.ts";
-import { AuthController } from "../controllers/auth.controller.ts";
 
 export default class extends AbstractView {
     private currentComponent: BaseComponent | null = null;
@@ -28,7 +27,6 @@ export default class extends AbstractView {
     render() {
         const authService = AuthService.getInstance();
         if (!authService.isAuthenticated()) {
-            AuthController.getInstance().setPreviousRoute("/tournament");
             this.router?.navigateTo("/login");
             return;
         }
