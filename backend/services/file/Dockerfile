@@ -7,20 +7,20 @@ RUN apt-get update && apt-get install -y jq
 # Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-
-# Install dependencies
-RUN npm ci --only=production
-
 # Copy source code
 COPY src/ ./src/
+# Copy package files
+COPY tsconfig.json .
+COPY package*.json ./
+# Install
+RUN npm install
+RUN npm run build
 
-# Create uploads directory
-RUN mkdir -p /app/uploads
+COPY /entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Expose port
 EXPOSE 3001
 
 # Start the service
-CMD ["npm", "start"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

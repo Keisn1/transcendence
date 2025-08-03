@@ -82,6 +82,30 @@ vault write auth/approle/role/backend-role \
     token_max_ttl=4h
 
 
+#approle for file-service read only
+cat <<EOF > /vault/init/fileservice-policy.hcl
+# Allow reading the JWT secret
+path "secret/data/jwt" {
+  capabilities = ["read"]
+}
+path "pki/*" {
+  capabilities = ["read"]
+}
+EOF
+vault policy write fileservice-policy /vault/init/fileservice-policy.hcl || echo "policy has already been written."
+
+vault write auth/approle/role/fileservice-role \
+    token_policies="fileservice-policy" \
+    token_ttl=1h \
+    token_max_ttl=4h
+
+
+#approle end
+
+
+
+
+
 cat /vault/init/.env >> /transcendence/.env
 rm /vault/init/.env # && rm /vault/init/vault-init.json # add in prod maybe. maybe risky. maybe unnecessary, idk
 echo "check .env now"
@@ -160,13 +184,43 @@ echo "$KEY" > "$INTKEY_PATH"
 
 echo "Internal cert and key saved to $INTCERT_PATH and $INTKEY_PATH"
 
+#NEW FOR FILESERVICE CERTS
+# --- Issue certificate and save .crt and .key for FILESERVICE connection ---
+INTERNAL_DOMAIN="fileservice.localhost"
+INTCERT_PATH="/vault/init/${INTERNAL_DOMAIN}.crt"
+INTKEY_PATH="/vault/init/${INTERNAL_DOMAIN}.key"
+
+echo "Requesting internal certificate for $INTERNAL_DOMAIN..."
+vault write -format=json pki/issue/https-cert-role \
+    common_name="$INTERNAL_DOMAIN" \
+    ttl="72h" > /vault/init/fileservice-cert.json
+
+# Extract cert, issuing CA, and private key
+CRT=$(jq -r '.data.certificate' /vault/init/fileservice-cert.json)
+CA=$(jq -r '.data.issuing_ca' /vault/init/fileservice-cert.json)
+KEY=$(jq -r '.data.private_key' /vault/init/fileservice-cert.json)
+
+# Save cert and key to shared init dir
+echo "$CRT" > "$INTCERT_PATH"
+echo "$CA" >> "$INTCERT_PATH"
+echo "$KEY" > "$INTKEY_PATH"
+
+echo "Internal cert and key saved to $INTCERT_PATH and $INTKEY_PATH"
+#FILESERVICE CERTS END
 
 # --- Fetch Role ID and Secret ID ---
 export ROLE_ID=$(vault read -field=role_id auth/approle/role/backend-role/role-id)
 export SECRET_ID=$(vault write -f -field=secret_id auth/approle/role/backend-role/secret-id)
 
+export ROLEFILESERVICE_ID=$(vault read -field=role_id auth/approle/role/fileservice-role/role-id)
+export SECRETFILESERVICE_ID=$(vault write -f -field=secret_id auth/approle/role/fileservice-role/secret-id)
+
+
 echo "catting EVEN harder rn."
 cat << EOF >> /vault/init/.env
+VAULT_FILESERVICE_ID=$ROLEFILESERVICE_ID
+VAULT_FILESERVICESECRET_ID=$SECRETFILESERVICE_ID
+
 VAULT_ROLE_ID=$ROLE_ID
 VAULT_SECRET_ID=$SECRET_ID
 EOF
@@ -178,4 +232,3 @@ echo "Logged in with AppRole token."
 echo "VAULT_TOKEN after is: $VAULT_TOKEN"
 echo "Vault KV and policies setup complete."
 
-#not optional anymore, i need to enable approle, make policies, go into a deepdive of how it interacts with each other to learn more deeply about it
