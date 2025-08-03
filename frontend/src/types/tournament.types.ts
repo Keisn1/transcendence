@@ -12,7 +12,7 @@ export interface Match {
     player1: User;
     player2: User;
     round: number;
-    result?: GameResult;
+    result: GameResult;
 }
 
 export type GameResult = {

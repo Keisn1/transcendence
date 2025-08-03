@@ -20,16 +20,44 @@ export class Tournament {
             const p1 = players[i];
             const p2 = players[i + 1] ?? null;
             this.matches.push({
-                matchId: `m${i / 2 + 1}`,
+                matchId: `r1m${i / 2 + 1}`,
                 player1: p1,
                 player2: p2,
                 round: 1,
+                result: { player1Score: 0, player2Score: 0 },
             });
         }
     }
-
+    
     hasMoreMatches() {
         return this.matches.length != 0 && this.nextMatchIdx < this.matches.length;
+    }
+    
+    generateNextRound() {
+        const lastRound = this.matches[this.matches.length - 1].round;
+        const currentRound = lastRound + 1;
+        const played = this.matches.filter(m => m.round === lastRound && m.result !== undefined);
+        const winners = played.map(m => {
+            const { player1Score, player2Score } = m.result!;
+            return player1Score >= player2Score ? m.player1 : m.player2;
+        });
+
+
+        this.nextMatchIdx = this.matches.length;
+
+        if (winners.length <= 1) return;
+        
+        for (let i = 0; i < winners.length; i += 2) {
+            const p1 = winners[i];
+            const p2 = winners[i + 1] ?? null;
+            this.matches.push({
+                matchId: `r${currentRound}m${i/2 + 1}`,
+                player1: p1,
+                player2: p2,
+                round: currentRound,
+                result: { player1Score: 0, player2Score: 0 },
+            });
+        }
     }
 }
 
@@ -91,6 +119,7 @@ export class TournamentController {
     finishMatch(result: GameResult): void {
         this.tournament.matches[this.tournament.nextMatchIdx].result = result;
         this.tournament.nextMatchIdx++;
+        if (!this.tournament.hasMoreMatches()) this.tournament.generateNextRound();
         this.tournamentMachine?.update(TournamentEvent.FINISH, this.tournament);
         this.router.navigateTo("/tournament");
     }
