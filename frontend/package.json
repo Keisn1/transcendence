@@ -1,20 +1,22 @@
 {
-  "name": "frontend",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
-  },
-  "devDependencies": {
-    "@tailwindcss/language-server": "^0.14.24",
-    "typescript": "~5.8.3",
-    "vite": "^7.0.0"
-  },
-  "dependencies": {
-    "@tailwindcss/vite": "^4.1.11",
-    "tailwindcss": "^4.1.11"
-  }
+    "name": "frontend",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "npm run dev:mock",
+        "dev:mock": "VITE_USE_MOCK=true vite",
+        "dev:proxy": "vite",
+        "build": "tsc && vite build",
+        "preview": "vite preview"
+    },
+    "devDependencies": {
+        "@tailwindcss/language-server": "^0.14.24",
+        "typescript": "~5.8.3",
+        "vite": "^7.0.0"
+    },
+    "dependencies": {
+        "@tailwindcss/vite": "^4.1.11",
+        "tailwindcss": "^4.1.11"
+    }
 }
