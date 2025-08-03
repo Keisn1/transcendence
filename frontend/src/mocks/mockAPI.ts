@@ -184,6 +184,7 @@ export function setupMockApi() {
                 playerIds: userIds,
                 players: players.map(({ password, ...u }) => u),
                 matches: matches,
+                nextMatchIdx: 0,
             };
 
             return new Response(JSON.stringify(tournament), {

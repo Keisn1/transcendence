@@ -15,14 +15,6 @@ export interface TournamentCreationBody {
     // players?: User[];
 }
 
-export interface Tournament {
-    id: string;
-    playerIds: string[];
-    players?: User[];
-    matches: Match[];
-    state: string;
-}
-
 export interface Match {
     matchId: string;
     // player1Id: string;

@@ -4,3 +4,6 @@
 
 - [ ] put tournament components into tournament
 - [ ] put warning when reload
+
+
+- [ ]  put methods of authservice that change state in the application into the authController

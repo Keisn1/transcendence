@@ -1,5 +1,4 @@
-import { type Tournament } from "../types/tournament.types";
-import { tournamentHasMoreMatches } from "./utils";
+import { Tournament } from "./tournament.controller";
 
 export enum TournamentState {
     UNINITIALIZED = "uninitialized",
@@ -42,11 +41,11 @@ export class TournamentMachine {
             return;
         }
 
-        console.log("here: ", tournamentHasMoreMatches(tournament));
+        console.log("here: ", tournament.hasMoreMatches());
         if (
             tx.from === TournamentState.IN_PROGRESS &&
             event === TournamentEvent.FINISH &&
-            !tournamentHasMoreMatches(tournament)
+            !tournament.hasMoreMatches()
         ) {
             this.state = TournamentState.COMPLETED;
         } else {
