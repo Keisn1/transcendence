@@ -28,6 +28,8 @@ export class Profile extends BaseComponent {
 
     private populateUserData() {
         if (!this.user) return;
+
+        console.log("user: ", this.user);
         if (this.usernameEl) this.usernameEl.textContent = this.user.username;
         if (this.emailEl) this.emailEl.textContent = this.user.email;
     }
@@ -35,7 +37,10 @@ export class Profile extends BaseComponent {
     private setupAvatarUpload() {
         this.avatarUpload = new AvatarUpload(() => {
             // Refresh user data when avatar changes
+            console.log("callback on avatarUpload");
+            console.log(this);
             this.user = this.authService.getCurrentUser();
+            console.log("updated user: ", this.user);
             this.populateUserData();
         });
 

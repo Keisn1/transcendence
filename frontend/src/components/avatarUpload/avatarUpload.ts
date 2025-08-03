@@ -67,11 +67,11 @@ export class AvatarUpload extends BaseComponent {
             const data = await response.json();
 
             // Step 2: Update profile with new avatar URL
-            await this.profileService.updateProfile({ avatar: "/file" + data.avatarUrl });
+            await this.profileService.updateProfile({ avatar: data.url });
 
             // Notify parent component
             if (this.onAvatarChange) {
-                this.onAvatarChange(data.avatarUrl);
+                this.onAvatarChange(data.url);
             }
         } catch (error) {
             console.error("Avatar upload failed:", error);

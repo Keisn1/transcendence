@@ -44,7 +44,8 @@ export default async function update(request: FastifyRequest, reply: FastifyRepl
         const [updated] = await request.server.db.query("SELECT id, username, email, avatar FROM users WHERE id = ?", [
             id,
         ]);
-        return reply.status(200).send(updated);
+
+        return reply.status(200).send({ user: updated });
     } catch (err: any) {
         request.log.error(err);
         if (err.message.includes("UNIQUE constraint failed")) {
@@ -69,11 +70,18 @@ export const updateUserSchema = {
         200: {
             type: "object",
             properties: {
-                id: { type: "number" },
-                username: { type: "string" },
-                email: { type: "string" },
-                avatar: { type: "string", format: "uri-reference" },
+                user: {
+                    type: "object",
+                    properties: {
+                        id: { type: "string" },
+                        username: { type: "string" },
+                        email: { type: "string" },
+                        avatar: { type: "string", format: "uri-reference" },
+                    },
+                    required: ["id", "username", "email", "avatar"],
+                },
             },
+            additionalProperties: false,
         },
     },
 } as const;

@@ -32,7 +32,6 @@ export default async function register(
             token,
             user,
         };
-
         return reply.status(201).send(response);
     } catch (err) {
         const error = err as Error;
