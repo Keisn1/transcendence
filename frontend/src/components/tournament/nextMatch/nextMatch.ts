@@ -50,7 +50,7 @@ export class NextMatch extends BaseComponent {
 
         const tournament = this.tournamentController.getTournament();
 		const nextMatch = tournament.matches[tournament.nextMatchIdx];
-        return `${nextMatch.player1.username} vs ${nextMatch.player2.username ?? "BYE"}`;
+        return `${nextMatch.player1.username} vs ${nextMatch.player2.username}`;
     }
 
     destroy(): void {

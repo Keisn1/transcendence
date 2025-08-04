@@ -18,8 +18,8 @@ export class TournamentMatchComponent extends BaseComponent {
         this.gameComponent = new GameComponent(GameControlsTournamentComponent);
         this.exitBtn = new ExitBtn();
 
-        this.container.appendChild(this.playerNamesDisplay.getContainer());
         this.container.appendChild(this.gameComponent.getContainer());
+        this.container.appendChild(this.playerNamesDisplay.getContainer());
         this.container.appendChild(this.exitBtn.getContainer());
 
         this.gameComponent.gameControls.addToFinishCallbacks(() => {

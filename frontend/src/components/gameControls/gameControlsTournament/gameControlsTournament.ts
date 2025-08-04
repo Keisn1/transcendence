@@ -36,6 +36,7 @@ export class GameControlsTournamentComponent extends BaseComponent implements IG
             this.started = true;
             this.startBtn.textContent = "Finish Match";
             this.startCallbacks.forEach((fn) => fn());
+            this.startBtn.disabled = true;
         } else {
             this.finishCallbacks.forEach((fn) => fn());
             this.reset();
