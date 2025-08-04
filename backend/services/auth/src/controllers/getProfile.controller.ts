@@ -12,7 +12,7 @@ export const getCurrentUserSchema = {
                 user: {
                     type: "object",
                     properties: {
-                        id: { type: "number" },
+                        id: { type: "string" },
                         username: { type: "string" },
                         email: { type: "string" },
                         avatar: { type: "string", format: "uri-reference" },

@@ -1,6 +1,7 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { genSaltSync, hashSync } from "bcrypt";
 import { RegisterBody, RegisterResponse, User } from "../types/auth.types";
+import { v4 as uuidv4 } from "uuid";
 
 export default async function register(
     request: FastifyRequest<{ Body: RegisterBody }>,
@@ -13,14 +14,15 @@ export default async function register(
         const salt = genSaltSync(10);
         const passwordHash = hashSync(password, salt);
 
+        const userId = uuidv4();
         // Store only user_id and password_hash in auth service
-        const result = await request.server.db.run(
-            "INSERT INTO users (username, email, password_hash, avatar) VALUES (?, ?, ?, ?)",
-            [username, email, passwordHash, "/uploads/default-pfp.png"],
+        await request.server.db.run(
+            "INSERT INTO users (id, username, email, password_hash, avatar) VALUES (?, ?, ?, ?, ?)",
+            [userId, username, email, passwordHash, "/uploads/default-pfp.png"],
         );
 
         const user: User = {
-            id: String(result.lastID),
+            id: userId, // Use generated UUID instead of result.lastID
             username: username,
             email: email,
             avatar: "/uploads/default-pfp.png",

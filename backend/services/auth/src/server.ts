@@ -3,7 +3,6 @@ import { routes } from "./routes/routes";
 import jwtPlugin from "./plugins/auth.plugin";
 import dbPlugin from "./plugins/db.plugin";
 
-// //THIS IS NEW SHIT THAT CHRIS PUT HERE TO MAKE HTTPS WORK
 import fs from "fs";
 import vaultLib from "node-vault";
 
