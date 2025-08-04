@@ -7,11 +7,9 @@ export interface RegisterPlayerBody {
 
 export interface Match {
     matchId: string;
-    // player1Id: string;
-    // player2Id: string;
     player1: User;
     player2: User;
-    round: number;
+    // round: number;
     result: GameResult;
 }
 
