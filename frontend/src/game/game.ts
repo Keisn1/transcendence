@@ -43,8 +43,10 @@ export class PongGame {
     private justPaused = false;
     private requestAnimationFrame: number | null = null;
     private result: GameResult;
+    private onFinishCallback?: () => void;
 
-    constructor(canvas: HTMLCanvasElement, config: GameConfig = {}) {
+    constructor(canvas: HTMLCanvasElement, config: GameConfig = {}, onFinish?: () => void) {
+        this.onFinishCallback = onFinish;
         const defaultControls: ControlsConfig = {
             player1: { up: "w", down: "s" },
             player2: { up: "ArrowUp", down: "ArrowDown" },
@@ -164,6 +166,7 @@ export class PongGame {
             this.ctx.fillStyle = "#fff";
             this.ctx.fillText(winMessage, this.canvas.width / 2, this.canvas.height / 2);
             this.result = { player1Score: p1Score, player2Score: p2Score };
+
             return true;
         }
         return false;
@@ -223,6 +226,16 @@ export class PongGame {
         }
 
         this.drawNewState();
+        if (this.isGameOver()) {
+            console.log("exiting game loop");
+
+            // Call the finish callback
+            if (this.onFinishCallback) {
+                this.onFinishCallback();
+            }
+
+            return;
+        }
 
         if (this.isRallyFinished()) {
             this.rallyCount++;
