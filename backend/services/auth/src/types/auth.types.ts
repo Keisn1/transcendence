@@ -34,7 +34,5 @@ export interface UpdateUserBody {
 }
 
 export interface UpdateUserResponse {
-    id: number;
-    username: string;
-    email: string;
+    user: User;
 }

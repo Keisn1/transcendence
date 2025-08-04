@@ -1,5 +1,5 @@
 import { AuthService } from "../auth/auth.service";
-import type { UpdateProfileBody } from "../../types/auth.types";
+import type { UpdateUserBody, UpdateUserResponse } from "../../types/auth.types";
 
 export class ProfileService {
     private static instance: ProfileService;
@@ -16,7 +16,7 @@ export class ProfileService {
         return ProfileService.instance;
     }
 
-    async updateProfile(updates: UpdateProfileBody): Promise<void> {
+    async updateProfile(updates: UpdateUserBody): Promise<void> {
         const response = await fetch("/api/user", {
             method: "PUT",
             headers: {
@@ -28,7 +28,7 @@ export class ProfileService {
 
         if (!response.ok) throw new Error("Profile update failed");
 
-        const data = await response.json();
+        const data: UpdateUserResponse = await response.json();
         console.log("data from PUT /api/user", data);
 
         // Notify AuthService to update cached user

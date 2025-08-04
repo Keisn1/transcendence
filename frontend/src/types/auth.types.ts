@@ -26,13 +26,14 @@ export interface RegisterResponse {
     user: User;
 }
 
-export interface UpdateProfileBody {
+export interface UpdateUserBody {
     username?: string;
     email?: string;
-    avatar?: File | string; // File for upload, string for URL
+    password?: string;
+    avatar?: string;
 }
 
-export interface UpdateProfileResponse {
+export interface UpdateUserResponse {
     user: User;
 }
 
@@ -40,5 +41,5 @@ export interface SignupForm {
     username: string;
     email: string;
     password: string;
-    confirmPassword?: string; // for frontend validation
+    confirmPassword?: string;
 }
