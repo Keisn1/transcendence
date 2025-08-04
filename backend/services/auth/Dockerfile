@@ -9,6 +9,8 @@ WORKDIR /app
 
 # Copy everything
 COPY . .
+RUN mkdir db
+
 # Copy backend
 COPY tsconfig.json .
 COPY package*.json .

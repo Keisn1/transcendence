@@ -43,12 +43,12 @@ if (process.env.ENV === "production") {
                 limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
             });
             server.register(jwtPlugin, { jwtSecret });
-            server.register(routes, { prefix: "api" });
-
             server.register(import("@fastify/static"), {
                 root: "/app/uploads",
                 prefix: "/uploads/",
             });
+            server.register(routes, { prefix: "api" });
+
             await server.listen({ port: 3001, host: "0.0.0.0" });
             console.log("✅ Production server started");
         } catch (err) {
@@ -71,13 +71,13 @@ if (process.env.ENV === "production") {
     server.register(import("@fastify/multipart"), {
         limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
     });
-
     server.register(import("@fastify/static"), {
         root: "/app/uploads",
         prefix: "/uploads/",
     });
     server.register(routes, { prefix: "api" });
-    server.listen({ port: 3001 }, (err, address) => {
+
+    server.listen({ port: 3001, host: "0.0.0.0" }, (err, address) => {
         if (err) {
             console.error(err);
             process.exit(1);
