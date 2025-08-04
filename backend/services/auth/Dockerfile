@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y jq
 WORKDIR /app
 
 # Copy everything
-COPY . .
+COPY src/ ./src/
 RUN mkdir db
 
 # Copy backend
