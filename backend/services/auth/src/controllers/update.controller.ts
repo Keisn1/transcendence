@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { genSaltSync, hashSync } from "bcrypt";
-import { UpdateUserBody, UpdateUserResponse } from "../types/auth.types";
+import { UpdateUserBody, UpdateUserResponse, User } from "../types/auth.types";
 
 export default async function update(request: FastifyRequest, reply: FastifyReply): Promise<UpdateUserResponse> {
     const id = request.user.id;
@@ -36,14 +36,17 @@ export default async function update(request: FastifyRequest, reply: FastifyRepl
 
     try {
         const sql = `UPDATE users SET ${fields.join(", ")}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`;
-        const result = await request.server.db.run(sql, values);
+        const resultUpdate = await request.server.db.run(sql, values);
 
-        if (result.changes === 0) {
+        if (resultUpdate.changes === 0) {
             return reply.status(404).send({ error: "User not found" });
         }
-        const [updated] = await request.server.db.query("SELECT id, username, email, avatar FROM users WHERE id = ?", [
-            id,
-        ]);
+
+        const [resultQuery] = await request.server.db.query(
+            "SELECT id, username, email, avatar FROM users WHERE id = ?",
+            [id],
+        );
+        const updated = resultQuery[0] as User;
 
         return reply.status(200).send({ user: updated });
     } catch (err: any) {
