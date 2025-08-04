@@ -29,7 +29,7 @@ export class NextMatch extends BaseComponent {
     private fillNextMatchDetails() {
         switch (this.tournamentController.getTournamentMachine()!.getState()) {
             case TournamentState.READY:
-                this.nextMatchDetails.textContent = "Ready to start first match";
+                this.nextMatchDetails.textContent = `Playing: ${this.nextMatchLabel()}`;
                 break;
             case TournamentState.IN_PROGRESS:
                 this.nextMatchDetails.textContent = `Playing: ${this.nextMatchLabel()}`;
@@ -45,8 +45,12 @@ export class NextMatch extends BaseComponent {
 
     private nextMatchLabel() {
         // TODO: bit strange, maybe a method on the tournament itself
-        const next = this.tournamentController.getTournament()!.matches.find((m) => !m.result)!;
-        return `${next.player1.username} vs ${next.player2.username ?? "BYE"}`;
+        // const next = this.tournamentController.getTournament()!.matches.find((m) => !m.result)!;
+        // return `${next.player1.username} vs ${next.player2.username ?? "BYE"}`;
+
+        const tournament = this.tournamentController.getTournament();
+		const nextMatch = tournament.matches[tournament.nextMatchIdx];
+        return `${nextMatch.player1.username} vs ${nextMatch.player2.username ?? "BYE"}`;
     }
 
     destroy(): void {
