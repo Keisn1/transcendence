@@ -1,0 +1,22 @@
+:PROPERTIES:
+:header-args:sqlite: :db auth.db :header yes
+:END:
+#+title: Sql
+
+* Tables
+#+begin_src sqlite
+.tables
+#+end_src
+
+#+RESULTS:
+: schema_migrations  users
+
+* Users
+** get all users
+#+begin_src sqlite
+SELECT * FROM users;
+#+end_src
+
+#+RESULTS:
+| id | username | email           | password_hash                                                | avatar                            | created_at          | updated_at          |
+|  1 | kay      | kay@example.com | $2b$10$TWLwv9a7JFzTGueG1ldxC.3qN3M7P42uRMCVbDpGBPOaBK0rLcrFm | /uploads/avatar-1754234377671.jpg | 2025-08-03 15:07:00 | 2025-08-03 15:19:37 |

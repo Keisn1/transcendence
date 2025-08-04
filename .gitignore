@@ -17,5 +17,7 @@
 !/vault/init/entrypoint.sh
 !/vault/init/vault-auto-init-unseal.sh
 !/vault/init/vault.hcl
-/backend/services/file/uploads/
-/backend/services/auth/db/
+/backend/services/file/uploads/*
+!/backend/services/file/uploads/default-pfp.png
+/backend/services/auth/db/*
+!/backend/services/auth/db/sql.org
