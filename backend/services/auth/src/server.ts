@@ -2,6 +2,8 @@ import Fastify from "fastify";
 import { routes } from "./routes/routes";
 import jwtPlugin from "./plugins/auth.plugin";
 import dbPlugin from "./plugins/db.plugin";
+import gdprPlugin from "./plugins/gdpr.plugin";
+
 
 import fs from "fs";
 import vaultLib from "node-vault";
@@ -10,8 +12,8 @@ if (process.env.ENV === "production") {
     const server = Fastify({
         logger: true,
         https: {
-            key: fs.readFileSync("/vault/init/auth-service.localhost.key"),
-            cert: fs.readFileSync("/vault/init/auth-service.localhost.crt"),
+            key: fs.readFileSync("/vault/init/fastify.localhost.key"),
+            cert: fs.readFileSync("/vault/init/fastify.localhost.crt"),
         },
     });
 
@@ -27,6 +29,7 @@ if (process.env.ENV === "production") {
         vault.token = result.auth.client_token;
     };
 
+
     const start = async () => {
         try {
             await loginWithAppRole();
@@ -36,7 +39,8 @@ if (process.env.ENV === "production") {
             server.register(jwtPlugin, { jwtSecret });
             server.register(dbPlugin);
             server.register(routes, { prefix: "api" });
-
+            //await server.register(gdprPlugin, { vault }); // GDPR PLUGIN FOR .5
+            server.register(gdprPlugin, { prefix: "api" });
             await server.listen({ port: 3000, host: "0.0.0.0" });
             console.log("✅ Production server started");
         } catch (err) {
@@ -57,7 +61,7 @@ if (process.env.ENV === "production") {
     server.register(jwtPlugin, { jwtSecret }); // jwtAuth decorator only
     server.register(dbPlugin);
     server.register(routes, { prefix: "api" });
-
+    server.register(gdprPlugin, { prefix: "api" });
     server.listen({ port: 3000 }, (err, address) => {
         if (err) {
             console.error(err);
