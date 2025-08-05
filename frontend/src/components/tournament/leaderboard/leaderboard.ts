@@ -18,10 +18,11 @@ export class Leaderboard extends BaseComponent {
 		this.fillLeaderboard();
 	}
 
-	private fillLeaderboard() {
+	private getPlayerScores(): { player: User; count: number }[] {
 		const tournament = this.tournamentController.getTournament()!;
 
 		const playerScores = new Map<string, { player: User; count: number }>();
+
 		for (const player of tournament.players) {
 			playerScores.set(player.id, { player: player, count: 0 });
 		}
@@ -33,16 +34,19 @@ export class Leaderboard extends BaseComponent {
 
 		const sorted = Array.from(playerScores.values()).sort((a, b) => b.count - a.count);
 
-		sorted.forEach((entry, idx) => {
-			let placeLabel: string;
-			if (idx === 0) placeLabel = "1st place";
-			else if (idx === 1) placeLabel = "2nd place";
-			else if (idx === 2) placeLabel = "3rd place";
-			else placeLabel = "";
+		return sorted;
+	}
+
+	private fillLeaderboard() {
+		const playerScores = this.getPlayerScores();
+
+		playerScores.forEach((entry, idx) => {
+			const placeLabel = `${toOrdinalNumber(idx + 1)} place`;
 
 			const html = leaderboardEntryTemplate
 				.replace(/{{place}}/g, placeLabel)
-				.replace(/{{playerName}}/g, entry.player.username);
+				.replace(/{{playerName}}/g, entry.player.username)
+				.replace(/{{score}}/g, entry.count.toString());
 			this.leaderboard.insertAdjacentHTML("beforeend", html)
 		});
 	}
@@ -50,4 +54,11 @@ export class Leaderboard extends BaseComponent {
 	destroy(): void {
         super.destroy();
     }
+}
+
+function toOrdinalNumber(n: number): string {
+	if (n % 10 === 1 && n % 100 !== 11) return `${n}st`;
+	if (n % 10 === 2 && n % 100 !== 12) return `${n}nd`;
+	if (n % 10 === 3 && n % 100 !== 13) return `${n}rd`;
+	return `${n}th`;
 }

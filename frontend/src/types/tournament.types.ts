@@ -9,7 +9,6 @@ export interface Match {
     matchId: string;
     player1: User;
     player2: User;
-    // round: number;
     result: GameResult;
 }
 
