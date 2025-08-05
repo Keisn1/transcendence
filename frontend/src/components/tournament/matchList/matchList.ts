@@ -6,7 +6,7 @@ import matchTemplate from "./match.html?raw";
 export class MatchList extends BaseComponent {
     private tournamentController: TournamentController;
     private matchList: HTMLUListElement;
-
+    
     constructor() {
         super("div", "match-list");
         console.log("constructing bracket component");
