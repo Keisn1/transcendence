@@ -23,9 +23,9 @@ export class AuthController {
         const currentPath = window.location.pathname;
         this.authService.logout();
 
-        const authRequiredPaths = [
-            "/profile", // , "/account", "/settings"
-        ];
+        console.log("inside logout");
+        console.log(currentPath);
+        const authRequiredPaths = ["/profile", "/settings", "/settings/gdpr"];
 
         if (authRequiredPaths.includes(currentPath)) {
             console.log("navigating to /");
