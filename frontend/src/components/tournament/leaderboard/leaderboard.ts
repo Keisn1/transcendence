@@ -41,7 +41,7 @@ export class Leaderboard extends BaseComponent {
 		const playerScores = this.getPlayerScores();
 
 		playerScores.forEach((entry, idx) => {
-			const placeLabel = `${toOrdinalNumber(idx + 1)} place`;
+			const placeLabel = `${this.toOrdinalNumber(idx + 1)} place`;
 
 			const html = leaderboardEntryTemplate
 				.replace(/{{place}}/g, placeLabel)
@@ -51,14 +51,15 @@ export class Leaderboard extends BaseComponent {
 		});
 	}
 
+	private toOrdinalNumber(n: number): string {
+		if (n % 10 === 1 && n % 100 !== 11) return `${n}st`;
+		if (n % 10 === 2 && n % 100 !== 12) return `${n}nd`;
+		if (n % 10 === 3 && n % 100 !== 13) return `${n}rd`;
+		return `${n}th`;
+	}
+
 	destroy(): void {
         super.destroy();
     }
 }
 
-function toOrdinalNumber(n: number): string {
-	if (n % 10 === 1 && n % 100 !== 11) return `${n}st`;
-	if (n % 10 === 2 && n % 100 !== 12) return `${n}nd`;
-	if (n % 10 === 3 && n % 100 !== 13) return `${n}rd`;
-	return `${n}th`;
-}
