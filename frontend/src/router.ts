@@ -5,7 +5,8 @@ import ProfileView from "./views/ProfileView.ts";
 import LoginView from "./views/LoginView.ts";
 import SignUpView from "./views/SignUpView.ts";
 import TournamentView from "./views/TournamentView.ts";
-
+import GdprSettingsView from "./views/GdprSettingsView";
+import SettingsView from "./views/SettingsView";
 export default class Router {
     private currentView: AbstractView | null = null;
 
@@ -45,6 +46,14 @@ export default class Router {
                 path: "/tournament",
                 view: TournamentView,
             },
+            {
+                path: "/settings",
+                view: SettingsView,
+            },
+            {
+                path: "/settings/gdpr",
+                view: GdprSettingsView,
+            }
         ];
 
         let potentialMatches = routes.map((route) => {

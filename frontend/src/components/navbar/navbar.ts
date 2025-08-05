@@ -15,6 +15,7 @@ export class Navbar extends BaseComponent {
     private menu: HTMLElement;
     private userMenuButton: HTMLElement;
     private logoutLink: HTMLElement;
+    private settingsLink: HTMLAnchorElement;
 
     constructor() {
         super("div", "navbar-container");
@@ -32,6 +33,7 @@ export class Navbar extends BaseComponent {
         this.menu = this.container.querySelector<HTMLElement>("#menu-container")!;
         this.userMenuButton = this.container.querySelector<HTMLElement>("#user-menu-button")!;
         this.logoutLink = this.container.querySelector<HTMLElement>("#logout-link")!;
+        this.settingsLink = this.container.querySelector<HTMLAnchorElement>("#settings-link")!;
 
         this.setupEvents();
         this.setupLinks();
@@ -75,6 +77,7 @@ export class Navbar extends BaseComponent {
         this.gameLink.href = "/game";
         this.tournamentLink.href = "/tournament";
         this.profileLink.href = "/profile";
+        this.settingsLink.href = "/settings";
     }
 
     setupEvents() {
