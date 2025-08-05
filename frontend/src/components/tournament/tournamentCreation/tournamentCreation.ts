@@ -1,9 +1,7 @@
-// import { TournamentController } from "../../controllers/tournament.controller.ts";
 import playerTemplate from "./player.html?raw";
 import tournamentTemplate from "./tournamentCreation.html?raw";
 import { BaseComponent } from "../../BaseComponent.ts";
 import { TournamentController } from "../../../controllers/tournament.controller.ts";
-import type { RegisterPlayerBody } from "../../../types/tournament.types.ts";
 import type { User } from "../../../types/auth.types.ts";
 
 export class TournamentCreation extends BaseComponent {
@@ -32,39 +30,55 @@ export class TournamentCreation extends BaseComponent {
         if (this.addedPlayersCount >= 4) return;
 
         const index = this.addedPlayersCount++;
-        const html = playerTemplate.replace(/{{index}}/g, `${index}`);
-        this.playerContainer.insertAdjacentHTML("beforeend", html);
-
+        this.playerContainer.insertAdjacentHTML("beforeend", playerTemplate.replace(/{{index}}/g, `${index}`));
+        
         const slot = this.playerContainer.querySelector<HTMLElement>(`#player-${index}`)!;
-
         const removeBtn = slot.querySelector<HTMLButtonElement>(".remove-btn")!;
-        removeBtn.addEventListener("click", () => {
-            slot.remove();
-            this.addedPlayersCount--;
-            this.registeredPlayers.splice(index - 1, 1);
-        });
-
         const registerBtn = slot.querySelector<HTMLButtonElement>(".register-player-btn")!;
-        registerBtn.addEventListener("click", (ev) => this.registerPlayer(index, ev));
+
+        removeBtn.addEventListener("click", this.handleRemove(slot, index));
+        registerBtn.addEventListener("click", this.handleRegister(index));
     }
 
-    private async registerPlayer(index: number, e: Event) {
+    private handleRemove = (slot: HTMLElement, index: number) => () => {
+        slot.remove();
+
+        const emailElement = this.container.querySelector<HTMLInputElement>(`#email-${index}`);
+        if (!emailElement) return;
+
+        const email = emailElement.value;
+        if (!email) return;
+        
+        if (this.registeredPlayers.some(player => player.email === email)) {
+            this.addedPlayersCount--;
+            this.registeredPlayers.splice(index - 1, 1);
+        }
+    }
+
+    private handleRegister = (index: number) => (e: Event) => {
         e.preventDefault();
+        this.registerPlayer(index);
+    }
+
+    private async registerPlayer(index: number) {
         const emailElement = this.container.querySelector<HTMLInputElement>(`#email-${index}`);
         const passwordElement = this.container.querySelector<HTMLInputElement>(`#password-${index}`);
 
-        if (!emailElement || !passwordElement) return this.showError("Inputs not found");
-
-        const body: RegisterPlayerBody = {
-            playerEmail: emailElement.value,
-            playerPassword: passwordElement.value,
-        };
+        if (!emailElement || !passwordElement) {
+            return this.showError("Inputs not found");
+        }
 
         try {
             const controller = TournamentController.getInstance();
-            const user = await controller.registerPlayer(body);
-            if (this.isPlayerAlreadyRegistered(user)) throw Error("Player already registered");
-            console.log(user);
+            const user = await controller.registerPlayer({
+                playerEmail: emailElement.value,
+                playerPassword: passwordElement.value,
+            });
+
+            if (this.isPlayerAlreadyRegistered(user)) {
+                throw new Error("Player already registered");
+            }
+
             this.storePlayer(user);
             this.showMessage("User registered successfully");
         } catch (err: any) {
@@ -72,7 +86,7 @@ export class TournamentCreation extends BaseComponent {
         }
     }
 
-    async handleStartTournament(e: Event) {
+    private async handleStartTournament(e: Event) {
         e.preventDefault();
         if (this.registeredPlayers.length < 2) {
             return this.showMessage("You need at least two players", "error");
@@ -95,14 +109,14 @@ export class TournamentCreation extends BaseComponent {
     }
 
     private showMessage(message: string, type: "success" | "error" = "success") {
-        this.container.querySelectorAll(".info-message").forEach((el) => el.remove());
+        const messageClass = type === "success" 
+            ? "bg-green-100 border-green-400 text-green-700" 
+            : "bg-red-100 border-red-400 text-red-700";
+
+        this.container.querySelectorAll(".info-message").forEach(el => el.remove());
 
         const div = document.createElement("div");
-        if (type === "success") {
-            div.className = `info-message bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded mb-4`;
-        } else if (type === "error") {
-            div.className = `info-message bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-4`;
-        }
+        div.className = `info-message ${messageClass} border px-4 py-2 rounded mb-4`;
         div.textContent = message;
 
         this.tournamentForm.insertAdjacentElement("beforebegin", div);
