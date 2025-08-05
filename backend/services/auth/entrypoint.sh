@@ -3,8 +3,8 @@ set -e
 
 CERT_SRC="/vault/init/pong.localhost.crt"
 KEY_SRC="/vault/init/pong.localhost.key"
-CERT_DST="/etc/ssl/certs/fastify.crt"
-KEY_DST="/etc/ssl/private/fastify.key"
+CERT_DST="/etc/ssl/certs/auth-service.crt"
+KEY_DST="/etc/ssl/private/auth-service.key"
 
 echo "⏳ Waiting for Vault to respond and /vault/init/.env to exist..."
 
@@ -37,10 +37,10 @@ while [ ! -f "$CERT_SRC" ] || [ ! -f "$KEY_SRC" ]; do
   sleep 2
 done
 
-# Copy to target SSL paths (used by Fastify)
+# Copy to target SSL paths (used by auth-service)
 cp "$CERT_SRC" "$CERT_DST"
 cp "$KEY_SRC" "$KEY_DST"
-echo "✅ Copied certificate and key to Fastify container."
+echo "✅ Copied certificate and key to auth-service container."
 
-echo "🚀 Starting Fastify server..."
+echo "🚀 Starting auth-service server..."
 exec npm start

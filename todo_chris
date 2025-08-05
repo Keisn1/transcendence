@@ -21,35 +21,27 @@ user has the rights to know what data is stored, and for how long // read up on 
 -stats of games played for example
 
 
-needs anonymization and deletion button
-
-upon click of anonymization:
-first confirm that the user really wants to do it, and be clear
-that the account will be unusable after anonymization,
-and that you will be logged out after clicking the button,
-after confirming, scramble all data completely.
-with no relation to the user at all. scramble it all.
-or rather, generate something random to replace it.
-then log the user out, and throw him back to homepage.
 
 
-for deletion, same info of it being unusable and unrecoverable,
-then wipe the database of every last bit of information we have of the user
-and then throw him back to the homepage logged out.
+todo
+setup link to /settings in navbar instead of the html
+
+
+implement 2fa in registration 
+be able to confirm the 2fa is working
 
 
 
 
-todo this afternoon
+
+
+
+
+
+stuff thats done/not my concern anymore
 have a gdpr tab in settings // done
 think about a popup with a warning what happens with anonymization/deleting // done
 logout redirection/jwtoken invalidation //done
 be able to update database for password/email adress //kay macht
 get a download button which gets all the data  //kay macht
-
-
-do the thing kay says.  on slack
-
-
-implement 2fa in registration 
-be able to confirm the 2fa is working
+change name of fastify.localhost certificate blablub to auth-service.locahost certificate blablub //done

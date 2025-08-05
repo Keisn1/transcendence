@@ -12,8 +12,8 @@ if (process.env.ENV === "production") {
     const server = Fastify({
         logger: true,
         https: {
-            key: fs.readFileSync("/vault/init/fastify.localhost.key"),
-            cert: fs.readFileSync("/vault/init/fastify.localhost.crt"),
+            key: fs.readFileSync("/vault/init/auth-service.localhost.key"),
+            cert: fs.readFileSync("/vault/init/auth-service.localhost.crt"),
         },
     });
 

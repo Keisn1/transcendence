@@ -162,8 +162,8 @@ echo "$KEY" > "$KEY_PATH"
 
 echo "Certificate and key generated: $CERT_PATH, $KEY_PATH"
 
-# --- Issue certificate and save .crt and .key for NGINX <-> Fastify connection ---
-INTERNAL_DOMAIN="fastify.localhost"
+# --- Issue certificate and save .crt and .key for NGINX <-> auth-service connection ---
+INTERNAL_DOMAIN="auth-service.localhost"
 INTCERT_PATH="/vault/init/${INTERNAL_DOMAIN}.crt"
 INTKEY_PATH="/vault/init/${INTERNAL_DOMAIN}.key"
 
