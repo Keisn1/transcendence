@@ -36,3 +36,11 @@ export interface UpdateUserBody {
 export interface UpdateUserResponse {
     user: User;
 }
+
+export interface complete2FABody {
+    token: string;
+}
+
+export interface complete2FAResponse {
+    success: boolean;
+}
