@@ -42,7 +42,7 @@ export default async function update(request: FastifyRequest, reply: FastifyRepl
             return reply.status(404).send({ error: "User not found" });
         }
 
-        const [resultQuery] = await request.server.db.query(
+        const resultQuery = await request.server.db.query(
             "SELECT id, username, email, avatar FROM users WHERE id = ?",
             [id],
         );

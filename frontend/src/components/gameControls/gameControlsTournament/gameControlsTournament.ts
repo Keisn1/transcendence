@@ -31,11 +31,21 @@ export class GameControlsTournamentComponent extends BaseComponent implements IG
         this.finishCallbacks = this.finishCallbacks.filter((cb) => cb !== fn);
     }
 
+    toggleStartBtn() {
+        console.log("toggling start button");
+        if (this.startBtn.disabled) {
+            this.startBtn.disabled = false;
+        } else {
+            this.startBtn.disabled = true;
+        }
+    }
+
     private handleClick() {
         if (!this.started) {
             this.started = true;
             this.startBtn.textContent = "Finish Match";
             this.startCallbacks.forEach((fn) => fn());
+            this.toggleStartBtn();
         } else {
             this.finishCallbacks.forEach((fn) => fn());
             this.reset();

@@ -8,4 +8,5 @@ export default interface IGameControls {
     removeFromFinishCallbacks(fn: () => void): void;
     getContainer(): HTMLElement;
     reset(): void;
+    toggleStartBtn?(): void;
 }

@@ -31,7 +31,12 @@ export class GameComponent extends BaseComponent {
         const ctx = this.canvas.getContext("2d")!;
         ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        this.game = new PongGame(this.canvas);
+        // Pass the finish callback to toggle the button
+        this.game = new PongGame(this.canvas, {}, () => {
+            if (this.gameControls.toggleStartBtn) {
+                this.gameControls.toggleStartBtn();
+            }
+        });
         if (level !== undefined) {
             this.game.setAiLevel(level);
         }

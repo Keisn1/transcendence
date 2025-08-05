@@ -3,6 +3,7 @@ import Router from "../router";
 import { TournamentService } from "../services/tournament/tournament.service.ts";
 import type { RegisterPlayerBody, GameResult, Match } from "../types/tournament.types.ts";
 import type { User } from "../types/auth.types.ts";
+import { v4 as uuidv4 } from 'uuid';
 
 export class Tournament {
     id: string = "";
@@ -10,26 +11,46 @@ export class Tournament {
     matches: Match[] = [];
     nextMatchIdx: number = 0;
     state: string = TournamentState.UNINITIALIZED;
+    // currentRound: number = 0;
 
     constructor(players?: User[]) {
         if (!players) return;
         this.players = players;
-        this.id = `t${Date.now()}`;
+        this.id = uuidv4();
+        this.buildRound(players);
+    }
 
+    buildRound(players: User[]) {
         for (let i = 0; i < players.length; i += 2) {
             const p1 = players[i];
-            const p2 = players[i + 1] ?? null;
+            const p2 = players[i + 1];
+            const initialResult: GameResult = { player1Score: 0, player2Score: 0 };
+
             this.matches.push({
-                matchId: `m${i / 2 + 1}`,
+                matchId: uuidv4(),
                 player1: p1,
                 player2: p2,
-                round: 1,
+                result: initialResult,
             });
         }
     }
-
+    
     hasMoreMatches() {
         return this.matches.length != 0 && this.nextMatchIdx < this.matches.length;
+    }
+    
+    generateNextRound() {
+        if (this.matches.length <= 1 || this.matches.length === 3) return;
+    
+        // this.currentRound++;
+        const winners = this.matches.map(m => {
+            const { player1Score, player2Score } = m.result!;
+            return player1Score >= player2Score ? m.player1 : m.player2;
+        });
+
+        if (winners.length <= 1) return;
+        
+        this.buildRound(winners);
     }
 }
 
@@ -91,6 +112,7 @@ export class TournamentController {
     finishMatch(result: GameResult): void {
         this.tournament.matches[this.tournament.nextMatchIdx].result = result;
         this.tournament.nextMatchIdx++;
+        if (!this.tournament.hasMoreMatches()) this.tournament.generateNextRound();
         this.tournamentMachine?.update(TournamentEvent.FINISH, this.tournament);
         this.router.navigateTo("/tournament");
     }
