@@ -28,6 +28,7 @@ if (process.env.ENV === "production") {
         vault.token = result.auth.client_token;
     };
 
+
     const start = async () => {
         try {
             await loginWithAppRole();

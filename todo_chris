@@ -1,0 +1,48 @@
+gdpr:
+
+made a template for gdpr plugin.
+it still needs
+ - 2fa check
+ - frontend
+ - db connection
+ - actual testing
+
+
+GDPR compliance:
+
+in user settings, privacy tab.
+
+user has the rights to know what data is stored, and for how long // read up on it.
+
+-username
+-email
+-passwordhash
+-2fa secret
+-stats of games played for example
+
+
+
+
+todo
+setup link to /settings in navbar instead of the html
+
+
+implement 2fa in registration 
+be able to confirm the 2fa is working
+
+
+
+new encrypt/decrypt key for 2fa secrets in vault abrufbar
+
+
+
+
+
+
+stuff thats done/not my concern anymore
+have a gdpr tab in settings // done
+think about a popup with a warning what happens with anonymization/deleting // done
+logout redirection/jwtoken invalidation //done
+be able to update database for password/email adress //kay macht
+get a download button which gets all the data  //kay macht
+change name of fastify.localhost certificate blablub to auth-service.locahost certificate blablub //done
