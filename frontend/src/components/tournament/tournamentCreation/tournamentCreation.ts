@@ -1,10 +1,9 @@
-// import { TournamentController } from "../../controllers/tournament.controller.ts";
 import playerTemplate from "./player.html?raw";
 import tournamentTemplate from "./tournamentCreation.html?raw";
 import { BaseComponent } from "../../BaseComponent.ts";
 import { TournamentController } from "../../../controllers/tournament.controller.ts";
-import type { RegisterPlayerBody } from "../../../types/tournament.types.ts";
 import type { User } from "../../../types/auth.types.ts";
+import { v4 as uuidv4 } from 'uuid';
 
 export class TournamentCreation extends BaseComponent {
     private playerContainer: HTMLElement;
@@ -23,59 +22,78 @@ export class TournamentCreation extends BaseComponent {
     }
 
     private setupEventListeners() {
-        this.addEventListenerWithCleanup(this.tournamentForm, "submit", this.handleStartTournament.bind(this));
         this.addEventListenerWithCleanup(this.addPlayerBtn, "click", this.handleAddPlayer.bind(this));
+        this.addEventListenerWithCleanup(this.tournamentForm, "submit", this.handleStartTournament.bind(this));
     }
 
     private handleAddPlayer(e: Event) {
         e.preventDefault();
         if (this.addedPlayersCount >= 4) return;
 
-        const index = this.addedPlayersCount++;
-        const html = playerTemplate.replace(/{{index}}/g, `${index}`);
-        this.playerContainer.insertAdjacentHTML("beforeend", html);
+        this.addedPlayersCount++;
+        const slotId = uuidv4();
+        const html = playerTemplate.replace(/{{slotId}}/g, slotId);
 
-        const slot = this.playerContainer.querySelector<HTMLElement>(`#player-${index}`)!;
+        this.playerContainer.insertAdjacentHTML("beforeend", html);
+        const slot = this.playerContainer.lastElementChild as HTMLElement;
 
         const removeBtn = slot.querySelector<HTMLButtonElement>(".remove-btn")!;
-        removeBtn.addEventListener("click", () => {
+        const registerBtn = slot.querySelector<HTMLButtonElement>(".register-player-btn")!;
+
+        // 1) REMOVE HANDLER
+        removeBtn.addEventListener("click", (ev) => {
+            ev.preventDefault();
+            
+            const playerId = slot.dataset.playerId;
+            if (playerId) {
+                this.registeredPlayers = this.registeredPlayers.filter(p => p.id !== playerId);
+            }
+            
             slot.remove();
             this.addedPlayersCount--;
-            this.registeredPlayers.splice(index - 1, 1);
+            console.log("After removal:", this.registeredPlayers);
         });
 
-        const registerBtn = slot.querySelector<HTMLButtonElement>(".register-player-btn")!;
-        registerBtn.addEventListener("click", (ev) => this.registerPlayer(index, ev));
+        // 2) REGISTER HANDLER
+        registerBtn.addEventListener("click", async (ev) => {
+            ev.preventDefault();
+            
+            const emailInput = slot.querySelector<HTMLInputElement>(`#email-${slotId}`);
+            const passwordInput = slot.querySelector<HTMLInputElement>(`#password-${slotId}`);
+            
+            if (!emailInput || !passwordInput) {
+                this.showMessage("Input elements not found", "error");
+                return;
+            }
+
+            try {
+                const user = await TournamentController.getInstance().registerPlayer({
+                    playerEmail: emailInput.value,
+                    playerPassword: passwordInput.value,
+                });
+
+                if (this.registeredPlayers.some(p => p.id === user.id)) {
+                    throw new Error("Player already registered");
+                }
+
+                this.registeredPlayers.push(user);
+                slot.dataset.playerId = user.id;
+
+                this.showMessage("User registered successfully");
+            } catch (err: any) {
+                this.showMessage(err.message || "Registration failed", "error");
+            }
+            console.log("After registration:", this.registeredPlayers);
+        });
     }
 
-    private async registerPlayer(index: number, e: Event) {
-        e.preventDefault();
-        const emailElement = this.container.querySelector<HTMLInputElement>(`#email-${index}`);
-        const passwordElement = this.container.querySelector<HTMLInputElement>(`#password-${index}`);
-
-        if (!emailElement || !passwordElement) return this.showError("Inputs not found");
-
-        const body: RegisterPlayerBody = {
-            playerEmail: emailElement.value,
-            playerPassword: passwordElement.value,
-        };
-
-        try {
-            const controller = TournamentController.getInstance();
-            const user = await controller.registerPlayer(body);
-            if (this.isPlayerAlreadyRegistered(user)) throw Error("Player already registered");
-            console.log(user);
-            this.storePlayer(user);
-            this.showMessage("User registered successfully");
-        } catch (err: any) {
-            this.showMessage(err.message ?? "Player registration failed", "error");
-        }
-    }
-
-    async handleStartTournament(e: Event) {
+    private async handleStartTournament(e: Event) {
         e.preventDefault();
         if (this.registeredPlayers.length < 2) {
             return this.showMessage("You need at least two players", "error");
+        }
+        if (this.registeredPlayers.length % 2 !== 0) {
+            return this.showMessage("You need an even number of players to start a tournament", "error");
         }
 
         try {
@@ -86,23 +104,15 @@ export class TournamentCreation extends BaseComponent {
         }
     }
 
-    private isPlayerAlreadyRegistered(user: User): boolean {
-        return this.registeredPlayers.some((p) => p.id === user.id);
-    }
-
-    private storePlayer(user: User) {
-        this.registeredPlayers.push(user);
-    }
-
     private showMessage(message: string, type: "success" | "error" = "success") {
-        this.container.querySelectorAll(".info-message").forEach((el) => el.remove());
+        const messageClass = type === "success" 
+            ? "bg-green-100 border-green-400 text-green-700" 
+            : "bg-red-100 border-red-400 text-red-700";
+
+        this.container.querySelectorAll(".info-message").forEach(el => el.remove());
 
         const div = document.createElement("div");
-        if (type === "success") {
-            div.className = `info-message bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded mb-4`;
-        } else if (type === "error") {
-            div.className = `info-message bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-4`;
-        }
+        div.className = `info-message ${messageClass} border px-4 py-2 rounded mb-4`;
         div.textContent = message;
 
         this.tournamentForm.insertAdjacentElement("beforebegin", div);
@@ -111,17 +121,6 @@ export class TournamentCreation extends BaseComponent {
             div.classList.add("opacity-0", "transition", "duration-500");
             setTimeout(() => div.remove(), 500);
         }, 3000);
-    }
-
-    private showError(message: string) {
-        const existing = this.container.querySelector(".error-message");
-        existing?.remove();
-
-        const div = document.createElement("div");
-        div.className = "error-message text-red-600 text-sm mt-2 text-center";
-        div.textContent = message;
-
-        this.tournamentForm.insertAdjacentElement("afterend", div);
     }
 
     destroy(): void {
