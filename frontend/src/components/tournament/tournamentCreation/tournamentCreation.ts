@@ -40,7 +40,11 @@ export class TournamentCreation extends BaseComponent {
         const removeBtn = slot.querySelector<HTMLButtonElement>(".remove-btn")!;
         const registerBtn = slot.querySelector<HTMLButtonElement>(".register-player-btn")!;
 
-        // 1) REMOVE HANDLER
+        this.attachRemoveHandler(slot, removeBtn);
+        this.attachRegisterHandler(slot, slotId, registerBtn);
+    }
+
+    private attachRemoveHandler(slot: HTMLElement, removeBtn: HTMLButtonElement): void {
         removeBtn.addEventListener("click", (ev) => {
             ev.preventDefault();
             
@@ -53,8 +57,9 @@ export class TournamentCreation extends BaseComponent {
             this.addedPlayersCount--;
             console.log("After removal:", this.registeredPlayers);
         });
+    }
 
-        // 2) REGISTER HANDLER
+    private attachRegisterHandler(slot: HTMLElement, slotId: string, registerBtn: HTMLButtonElement): void {
         registerBtn.addEventListener("click", async (ev) => {
             ev.preventDefault();
             
