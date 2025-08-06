@@ -1,4 +1,4 @@
-import playerTemplate from "./playerSlot.html?raw";
+import playerSlotTemplate from "./playerSlot.html?raw";
 import tournamentCreationPanelTemplate from "./tournamentCreationPanel.html?raw";
 import { BaseComponent } from "../../BaseComponent.ts";
 import { TournamentController } from "../../../controllers/tournament.controller.ts";
@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 export class TournamentCreationPanel extends BaseComponent {
     private tournamentForm: HTMLFormElement;
-    private playerContainer: HTMLElement;
+    private playersContainer: HTMLElement;
     private addPlayerBtn: HTMLButtonElement;
     private addedPlayersCount: number = 0;
     private registeredPlayers: User[] = [];
@@ -18,7 +18,7 @@ export class TournamentCreationPanel extends BaseComponent {
         this.container.innerHTML = tournamentCreationPanelTemplate;
     
         this.tournamentForm = this.container.querySelector<HTMLFormElement>("#tournament-form")!;
-        this.playerContainer = this.container.querySelector("#players-container")!;
+        this.playersContainer = this.container.querySelector("#players-container")!;
         this.addPlayerBtn = this.container.querySelector<HTMLButtonElement>("#add-player")!;
         this.setupEventListeners();
     }
@@ -34,64 +34,60 @@ export class TournamentCreationPanel extends BaseComponent {
 
         this.addedPlayersCount++;
         const slotId = uuidv4();
-        const html = playerTemplate.replace(/{{slotId}}/g, slotId);
+        const slotHtml = playerSlotTemplate.replace(/{{slotId}}/g, slotId);
 
-        this.playerContainer.insertAdjacentHTML("beforeend", html);
-        const slot = this.playerContainer.lastElementChild as HTMLElement;
+        this.playersContainer.insertAdjacentHTML("beforeend", slotHtml);
+        const slot = this.playersContainer.lastElementChild as HTMLElement;
 
         const removeBtn = slot.querySelector<HTMLButtonElement>(".remove-btn")!;
         const registerBtn = slot.querySelector<HTMLButtonElement>(".register-player-btn")!;
 
-        this.attachRemoveHandler(slot, removeBtn);
-        this.attachRegisterHandler(slot, slotId, registerBtn);
+        removeBtn.addEventListener("click", (ev) => { this.removeHandler(ev, slot) });
+        registerBtn.addEventListener("click", async (ev) => { this.registerHandler(ev, slot, slotId) });
     }
 
-    private attachRemoveHandler(slot: HTMLElement, removeBtn: HTMLButtonElement): void {
-        removeBtn.addEventListener("click", (ev) => {
-            ev.preventDefault();
+    private removeHandler(ev: Event, slot: HTMLElement) {
+        ev.preventDefault();
             
-            const playerId = slot.dataset.playerId;
-            if (playerId) {
-                this.registeredPlayers = this.registeredPlayers.filter(p => p.id !== playerId);
-            }
-            
-            slot.remove();
-            this.addedPlayersCount--;
-            console.log("After removal:", this.registeredPlayers);
-        });
+        const playerId = slot.dataset.playerId;
+        if (playerId) {
+            this.registeredPlayers = this.registeredPlayers.filter(p => p.id !== playerId);
+        }
+        
+        slot.remove();
+        this.addedPlayersCount--;
+        console.log("After removal:", this.registeredPlayers);
     }
 
-    private attachRegisterHandler(slot: HTMLElement, slotId: string, registerBtn: HTMLButtonElement): void {
-        registerBtn.addEventListener("click", async (ev) => {
-            ev.preventDefault();
+    private async registerHandler(ev: Event, slot: HTMLElement, slotId: string) {
+        ev.preventDefault();
             
-            const emailInput = slot.querySelector<HTMLInputElement>(`#email-${slotId}`);
-            const passwordInput = slot.querySelector<HTMLInputElement>(`#password-${slotId}`);
-            
-            if (!emailInput || !passwordInput) {
-                this.showMessage("Input elements not found", "error");
-                return;
+        const emailInput = slot.querySelector<HTMLInputElement>(`#email-${slotId}`);
+        const passwordInput = slot.querySelector<HTMLInputElement>(`#password-${slotId}`);
+        
+        if (!emailInput || !passwordInput) {
+            this.showMessage("Input elements not found", "error");
+            return;
+        }
+
+        try {
+            const user = await TournamentController.getInstance().registerPlayer({
+                playerEmail: emailInput.value,
+                playerPassword: passwordInput.value,
+            });
+
+            if (this.registeredPlayers.some(p => p.id === user.id)) {
+                throw new Error("Player already registered");
             }
 
-            try {
-                const user = await TournamentController.getInstance().registerPlayer({
-                    playerEmail: emailInput.value,
-                    playerPassword: passwordInput.value,
-                });
+            this.registeredPlayers.push(user);
+            slot.dataset.playerId = user.id;
 
-                if (this.registeredPlayers.some(p => p.id === user.id)) {
-                    throw new Error("Player already registered");
-                }
-
-                this.registeredPlayers.push(user);
-                slot.dataset.playerId = user.id;
-
-                this.showMessage("User registered successfully");
-            } catch (err: any) {
-                this.showMessage(err.message || "Registration failed", "error");
-            }
-            console.log("After registration:", this.registeredPlayers);
-        });
+            this.showMessage("User registered successfully");
+        } catch (err: any) {
+            this.showMessage(err.message || "Registration failed", "error");
+        }
+        console.log("After registration:", this.registeredPlayers); 
     }
 
     private async handleStartTournament(e: Event) {
