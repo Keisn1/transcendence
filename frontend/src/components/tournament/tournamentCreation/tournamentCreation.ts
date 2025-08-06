@@ -41,18 +41,18 @@ export class TournamentCreation extends BaseComponent {
     }
 
     private handleRemove = (slot: HTMLElement, index: number) => () => {
-        slot.remove();
-
         const emailElement = this.container.querySelector<HTMLInputElement>(`#email-${index}`);
         if (!emailElement) return;
-
+        
         const email = emailElement.value;
         if (!email) return;
         
-        if (this.registeredPlayers.some(player => player.email === email)) {
+        if (this.registeredPlayers.some(user => user.email === email)) {
             this.addedPlayersCount--;
-            this.registeredPlayers.splice(index - 1, 1);
+            // this.registeredPlayers.splice(index - 1, 1);
+            this.registeredPlayers = this.registeredPlayers.filter((player) => player.email !== email);
         }
+        slot.remove();
     }
 
     private handleRegister = (index: number) => (e: Event) => {
@@ -84,12 +84,16 @@ export class TournamentCreation extends BaseComponent {
         } catch (err: any) {
             this.showMessage(err.message ?? "Player registration failed", "error");
         }
+        console.log(this.registeredPlayers);
     }
 
     private async handleStartTournament(e: Event) {
         e.preventDefault();
         if (this.registeredPlayers.length < 2) {
             return this.showMessage("You need at least two players", "error");
+        }
+        if (this.registeredPlayers.length % 2 !== 0) {
+            return this.showMessage("You need an even number of players to start a tournament", "error");
         }
 
         try {
