@@ -15,7 +15,7 @@ export class TournamentFinalComponent extends BaseComponent {
         super("div", "tournament-container", "mt-8 sm:mx-auto sm:w-full sm:max-w-2xl");
         console.log("constructing bracket component");
         const title = "Tournament Results";
-        const description = "View the current tournament leaderboard and review every match outcome";
+        const description = "View the current tournament leaderboard and review every match outcome.";
         this.header = new TournamentHeader(title, description);
         this.leaderboard = new Leaderboard();
         this.matchList = new MatchList();

@@ -8,7 +8,6 @@ export class TournamentCreation extends BaseComponent {
 
     constructor() {
         super("div", "tournament-container", "flex min-h-screen flex-col justify-center px-6 py-12 lg:px-8");
-
         const title = "Pong Tournament Signup";
         const description = "Register up to 4 players below.";
         this.header = new TournamentHeader(title, description);
