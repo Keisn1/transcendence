@@ -1,7 +1,7 @@
 import { AuthService } from "../auth/auth.service";
 import type { RegisterPlayerBody } from "../../types/tournament.types.ts";
 import { type User } from "../../types/auth.types.ts";
-import { Tournament } from "../../controllers/tournament.controller.ts";
+import { TournamentDTO } from "../../controllers/tournament.controller.ts";
 
 export class TournamentService {
     private static instance: TournamentService;
@@ -28,13 +28,28 @@ export class TournamentService {
             body: JSON.stringify(userCredentials),
         });
 
-        if (!response.ok) throw new Error("Player registration failed");
+        if (!response.ok) {
+            const errMsg = await response.text();
+            throw new Error(`Player registration failed: ${errMsg}`);
+        }
 
         const { user } = (await response.json()) as { user: User };
         return user;
     }
 
-    async createTournament(tournament: Tournament): Promise<Tournament> {
-        return tournament;
+    async createTournament(tournamentDTO: TournamentDTO): Promise<void> {
+        const response = await fetch("/api/tournament", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${this.authService.getAuthToken()}`,
+            },
+            body: JSON.stringify(tournamentDTO),
+        });
+
+        if (!response.ok) {
+            const errMsg = await response.text();
+            throw new Error(`Failed to save tournament: ${errMsg}`);
+        }
     }
 }

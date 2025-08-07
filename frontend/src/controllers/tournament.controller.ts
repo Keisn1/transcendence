@@ -11,7 +11,6 @@ export class Tournament {
     matches: Match[] = [];
     nextMatchIdx: number = 0;
     state: string = TournamentState.UNINITIALIZED;
-    // currentRound: number = 0;
 
     constructor(players?: User[]) {
         if (!players) return;
@@ -54,6 +53,16 @@ export class Tournament {
     }
 }
 
+export class TournamentDTO {
+    tournamentId: string;
+    playersId: string[];
+
+    constructor(tournament: Tournament) {
+        this.tournamentId = tournament.id;
+        this.playersId = tournament.players.map(player => player.id);
+    }
+}
+
 export class TournamentController {
     private static instance: TournamentController;
     private tournamentService: TournamentService;
@@ -80,19 +89,15 @@ export class TournamentController {
         return user;
     }
 
-    public async createTournament(players: User[]) {
-        console.log("controller is creating tournament");
+    public async createTournament(players: User[]): Promise<void> {
         const tournament = new Tournament(players);
-        console.log("nbr of matches: ", tournament.matches.length);
+        const tournamentDTO = new TournamentDTO(tournament);
 
-        await this.tournamentService.createTournament(tournament);
-        console.log(tournament.matches);
-
-        // Controller initializes and manages the state machine
+        await this.tournamentService.createTournament(tournamentDTO);
+        
         this.tournament = tournament;
-        this.tournamentMachine.update(TournamentEvent.LOAD, this.tournament);
+        this.tournamentMachine.update(TournamentEvent.LOAD, tournament);
         this.router.navigateTo(`/tournament`);
-        return;
     }
 
     public getTournament() {
