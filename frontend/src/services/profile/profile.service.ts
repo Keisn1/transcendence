@@ -1,13 +1,11 @@
 import { AuthService } from "../auth/auth.service";
 import type { UpdateUserBody, UpdateUserResponse } from "../../types/auth.types";
+import { AuthStorage } from "../auth/auth.storage";
 
 export class ProfileService {
     private static instance: ProfileService;
-    private authService: AuthService;
 
-    private constructor() {
-        this.authService = AuthService.getInstance();
-    }
+    private constructor() {}
 
     static getInstance(): ProfileService {
         if (!ProfileService.instance) {
@@ -21,7 +19,7 @@ export class ProfileService {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${this.authService.getAuthToken()}`,
+                Authorization: `Bearer ${AuthStorage.getToken()}`,
             },
             body: JSON.stringify(updates),
         });
@@ -33,6 +31,6 @@ export class ProfileService {
         console.log("data from PUT /api/user", data);
 
         // Notify AuthService to update cached user
-        this.authService.updateCurrentUser(data.user);
+        AuthService.getInstance().updateCurrentUser(data.user);
     }
 }

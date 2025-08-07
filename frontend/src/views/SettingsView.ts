@@ -1,6 +1,7 @@
 import AbstractView from "./AbstractView.ts";
 import { Navbar } from "../components/navbar/navbar.ts";
 import { Settings } from "../components/settings/settings.component.ts";
+import { AuthService } from "../services/auth/auth.service.ts";
 
 export default class extends AbstractView {
     private navbar: Navbar | null = null;
@@ -12,6 +13,10 @@ export default class extends AbstractView {
     }
 
     render() {
+        if (!AuthService.getInstance().isAuthenticated()) {
+            this.router?.navigateTo("/login");
+            return;
+        }
         this.navbar = new Navbar();
         document.body.appendChild(this.navbar.getContainer());
 

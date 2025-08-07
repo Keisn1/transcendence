@@ -1,16 +1,14 @@
 import settingsTemplate from "./settings.html?raw";
 import { BaseComponent } from "../BaseComponent.ts";
-import { AuthService } from "../../services/auth/auth.service.ts";
+import { AuthStorage } from "../../services/auth/auth.storage.ts";
 
 export class Settings extends BaseComponent {
     private enable2FABtn: HTMLButtonElement;
-    private authService: AuthService;
 
     constructor() {
         super("div", "settings-container");
         this.container.innerHTML = settingsTemplate;
         this.enable2FABtn = this.container.querySelector<HTMLButtonElement>("#enable-2fa-btn")!;
-        this.authService = AuthService.getInstance();
         this.setupEventListeners();
     }
 
@@ -20,9 +18,9 @@ export class Settings extends BaseComponent {
 
     private async handleEnable2FA() {
         try {
-            const token = this.authService.getAuthToken();
+            const token = AuthStorage.getToken();
             console.log("Token from AuthService:", token ? "Token exists" : "No token found");
-            
+
             if (!token) {
                 alert("Please log in first.");
                 return;
@@ -32,17 +30,17 @@ export class Settings extends BaseComponent {
             const response = await fetch("/api/auth/2fa/init", {
                 method: "POST",
                 headers: {
-                    "Authorization": `Bearer ${token}`
-                }
+                    Authorization: `Bearer ${token}`,
+                },
             });
-            
+
             console.log("Response status:", response.status);
             console.log("Response ok:", response.ok);
-            
+
             if (!response.ok) {
                 const errorText = await response.text();
                 console.error("Error response:", errorText);
-                
+
                 let errorMessage = "Unknown error";
                 try {
                     const errorJson = JSON.parse(errorText);
@@ -50,7 +48,7 @@ export class Settings extends BaseComponent {
                 } catch (e) {
                     errorMessage = errorText || `HTTP ${response.status}`;
                 }
-                
+
                 alert(`Failed to initiate 2FA: ${errorMessage}`);
                 return;
             }
@@ -99,9 +97,9 @@ export class Settings extends BaseComponent {
 
             const verifyResponse = await fetch("/api/auth/2fa/complete", {
                 method: "POST",
-                headers: { 
+                headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({ token: tfaToken }),
             });
@@ -111,7 +109,7 @@ export class Settings extends BaseComponent {
                 qrContainer.remove();
             } else {
                 const error = await verifyResponse.json();
-                alert(`Invalid 2FA code: ${error.error || 'Please try again.'}`);
+                alert(`Invalid 2FA code: ${error.error || "Please try again."}`);
             }
         } catch (error) {
             console.error("Error verifying 2FA:", error);

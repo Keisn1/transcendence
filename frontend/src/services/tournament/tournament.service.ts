@@ -1,15 +1,12 @@
-import { AuthService } from "../auth/auth.service";
 import type { RegisterPlayerBody } from "../../types/tournament.types.ts";
 import { type User } from "../../types/auth.types.ts";
 import { Tournament } from "../../controllers/tournament.controller.ts";
+import { AuthStorage } from "../auth/auth.storage.ts";
 
 export class TournamentService {
     private static instance: TournamentService;
-    private authService: AuthService;
 
-    private constructor() {
-        this.authService = AuthService.getInstance();
-    }
+    private constructor() {}
 
     static getInstance(): TournamentService {
         if (!TournamentService.instance) {
@@ -23,7 +20,7 @@ export class TournamentService {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${this.authService.getAuthToken()}`,
+                Authorization: `Bearer ${AuthStorage.getToken()}`,
             },
             body: JSON.stringify(userCredentials),
         });

@@ -6,49 +6,7 @@ import type {
     RegisterBody,
     RegisterResponse,
 } from "../../types/auth.types";
-
-class AuthStorage {
-    private static readonly USER_KEY = "user";
-    private static readonly TOKEN_KEY = "authToken";
-
-    static saveUser(user: User): void {
-        try {
-            localStorage.setItem(this.USER_KEY, JSON.stringify(user));
-        } catch (error) {
-            console.error("Failed to save user data to localStorage:", error);
-        }
-    }
-
-    static loadUser(): User | null {
-        try {
-            const userData = localStorage.getItem(this.USER_KEY);
-            if (userData && userData !== "undefined" && userData !== "null") {
-                return JSON.parse(userData);
-            }
-            return null;
-        } catch (error) {
-            console.warn("Failed to parse user data from localStorage, clearing it:", error);
-            localStorage.removeItem(this.USER_KEY);
-            return null;
-        }
-    }
-
-    static clearUser(): void {
-        localStorage.removeItem(this.USER_KEY);
-    }
-
-    static saveToken(token: string): void {
-        localStorage.setItem(this.TOKEN_KEY, token);
-    }
-
-    static getToken(): string | null {
-        return localStorage.getItem(this.TOKEN_KEY);
-    }
-
-    static clearToken(): void {
-        localStorage.removeItem(this.TOKEN_KEY);
-    }
-}
+import { AuthStorage } from "./auth.storage";
 
 export class AuthService {
     private static instance: AuthService;
@@ -71,6 +29,8 @@ export class AuthService {
     }
 
     isAuthenticated(): boolean {
+        if (this.currentUser !== null && AuthStorage.getToken() === null) this.logout();
+        if (this.currentUser === null && AuthStorage.getToken() !== null) this.logout();
         return this.currentUser !== null;
     }
 
@@ -117,8 +77,8 @@ export class AuthService {
         const data: RegisterResponse = await response.json();
         const user: User = data.user;
         this.currentUser = user;
-        this.saveUserToStorage(user);
-        this.saveTokenToStorage(data.token);
+        AuthStorage.saveUser(user);
+        AuthStorage.saveToken(data.token);
         this.notifyListeners();
     }
 
@@ -128,23 +88,6 @@ export class AuthService {
         AuthStorage.clearUser();
         AuthStorage.clearToken();
         this.notifyListeners();
-    }
-
-    private saveTokenToStorage(token: string): void {
-        localStorage.setItem("authToken", token);
-    }
-
-    getAuthToken(): string | null {
-        return AuthStorage.getToken();
-    }
-
-    // methods that control User Data in localStorage
-    private saveUserToStorage(user: User): void {
-        try {
-            localStorage.setItem("user", JSON.stringify(user));
-        } catch (error) {
-            console.error("Failed to save user data to localStorage:", error);
-        }
     }
 
     // way of consumer to subscribe to changes in the AuthService
