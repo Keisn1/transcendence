@@ -1,6 +1,6 @@
 import settingsTemplate from "./settings.html?raw";
 import { BaseComponent } from "../BaseComponent.ts";
-import { AuthStorage } from "../../services/auth/auth.storage.ts";
+import { AuthController } from "../../controllers/auth.controller.ts";
 
 export class Settings extends BaseComponent {
     private enable2FABtn: HTMLButtonElement;
@@ -18,50 +18,17 @@ export class Settings extends BaseComponent {
 
     private async handleEnable2FA() {
         try {
-            const token = AuthStorage.getToken();
-            console.log("Token from AuthService:", token ? "Token exists" : "No token found");
-
-            if (!token) {
-                alert("Please log in first.");
-                return;
-            }
-
-            console.log("Making request to /api/auth/2fa/init");
-            const response = await fetch("/api/auth/2fa/init", {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            console.log("Response status:", response.status);
-            console.log("Response ok:", response.ok);
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error("Error response:", errorText);
-
-                let errorMessage = "Unknown error";
-                try {
-                    const errorJson = JSON.parse(errorText);
-                    errorMessage = errorJson.error || errorJson.message || "Unknown error";
-                } catch (e) {
-                    errorMessage = errorText || `HTTP ${response.status}`;
-                }
-
-                alert(`Failed to initiate 2FA: ${errorMessage}`);
-                return;
-            }
-
-            const { qrCodeSvg } = await response.json();
-            this.showQRCodeSetup(qrCodeSvg, token);
+            const authController = AuthController.getInstance();
+            const qrCodeSvg = await authController.initiate2FA();
+            this.showQRCodeSetup(qrCodeSvg);
         } catch (error) {
+            const message = error instanceof Error ? error.message : "Failed to initiate 2FA";
             console.error("Error setting up 2FA:", error);
-            alert("An error occurred while setting up 2FA.");
+            alert(`Failed to initiate 2FA: ${message}`);
         }
     }
 
-    private showQRCodeSetup(qrCodeSvg: string, token: string) {
+    private showQRCodeSetup(qrCodeSvg: string) {
         const qrContainer = document.createElement("div");
         qrContainer.className = "mt-6 p-4 bg-gray-100 rounded";
         qrContainer.innerHTML = `
@@ -81,11 +48,11 @@ export class Settings extends BaseComponent {
 
         const verifyBtn = qrContainer.querySelector<HTMLButtonElement>("#verify-2fa-btn")!;
         this.addEventListenerWithCleanup(verifyBtn, "click", async () => {
-            await this.handleVerify2FA(qrContainer, token);
+            await this.handleVerify2FA(qrContainer);
         });
     }
 
-    private async handleVerify2FA(qrContainer: HTMLElement, token: string) {
+    private async handleVerify2FA(qrContainer: HTMLElement) {
         try {
             const tfaTokenInput = qrContainer.querySelector<HTMLInputElement>("#twofa-token")!;
             const tfaToken = tfaTokenInput.value;
@@ -95,25 +62,16 @@ export class Settings extends BaseComponent {
                 return;
             }
 
-            const verifyResponse = await fetch("/api/auth/2fa/complete", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ token: tfaToken }),
-            });
+            const authController = AuthController.getInstance();
+            await authController.complete2FA(tfaToken);
 
-            if (verifyResponse.ok) {
-                alert("2FA enabled successfully!");
-                qrContainer.remove();
-            } else {
-                const error = await verifyResponse.json();
-                alert(`Invalid 2FA code: ${error.error || "Please try again."}`);
-            }
+            alert("2FA enabled successfully!");
+            qrContainer.remove();
         } catch (error) {
             console.error("Error verifying 2FA:", error);
-            alert("An error occurred while verifying 2FA.");
+
+            const message = error instanceof Error ? error.message : "Invalid 2FA code";
+            alert(`Invalid 2FA code: ${message}`);
         }
     }
 

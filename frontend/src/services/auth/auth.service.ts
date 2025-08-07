@@ -90,6 +90,46 @@ export class AuthService {
         this.notifyListeners();
     }
 
+    async initiate2FA(): Promise<string> {
+        const response = await fetch("/api/auth/2fa/init", {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${AuthStorage.getToken()}`,
+            },
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            let errorMessage = "Unknown error";
+            try {
+                const errorJson = JSON.parse(errorText);
+                errorMessage = errorJson.error || errorJson.message || "Unknown error";
+            } catch (e) {
+                errorMessage = errorText || `HTTP ${response.status}`;
+            }
+            throw new Error(errorMessage);
+        }
+
+        const { qrCodeSvg } = await response.json();
+        return qrCodeSvg;
+    }
+
+    async complete2FA(token: string): Promise<void> {
+        const response = await fetch("/api/auth/2fa/complete", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${AuthStorage.getToken()}`,
+            },
+            body: JSON.stringify({ token }),
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || "Invalid 2FA code");
+        }
+    }
+
     // way of consumer to subscribe to changes in the AuthService
     onAuthChange(callback: (user: User | null) => void): () => void {
         this.listeners.push(callback);
