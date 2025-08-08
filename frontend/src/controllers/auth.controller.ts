@@ -44,6 +44,10 @@ export class AuthController {
         await this.authService.complete2FA(token);
     }
 
+    public async disable2FA(token: string): Promise<void> {
+        console.log("disable 2FA called: ", token);
+    }
+
     public async login(credentials: { email: string; password: string }): Promise<void> {
         await this.authService.login(credentials);
         this.router.navigateTo("/");
