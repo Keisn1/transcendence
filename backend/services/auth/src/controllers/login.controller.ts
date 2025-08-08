@@ -26,7 +26,7 @@ export default async function login(
         };
 
         // Generate JWT
-        const token = request.server.jwt.sign(user);
+        const token = request.server.jwt.sign(user, { expiresIn: "1h" });
         const response: LoginResponse = { token, user };
 
         // send response

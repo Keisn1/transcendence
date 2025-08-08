@@ -29,7 +29,7 @@ export default async function register(
         };
 
         // Generate JWT
-        const token = request.server.jwt.sign(user);
+        const token = request.server.jwt.sign(user, { expiresIn: "1h" });
         const response: RegisterResponse = {
             token,
             user,
