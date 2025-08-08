@@ -219,4 +219,23 @@ export class AuthService {
         AuthStorage.saveUser(user);
         this.notifyListeners();
     }
+
+    async verifyUser(userCredentials: LoginBody): Promise<PublicUser>{
+        const response = await fetch("/api/auth/verify", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${AuthStorage.getToken()}`,
+            },
+            body: JSON.stringify(userCredentials),
+        });
+
+        if (!response.ok) {
+            const errMsg = await response.text();
+            throw new Error(`Player registration failed: ${errMsg}`);
+        }
+
+        const { user } = (await response.json()) as { user: PublicUser };
+        return user;
+    }
 }

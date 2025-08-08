@@ -4,6 +4,7 @@ import { BaseComponent } from "../../BaseComponent.ts";
 import { TournamentController } from "../../../controllers/tournament.controller.ts";
 import type { PublicUser } from "../../../types/auth.types.ts";
 import { v4 as uuidv4 } from "uuid";
+import { AuthController } from "../../../controllers/auth.controller.ts";
 
 export class TournamentCreationPanel extends BaseComponent {
     private tournamentForm: HTMLFormElement;
@@ -75,9 +76,9 @@ export class TournamentCreationPanel extends BaseComponent {
         }
 
         try {
-            const user = await TournamentController.getInstance().registerPlayer({
-                playerEmail: emailInput.value,
-                playerPassword: passwordInput.value,
+            const user = await AuthController.getInstance().verifyUser({
+                email: emailInput.value,
+                password: passwordInput.value,
             });
 
             if (this.registeredPlayers.some((p) => p.id === user.id)) {

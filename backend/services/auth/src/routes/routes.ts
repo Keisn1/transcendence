@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 import healthRoute from "./health";
-import login, { loginSchema } from "../controllers/login.controller";
+import { login, verify, loginSchema, verifySchema } from "../controllers/login.controller";
 import register, { registerSchema } from "../controllers/register.controller";
 import updateProfile, { updateProfileSchema } from "../controllers/updateProfile.controller";
 import getProfile, { getCurrentUserSchema } from "../controllers/getProfile.controller";
@@ -13,6 +13,7 @@ export async function routes(fastify: FastifyInstance) {
         (fastify: FastifyInstance) => {
             fastify.post("/signup", { schema: registerSchema }, register); // incorporates user creation
             fastify.post("/login", { schema: loginSchema }, login);
+            fastify.post("/verify", { schema: verifySchema }, verify);
             fastify.get("/health", healthRoute);
             fastify.register(
                 (fastify: FastifyInstance) => {
