@@ -31,17 +31,11 @@ export class ProfileComponent extends BaseComponent {
                 },
             });
 
-            // Debug: log the raw response
-            const responseText = await response.text();
-            console.log("Raw response:", responseText);
-            console.log("Response status:", response.status);
-            console.log("Response headers:", response.headers);
-
             if (!response.ok) {
-                throw new Error(`Failed to fetch profile: ${response.status}`);
+                throw new Error("Failed to fetch profile");
             }
 
-            const data = JSON.parse(responseText); // Manual parse for debugging
+            const data = await response.json();
             this.profile = data.profile;
             this.populateUserData();
         } catch (error) {

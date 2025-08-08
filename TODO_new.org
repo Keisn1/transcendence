@@ -1,10 +1,13 @@
 #+title: Todo New
 
-- [ ] Disabling to press enable2FA multiple times
-- [ ] what happens if the process is aborted?
-- [ ] disable enable2FA if the user has it already enabled
-- [ ] twofa_enabled should have a default value of "false"
-- [ ] add 2faEnabled attribute on user
-
+- [X] Disabling to press enable2FA multiple times
+- [X] disable enable2FA if the user has it already enabled
+- [X] twofa_enabled should have a default value of "false"
+- [X] add 2faEnabled attribute on user
 - [ ] do authorization in updateUser
   - find a way that only the actual user can change its data
+
+- [ ] what happens if the process is aborted?
+- [ ] actually implement 2fa verification (in login / disable and register)
+- [ ] implement "api/auth/verify-player" (something like that)
+- [ ] make better updateProfile (everything)
