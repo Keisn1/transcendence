@@ -20,7 +20,6 @@ export default fp<AuthPluginOptions>(async (fastify, opts: AuthPluginOptions) =>
             request.user = {
                 id: decoded.id,
                 username: decoded.username,
-                email: decoded.email,
                 avatar: decoded.avatar,
                 twoFaEnabled: decoded.twoFaEnabled,
             };

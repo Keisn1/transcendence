@@ -1,3 +1,10 @@
+export interface PublicUser {
+    id: string;
+    username: string;
+    avatar: string;
+    twoFaEnabled: boolean;
+}
+
 export interface User {
     id: string;
     username: string;
@@ -8,7 +15,7 @@ export interface User {
 
 export interface LoginResponse {
     token: string;
-    user: User;
+    user: PublicUser;
 }
 
 export interface LoginBody {
@@ -24,7 +31,7 @@ export interface RegisterBody {
 
 export interface RegisterResponse {
     token: string;
-    user: User;
+    user: PublicUser;
 }
 
 export interface UpdateUserBody {
@@ -35,7 +42,7 @@ export interface UpdateUserBody {
 }
 
 export interface UpdateUserResponse {
-    user: User;
+    user: PublicUser;
 }
 
 export interface complete2FABody {

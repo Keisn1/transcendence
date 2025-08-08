@@ -1,5 +1,5 @@
 import type { RegisterPlayerBody } from "../../types/tournament.types.ts";
-import { type User } from "../../types/auth.types.ts";
+import { type PublicUser } from "../../types/auth.types.ts";
 import { TournamentDTO } from "../../controllers/tournament.controller.ts";
 import { AuthStorage } from "../auth/auth.storage.ts";
 
@@ -15,7 +15,7 @@ export class TournamentService {
         return TournamentService.instance;
     }
 
-    async registerPlayer(userCredentials: RegisterPlayerBody): Promise<User> {
+    async registerPlayer(userCredentials: RegisterPlayerBody): Promise<PublicUser> {
         const response = await fetch("/api/verify-player", {
             method: "POST",
             headers: {
@@ -30,7 +30,7 @@ export class TournamentService {
             throw new Error(`Player registration failed: ${errMsg}`);
         }
 
-        const { user } = (await response.json()) as { user: User };
+        const { user } = (await response.json()) as { user: PublicUser };
         return user;
     }
 

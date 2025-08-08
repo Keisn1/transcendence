@@ -14,7 +14,6 @@ export const getCurrentUserSchema = {
                     properties: {
                         id: { type: "string" },
                         username: { type: "string" },
-                        email: { type: "string" },
                         avatar: { type: "string", format: "uri-reference" },
                         twoFaEnabled: { type: "boolean" },
                     },

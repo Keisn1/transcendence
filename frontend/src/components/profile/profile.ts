@@ -1,15 +1,15 @@
 import { BaseComponent } from "../BaseComponent";
 import profileTemplate from "./profile.html?raw";
 import { AuthService } from "../../services/auth/auth.service";
-import type { User } from "../../types/auth.types";
+import type { PublicUser } from "../../types/auth.types";
 import { AvatarUpload } from "../avatarUpload/avatarUpload";
 
 export class Profile extends BaseComponent {
     private authService: AuthService;
-    private user: User | null = null;
+    private user: PublicUser | null = null;
     private avatarUpload: AvatarUpload | null = null;
     private usernameEl: HTMLElement;
-    private emailEl: HTMLElement;
+    // private emailEl: HTMLElement;
     private avatarContainer: HTMLElement;
 
     constructor() {
@@ -19,7 +19,7 @@ export class Profile extends BaseComponent {
         this.container.innerHTML = profileTemplate;
 
         this.usernameEl = this.container.querySelector("#profile-username")!;
-        this.emailEl = this.container.querySelector("#profile-email")!;
+        // this.emailEl = this.container.querySelector("#profile-email")!;
         this.avatarContainer = this.container.querySelector("#avatar-container")!;
 
         this.setupAvatarUpload();
@@ -31,7 +31,7 @@ export class Profile extends BaseComponent {
 
         console.log("user: ", this.user);
         if (this.usernameEl) this.usernameEl.textContent = this.user.username;
-        if (this.emailEl) this.emailEl.textContent = this.user.email;
+        // if (this.emailEl) this.emailEl.textContent = this.user.email;
     }
 
     private setupAvatarUpload() {

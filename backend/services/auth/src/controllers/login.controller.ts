@@ -19,9 +19,9 @@ export default async function login(
             return reply.status(401).send({ error: "Invalid credentials" });
         }
 
-        const { password_hash: _, twofa_enabled, ...userWithoutPassword } = userRecords[0];
+        const { password_hash: _, twofa_enabled, email: __, ...userWithoutPasswordEmail } = userRecords[0];
         const user = {
-            ...userWithoutPassword,
+            ...userWithoutPasswordEmail,
             twoFaEnabled: Boolean(twofa_enabled), // Convert 0/1 to false/true
         };
 
@@ -57,7 +57,6 @@ export const loginSchema = {
                     properties: {
                         id: { type: "string" },
                         username: { type: "string" },
-                        email: { type: "string" },
                         avatar: { type: "string", format: "uri-reference" },
                         twoFaEnabled: { type: "boolean" },
                     },

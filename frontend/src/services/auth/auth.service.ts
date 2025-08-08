@@ -1,5 +1,5 @@
 import type {
-    User,
+    PublicUser,
     LoginResponse,
     LoginBody,
     SignupForm,
@@ -10,8 +10,8 @@ import { AuthStorage } from "./auth.storage";
 
 export class AuthService {
     private static instance: AuthService;
-    private currentUser: User | null = null;
-    private listeners: ((user: User | null) => void)[] = [];
+    private currentUser: PublicUser | null = null;
+    private listeners: ((user: PublicUser | null) => void)[] = [];
 
     private constructor() {
         this.currentUser = AuthStorage.loadUser();
@@ -24,7 +24,7 @@ export class AuthService {
         return AuthService.instance;
     }
 
-    getCurrentUser(): User | null {
+    getCurrentUser(): PublicUser | null {
         return this.currentUser;
     }
 
@@ -48,7 +48,7 @@ export class AuthService {
         }
 
         const data: LoginResponse = await response.json();
-        const user: User = data.user;
+        const user: PublicUser = data.user;
         this.currentUser = user;
         AuthStorage.saveUser(user);
         AuthStorage.saveToken(data.token);
@@ -75,7 +75,7 @@ export class AuthService {
         }
 
         const data: RegisterResponse = await response.json();
-        const user: User = data.user;
+        const user: PublicUser = data.user;
         this.currentUser = user;
         AuthStorage.saveUser(user);
         AuthStorage.saveToken(data.token);
@@ -137,7 +137,7 @@ export class AuthService {
     }
 
     // way of consumer to subscribe to changes in the AuthService
-    onAuthChange(callback: (user: User | null) => void): () => void {
+    onAuthChange(callback: (user: PublicUser | null) => void): () => void {
         this.listeners.push(callback);
         // Return cleanup function
         return () => {
@@ -150,7 +150,7 @@ export class AuthService {
         this.listeners.forEach((listener) => listener(this.currentUser));
     }
 
-    updateCurrentUser(user: User): void {
+    updateCurrentUser(user: PublicUser): void {
         this.currentUser = user;
         AuthStorage.saveUser(user);
         this.notifyListeners();

@@ -2,21 +2,21 @@ import playerSlotTemplate from "./playerSlot.html?raw";
 import tournamentCreationPanelTemplate from "./tournamentCreationPanel.html?raw";
 import { BaseComponent } from "../../BaseComponent.ts";
 import { TournamentController } from "../../../controllers/tournament.controller.ts";
-import type { User } from "../../../types/auth.types.ts";
-import { v4 as uuidv4 } from 'uuid';
+import type { PublicUser } from "../../../types/auth.types.ts";
+import { v4 as uuidv4 } from "uuid";
 
 export class TournamentCreationPanel extends BaseComponent {
     private tournamentForm: HTMLFormElement;
     private playersContainer: HTMLElement;
     private addPlayerBtn: HTMLButtonElement;
     private addedPlayersCount: number = 0;
-    private registeredPlayers: User[] = [];
+    private registeredPlayers: PublicUser[] = [];
 
     constructor() {
         super("div", "tournament-container");
-		console.log("constructing tournament creation panel");
+        console.log("constructing tournament creation panel");
         this.container.innerHTML = tournamentCreationPanelTemplate;
-    
+
         this.tournamentForm = this.container.querySelector<HTMLFormElement>("#tournament-form")!;
         this.playersContainer = this.container.querySelector("#players-container")!;
         this.addPlayerBtn = this.container.querySelector<HTMLButtonElement>("#add-player")!;
@@ -42,18 +42,22 @@ export class TournamentCreationPanel extends BaseComponent {
         const removeBtn = slot.querySelector<HTMLButtonElement>(".remove-btn")!;
         const registerBtn = slot.querySelector<HTMLButtonElement>(".register-player-btn")!;
 
-        removeBtn.addEventListener("click", (ev) => { this.removeHandler(ev, slot) });
-        registerBtn.addEventListener("click", async (ev) => { this.registerHandler(ev, slot, slotId) });
+        removeBtn.addEventListener("click", (ev) => {
+            this.removeHandler(ev, slot);
+        });
+        registerBtn.addEventListener("click", async (ev) => {
+            this.registerHandler(ev, slot, slotId);
+        });
     }
 
     private removeHandler(ev: Event, slot: HTMLElement) {
         ev.preventDefault();
-            
+
         const playerId = slot.dataset.playerId;
         if (playerId) {
-            this.registeredPlayers = this.registeredPlayers.filter(p => p.id !== playerId);
+            this.registeredPlayers = this.registeredPlayers.filter((p) => p.id !== playerId);
         }
-        
+
         slot.remove();
         this.addedPlayersCount--;
         console.log("After removal:", this.registeredPlayers);
@@ -61,10 +65,10 @@ export class TournamentCreationPanel extends BaseComponent {
 
     private async registerHandler(ev: Event, slot: HTMLElement, slotId: string) {
         ev.preventDefault();
-            
+
         const emailInput = slot.querySelector<HTMLInputElement>(`#email-${slotId}`);
         const passwordInput = slot.querySelector<HTMLInputElement>(`#password-${slotId}`);
-        
+
         if (!emailInput || !passwordInput) {
             this.showMessage("Input elements not found", "error");
             return;
@@ -76,7 +80,7 @@ export class TournamentCreationPanel extends BaseComponent {
                 playerPassword: passwordInput.value,
             });
 
-            if (this.registeredPlayers.some(p => p.id === user.id)) {
+            if (this.registeredPlayers.some((p) => p.id === user.id)) {
                 throw new Error("Player already registered");
             }
 
@@ -87,7 +91,7 @@ export class TournamentCreationPanel extends BaseComponent {
         } catch (err: any) {
             this.showMessage(err.message || "Registration failed", "error");
         }
-        console.log("After registration:", this.registeredPlayers); 
+        console.log("After registration:", this.registeredPlayers);
     }
 
     private async handleStartTournament(e: Event) {
@@ -108,11 +112,12 @@ export class TournamentCreationPanel extends BaseComponent {
     }
 
     private showMessage(message: string, type: "success" | "error" = "success") {
-        const messageClass = type === "success" 
-            ? "bg-green-100 border-green-400 text-green-700" 
-            : "bg-red-100 border-red-400 text-red-700";
+        const messageClass =
+            type === "success"
+                ? "bg-green-100 border-green-400 text-green-700"
+                : "bg-red-100 border-red-400 text-red-700";
 
-        this.container.querySelectorAll(".info-message").forEach(el => el.remove());
+        this.container.querySelectorAll(".info-message").forEach((el) => el.remove());
 
         const div = document.createElement("div");
         div.className = `info-message ${messageClass} border px-4 py-2 rounded mb-4`;

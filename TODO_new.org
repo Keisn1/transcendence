@@ -5,3 +5,6 @@
 - [ ] disable enable2FA if the user has it already enabled
 - [ ] twofa_enabled should have a default value of "false"
 - [ ] add 2faEnabled attribute on user
+
+- [ ] do authorization in updateUser
+  - find a way that only the actual user can change its data

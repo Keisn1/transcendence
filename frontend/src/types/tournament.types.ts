@@ -1,4 +1,4 @@
-import { type User } from "./auth.types";
+import { type PublicUser } from "./auth.types";
 
 export interface RegisterPlayerBody {
     playerEmail: string;
@@ -7,8 +7,8 @@ export interface RegisterPlayerBody {
 
 export interface Match {
     matchId: string;
-    player1: User;
-    player2: User;
+    player1: PublicUser;
+    player2: PublicUser;
     result: GameResult;
 }
 

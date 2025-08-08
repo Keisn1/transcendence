@@ -2,24 +2,24 @@ import { TournamentEvent, TournamentMachine, TournamentState } from "./tournamen
 import Router from "../router";
 import { TournamentService } from "../services/tournament/tournament.service.ts";
 import type { RegisterPlayerBody, GameResult, Match } from "../types/tournament.types.ts";
-import type { User } from "../types/auth.types.ts";
-import { v4 as uuidv4 } from 'uuid';
+import type { PublicUser } from "../types/auth.types.ts";
+import { v4 as uuidv4 } from "uuid";
 
 export class Tournament {
     id: string = "";
-    players: User[] = [];
+    players: PublicUser[] = [];
     matches: Match[] = [];
     nextMatchIdx: number = 0;
     state: string = TournamentState.UNINITIALIZED;
 
-    constructor(players?: User[]) {
+    constructor(players?: PublicUser[]) {
         if (!players) return;
         this.players = players;
         this.id = uuidv4();
         this.buildRound(players);
     }
 
-    buildRound(players: User[]) {
+    buildRound(players: PublicUser[]) {
         for (let i = 0; i < players.length; i += 2) {
             const p1 = players[i];
             const p2 = players[i + 1];
@@ -33,22 +33,22 @@ export class Tournament {
             });
         }
     }
-    
+
     hasMoreMatches() {
         return this.matches.length != 0 && this.nextMatchIdx < this.matches.length;
     }
-    
+
     generateNextRound() {
         if (this.matches.length <= 1 || this.matches.length === 3) return;
-    
+
         // this.currentRound++;
-        const winners = this.matches.map(m => {
+        const winners = this.matches.map((m) => {
             const { player1Score, player2Score } = m.result!;
             return player1Score >= player2Score ? m.player1 : m.player2;
         });
 
         if (winners.length <= 1) return;
-        
+
         this.buildRound(winners);
     }
 }
@@ -59,7 +59,7 @@ export class TournamentDTO {
 
     constructor(tournament: Tournament) {
         this.tournamentId = tournament.id;
-        this.playersId = tournament.players.map(player => player.id);
+        this.playersId = tournament.players.map((player) => player.id);
     }
 }
 
@@ -84,17 +84,17 @@ export class TournamentController {
         return TournamentController.instance;
     }
 
-    public async registerPlayer(userCredentials: RegisterPlayerBody): Promise<User> {
+    public async registerPlayer(userCredentials: RegisterPlayerBody): Promise<PublicUser> {
         const user = await this.tournamentService.registerPlayer(userCredentials);
         return user;
     }
 
-    public async createTournament(players: User[]): Promise<void> {
+    public async createTournament(players: PublicUser[]): Promise<void> {
         const tournament = new Tournament(players);
         const tournamentDTO = new TournamentDTO(tournament);
 
         await this.tournamentService.createTournament(tournamentDTO);
-        
+
         this.tournament = tournament;
         this.tournamentMachine.update(TournamentEvent.LOAD, tournament);
         this.router.navigateTo(`/tournament`);
