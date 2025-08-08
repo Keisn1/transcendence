@@ -19,7 +19,11 @@ export default async function login(
             return reply.status(401).send({ error: "Invalid credentials" });
         }
 
-        const { password_hash: _, ...user } = userRecords[0];
+        const { password_hash: _, twofa_enabled, ...userWithoutPassword } = userRecords[0];
+        const user = {
+            ...userWithoutPassword,
+            twoFaEnabled: Boolean(twofa_enabled), // Convert 0/1 to false/true
+        };
 
         // Generate JWT
         const token = request.server.jwt.sign(user);
