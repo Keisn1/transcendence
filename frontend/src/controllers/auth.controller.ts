@@ -1,7 +1,6 @@
 import { AuthService } from "../services/auth/auth.service.ts";
 import Router from "../router";
 import { type SignupForm } from "../types/auth.types.ts";
-import { AuthStorage } from "../services/auth/auth.storage.ts";
 
 export class AuthController {
     private static instance: AuthController;
@@ -46,26 +45,7 @@ export class AuthController {
     }
 
     public async disable2FA(token: string): Promise<void> {
-        const response = await fetch("/api/auth/2fa/disable", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${AuthStorage.getToken()}`,
-            },
-            body: JSON.stringify({ token }),
-        });
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || "Failed to disable 2FA");
-        }
-
-        // Update current user state
-        const user = this.authService.getCurrentUser();
-        if (user) {
-            user.twoFaEnabled = false;
-            this.authService.updateCurrentUser(user);
-        }
+        await this.authService.disable2FA(token);
     }
 
     public async login(credentials: { email: string; password: string }): Promise<{ requires2FA: boolean }> {

@@ -9,7 +9,10 @@
   - clicking enable 2fa again after the user navigated somewhere else will just create another secret
 - [X] do authorization in updateUser/updateProfile
   - find a way that only the actual user can change its data
-- [ ] actually implement 2fa verification (in login / disable and register)
-- [ ] implement disable-2fa verification
+- [X] actually implement 2fa verification (in login / disable and register)
+- [X] implement disable-2fa verification
+- [X] make better updateProfile (everything)
+
 - [ ] implement "api/auth/verify-player" (something like that)
-- [ ] make better updateProfile (everything)
+  - [ ] this is for the tournament
+  - [ ] also will use 2fa

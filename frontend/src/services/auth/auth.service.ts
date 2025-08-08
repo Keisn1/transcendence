@@ -131,6 +131,29 @@ export class AuthService {
         this.notifyListeners();
     }
 
+    async disable2FA(token: string): Promise<void> {
+        const response = await fetch("/api/auth/2fa/disable", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${AuthStorage.getToken()}`,
+            },
+            body: JSON.stringify({ token }),
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || "Failed to disable 2FA");
+        }
+
+        // Update current user state
+        const user = this.getCurrentUser();
+        if (user) {
+            user.twoFaEnabled = false;
+            this.updateCurrentUser(user);
+        }
+    }
+
     async initiate2FA(): Promise<string> {
         const response = await fetch("/api/auth/2fa/init", {
             method: "POST",
