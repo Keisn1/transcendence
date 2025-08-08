@@ -68,9 +68,22 @@ export class AuthController {
         }
     }
 
-    public async login(credentials: { email: string; password: string }): Promise<void> {
-        await this.authService.login(credentials);
+    public async login(credentials: { email: string; password: string }): Promise<{ requires2FA: boolean }> {
+        const result = await this.authService.login(credentials);
+        if (!result.requires2FA) {
+            this.router.navigateTo("/");
+        }
+
+        return result;
+    }
+
+    public async complete2FALogin(token: string): Promise<void> {
+        await this.authService.complete2FALogin(token);
         this.router.navigateTo("/");
+    }
+
+    public clearPendingLogin(): void {
+        this.authService.clearPendingLogin();
     }
 
     public async signUp(formData: SignupForm): Promise<void> {

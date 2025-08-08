@@ -19,10 +19,10 @@ export default async function login(
             return reply.status(401).send({ error: "Invalid credentials" });
         }
 
-        const { password_hash: _, twofa_enabled, email: __, ...userWithoutPasswordEmail } = userRecords[0];
+        const { password_hash: _, twoFaEnabled, email: __, ...userWithoutPasswordEmail } = userRecords[0];
         const user = {
             ...userWithoutPasswordEmail,
-            twoFaEnabled: Boolean(twofa_enabled), // Convert 0/1 to false/true
+            twoFaEnabled: Boolean(twoFaEnabled), // Convert 0/1 to false/true
         };
 
         // Generate JWT

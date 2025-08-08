@@ -9,6 +9,7 @@ import type {
 import { AuthStorage } from "./auth.storage";
 
 export class AuthService {
+    private pendingLoginData: { token: string; user: PublicUser } | null = null;
     private static instance: AuthService;
     private currentUser: PublicUser | null = null;
     private listeners: ((user: PublicUser | null) => void)[] = [];
@@ -34,7 +35,7 @@ export class AuthService {
         return this.currentUser !== null;
     }
 
-    async login(credentials: LoginBody): Promise<void> {
+    async login(credentials: LoginBody): Promise<{ requires2FA: boolean }> {
         const response = await fetch("/api/auth/login", {
             method: "POST",
             headers: {
@@ -49,10 +50,50 @@ export class AuthService {
 
         const data: LoginResponse = await response.json();
         const user: PublicUser = data.user;
-        this.currentUser = user;
-        AuthStorage.saveUser(user);
-        AuthStorage.saveToken(data.token);
+
+        if (user.twoFaEnabled) {
+            // Store login data temporarily
+            this.pendingLoginData = { token: data.token, user };
+            return { requires2FA: true };
+        } else {
+            // Complete login immediately
+            this.currentUser = user;
+            AuthStorage.saveUser(user);
+            AuthStorage.saveToken(data.token);
+            this.notifyListeners();
+            return { requires2FA: false };
+        }
+    }
+
+    async complete2FALogin(token: string): Promise<void> {
+        if (!this.pendingLoginData) {
+            throw new Error("No pending login session");
+        }
+
+        const response = await fetch("/api/auth/2fa/verify", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${this.pendingLoginData.token}`,
+            },
+            body: JSON.stringify({ token }),
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || "Invalid 2FA code");
+        }
+
+        // Complete login
+        this.currentUser = this.pendingLoginData.user;
+        AuthStorage.saveUser(this.pendingLoginData.user);
+        AuthStorage.saveToken(this.pendingLoginData.token);
+        this.pendingLoginData = null;
         this.notifyListeners();
+    }
+
+    clearPendingLogin(): void {
+        this.pendingLoginData = null;
     }
 
     async signUp(credentials: SignupForm): Promise<void> {

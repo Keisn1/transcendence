@@ -19,4 +19,4 @@ SELECT * FROM users;
 
 #+RESULTS:
 | id                                   | username | email   | password_hash                                                | avatar                   | twofa_secret                                         | created_at          | updated_at          | twofa_enabled |
-| 2b947192-194f-43fa-964a-571896947f12 | k        | k@x.com | $2b$10$SF2zwVMX8njxrCHAQPfdZegfqtG.1MEXa5ThVkRP0j48L7ya7iDvm | /uploads/default-pfp.png | EFWDERJWM5JCQ3BEGAXUO3TYNYZFI5KDNEUDS4ZQKBGF44ZIHZZQ | 2025-08-08 10:57:04 | 2025-08-08 10:57:53 |             0 |
+| 9893c4d0-c352-4247-847d-8bea55d95a76 | k        | k@x.com | $2b$10$xnNskh8EHuBxgMPSWQAoxePqk9iJyXJlNaq1uCHh7XlH5awE2IXlm | /uploads/default-pfp.png | JMXDEUKKJVTUYU2SNBQTS6JIGMXUCXJUHZTC43RGORWVGT3IHY6A | 2025-08-08 11:37:46 | 2025-08-08 11:49:55 |             1 |

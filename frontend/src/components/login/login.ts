@@ -1,5 +1,6 @@
 import { AuthController } from "../../controllers/auth.controller.ts";
 import { BaseComponent } from "../BaseComponent";
+import { TwoFactorVerification } from "../twoFactorVerification/twoFactorVerification.ts";
 import loginTemplate from "./login.html?raw";
 
 export class Login extends BaseComponent {
@@ -21,10 +22,16 @@ export class Login extends BaseComponent {
 
         try {
             const authController = AuthController.getInstance();
-            await authController.login({
+            const result = await authController.login({
                 email: this.loginForm.querySelector<HTMLInputElement>("#email")!.value,
                 password: this.loginForm.querySelector<HTMLInputElement>("#password")!.value,
             });
+
+            // Check if 2FA is required
+            if (result.requires2FA) {
+                this.show2FAVerification();
+            }
+            // If not requires2FA, authController already navigated to "/"
         } catch (error) {
             console.error("Login attempt failed:", {
                 email: this.loginForm.querySelector<HTMLInputElement>("#email")!.value,
@@ -34,6 +41,32 @@ export class Login extends BaseComponent {
             });
             this.showError("Login failed. Please check your credentials.");
         }
+    }
+
+    private show2FAVerification() {
+        const verification = new TwoFactorVerification(
+            "Enter your 2FA code to complete login:",
+            async (token) => {
+                try {
+                    const authController = AuthController.getInstance();
+                    await authController.complete2FALogin(token);
+                    // AuthController handles navigation to "/"
+                    verification.getContainer().remove();
+                    verification.destroy();
+                } catch (error) {
+                    throw error; // Let TwoFactorVerification handle error display
+                }
+            },
+            () => {
+                // User cancelled - clear pending login
+                const authController = AuthController.getInstance();
+                authController.clearPendingLogin();
+                verification.getContainer().remove();
+                verification.destroy();
+            },
+        );
+
+        this.container.appendChild(verification.getContainer());
     }
 
     private showError(message: string) {
