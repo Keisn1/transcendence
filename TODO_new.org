@@ -13,6 +13,6 @@
 - [X] implement disable-2fa verification
 - [X] make better updateProfile (everything)
 
-- [ ] implement "api/auth/verify-player" (something like that)
+- [ ] implement "api/auth/verify" (something like that)
   - [ ] this is for the tournament
   - [ ] also will use 2fa
