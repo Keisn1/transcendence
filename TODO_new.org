@@ -4,10 +4,11 @@
 - [X] disable enable2FA if the user has it already enabled
 - [X] twofa_enabled should have a default value of "false"
 - [X] add 2faEnabled attribute on user
-- [ ] do authorization in updateUser
+- [X] what happens if the process is aborted?
+  - 2fa secret gets created but it is not used since it is still disabled
+  - clicking enable 2fa again after the user navigated somewhere else will just create another secret
+- [X] do authorization in updateUser/updateProfile
   - find a way that only the actual user can change its data
-
-- [ ] what happens if the process is aborted?
 - [ ] actually implement 2fa verification (in login / disable and register)
 - [ ] implement "api/auth/verify-player" (something like that)
 - [ ] make better updateProfile (everything)
