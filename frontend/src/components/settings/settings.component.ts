@@ -16,6 +16,7 @@ export class Settings extends BaseComponent {
     }
 
     private renderButtons() {
+        console.log("button get rerendered");
         const user = AuthService.getInstance().getCurrentUser();
         const buttonsContainer = this.container.querySelector(".buttons-container")!;
 

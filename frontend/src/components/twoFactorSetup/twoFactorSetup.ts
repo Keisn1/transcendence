@@ -30,10 +30,16 @@ export class TwoFactorSetup extends BaseComponent {
 
     private handleClose() {
         console.log("handle close button");
+
+        // Check if 2FA was successfully enabled and trigger completion
+        if (this.container.querySelector(".success-message") && this.onComplete) {
+            this.onComplete();
+        }
+
         if (this.onClose) {
             this.onClose();
         }
-        this.container.remove(); // Add this line
+        this.container.remove();
         this.destroy();
     }
 
@@ -50,10 +56,6 @@ export class TwoFactorSetup extends BaseComponent {
             await authController.complete2FA(token);
 
             this.showSuccess("2FA enabled successfully!");
-
-            if (this.onComplete) {
-                this.onComplete();
-            }
         } catch (error) {
             console.error("Error verifying 2FA:", error);
             const message = error instanceof Error ? error.message : "Invalid 2FA code";
