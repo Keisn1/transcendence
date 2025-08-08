@@ -23,6 +23,15 @@ export interface LoginBody {
     password: string;
 }
 
+export interface VerifyResponse {
+    user: PublicUser;
+}
+
+export interface VerifyBody {
+    email: string;
+    password: string;
+}
+
 export interface RegisterBody {
     username: string;
     email: string;

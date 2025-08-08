@@ -1,7 +1,7 @@
 import { TournamentEvent, TournamentMachine, TournamentState } from "./tournament.machine.ts";
 import Router from "../router";
 import { TournamentService } from "../services/tournament/tournament.service.ts";
-import type { RegisterPlayerBody, GameResult, Match } from "../types/tournament.types.ts";
+import type { GameResult, Match } from "../types/tournament.types.ts";
 import type { PublicUser } from "../types/auth.types.ts";
 import { v4 as uuidv4 } from "uuid";
 
@@ -53,16 +53,6 @@ export class Tournament {
     }
 }
 
-export class TournamentDTO {
-    tournamentId: string;
-    playersId: string[];
-
-    constructor(tournament: Tournament) {
-        this.tournamentId = tournament.id;
-        this.playersId = tournament.players.map((player) => player.id);
-    }
-}
-
 export class TournamentController {
     private static instance: TournamentController;
     private tournamentService: TournamentService;
@@ -84,16 +74,11 @@ export class TournamentController {
         return TournamentController.instance;
     }
 
-    public async registerPlayer(userCredentials: RegisterPlayerBody): Promise<PublicUser> {
-        const user = await this.tournamentService.registerPlayer(userCredentials);
-        return user;
-    }
 
     public async createTournament(players: PublicUser[]): Promise<void> {
         const tournament = new Tournament(players);
-        const tournamentDTO = new TournamentDTO(tournament);
 
-        await this.tournamentService.createTournament(tournamentDTO);
+        await this.tournamentService.createTournament(tournament);
 
         this.tournament = tournament;
         this.tournamentMachine.update(TournamentEvent.LOAD, tournament);
