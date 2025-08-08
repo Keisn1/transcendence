@@ -31,10 +31,10 @@
         <div class="hidden sm:ml-6 sm:block">
           <div class="flex space-x-4">
             <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
-            <a data-link id="link-1" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white" aria-current="page">Dashboard</a>
-            <a data-link id="link-2" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Game</a>
+            <a data-link id="dashboard-link" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white" aria-current="page">Dashboard</a>
+            <a data-link id="game-link" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Game</a>
             <a  href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Leader Board</a>
-            <a data-link id="link-3" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Tournament</a>
+            <a data-link id="tournament-link" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Tournament</a>
           </div>
         </div>
       </div>
@@ -50,10 +50,10 @@
 
         <!-- Add this after the notification button and before profile dropdown -->
         <div id="auth-buttons" class="hidden flex items-center space-x-4 mr-4">
-          <a data-link href="/login" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+          <a data-link id="login-link" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
             Login
           </a>
-          <a data-link href="/signup" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-md text-sm font-medium">
+          <a data-link id="signup-link" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-md text-sm font-medium">
             Sign Up
           </a>
         </div>
@@ -91,7 +91,7 @@
                   <a data-link id="profile-link" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-0">Your Profile</a>
                   <a data-link id="settings-link" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-1">Settings</a>
                   <!-- Update the sign out link in the dropdown -->
-                  <a href="/signout" id="logout-link" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">
+                  <a id="logout-link" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">
                     Sign out
                   </a>
                 </div>
@@ -105,10 +105,10 @@
     <div class="sm:hidden" id="mobile-menu">
       <div class="space-y-1 px-2 pt-2 pb-3">
         <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
-        <a href="#" class="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white" aria-current="page">Dashboard</a>
-        <a href="#" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Team</a>
-        <a href="#" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Projects</a>
-        <a href="#" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Calendar</a>
+        <a data-link id="mobile-dashboard-link" class="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white" aria-current="page">Dashboard</a>
+        <a data-link id="mobile-game-link" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Game</a>
+        <a data-link  class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Leaderboard</a>
+        <a data-link id="mobile-tournament-link" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Tournament</a>
       </div>
     </div>
 </nav>

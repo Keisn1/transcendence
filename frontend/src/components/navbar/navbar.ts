@@ -14,8 +14,13 @@ export class Navbar extends BaseComponent {
     private profileDropdown: HTMLElement;
     private menu: HTMLElement;
     private userMenuButton: HTMLElement;
+    private loginLink: HTMLAnchorElement;
+    private signupLink: HTMLAnchorElement;
     private logoutLink: HTMLElement;
     private settingsLink: HTMLAnchorElement;
+    private mobileDashboardLink: HTMLAnchorElement;
+    private mobileGameLink: HTMLAnchorElement;
+    private mobileTournamentLink: HTMLAnchorElement;
 
     constructor() {
         super("div", "navbar-container");
@@ -23,10 +28,16 @@ export class Navbar extends BaseComponent {
 
         this.container.innerHTML = navbarTemplate;
         // links
-        this.dashboardLink = this.container.querySelector<HTMLAnchorElement>("#link-1")!;
-        this.gameLink = this.container.querySelector<HTMLAnchorElement>("#link-2")!;
-        this.tournamentLink = this.container.querySelector<HTMLAnchorElement>("#link-3")!;
+        this.dashboardLink = this.container.querySelector<HTMLAnchorElement>("#dashboard-link")!;
+        this.gameLink = this.container.querySelector<HTMLAnchorElement>("#game-link")!;
+        this.tournamentLink = this.container.querySelector<HTMLAnchorElement>("#tournament-link")!;
         this.profileLink = this.container.querySelector<HTMLAnchorElement>("#profile-link")!;
+        this.loginLink = this.container.querySelector<HTMLAnchorElement>("#login-link")!;
+        this.signupLink = this.container.querySelector<HTMLAnchorElement>("#signup-link")!;
+
+        this.mobileDashboardLink = this.container.querySelector<HTMLAnchorElement>("#mobile-dashboard-link")!;
+        this.mobileGameLink = this.container.querySelector<HTMLAnchorElement>("#mobile-game-link")!;
+        this.mobileTournamentLink = this.container.querySelector<HTMLAnchorElement>("#mobile-tournament-link")!;
 
         // drowdown
         this.profileDropdown = this.container.querySelector<HTMLAnchorElement>("#profile-dropdown-container")!;
@@ -78,6 +89,12 @@ export class Navbar extends BaseComponent {
         this.tournamentLink.href = "/tournament";
         this.profileLink.href = "/profile";
         this.settingsLink.href = "/settings";
+        this.loginLink.href = "/login";
+        this.signupLink.href = "/signup";
+
+        this.mobileDashboardLink.href = "/";
+        this.mobileGameLink.href = "/game";
+        this.mobileTournamentLink.href = "/tournament";
     }
 
     setupEvents() {
