@@ -128,6 +128,12 @@ export class AuthService {
             const error = await response.json();
             throw new Error(error.error || "Invalid 2FA code");
         }
+
+        const user = this.getCurrentUser();
+        if (user) {
+            user.twoFaEnabled = true;
+            this.updateCurrentUser(user);
+        }
     }
 
     // way of consumer to subscribe to changes in the AuthService
