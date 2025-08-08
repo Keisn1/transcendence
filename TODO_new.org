@@ -16,3 +16,6 @@
 - [ ] implement "api/auth/verify" (something like that)
   - [ ] this is for the tournament
   - [ ] also will use 2fa
+
+- [ ] change prefix for updateProfile
+- [ ] grey line on tournamentCreationPanel
