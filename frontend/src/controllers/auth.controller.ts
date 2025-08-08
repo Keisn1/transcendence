@@ -33,6 +33,17 @@ export class AuthController {
         }
     }
 
+    public async initiate2FA(): Promise<string> {
+        if (!this.authService.isAuthenticated()) {
+            throw new Error("Please log in first");
+        }
+        return await this.authService.initiate2FA();
+    }
+
+    public async complete2FA(token: string): Promise<void> {
+        await this.authService.complete2FA(token);
+    }
+
     public async login(credentials: { email: string; password: string }): Promise<void> {
         await this.authService.login(credentials);
         this.router.navigateTo("/");

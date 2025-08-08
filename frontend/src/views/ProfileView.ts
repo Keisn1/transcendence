@@ -14,9 +14,8 @@ export default class extends AbstractView {
     }
 
     render() {
-        const authService = AuthService.getInstance();
-        if (!authService.isAuthenticated()) {
-            this.router?.navigateTo("/signup");
+        if (!AuthService.getInstance().isAuthenticated()) {
+            this.router?.navigateTo("/login");
             return;
         }
 

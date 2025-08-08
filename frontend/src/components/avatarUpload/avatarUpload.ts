@@ -2,6 +2,7 @@ import { BaseComponent } from "../BaseComponent";
 import { AuthService } from "../../services/auth/auth.service";
 import { ProfileService } from "../../services/profile/profile.service";
 import avatarUploadTemplate from "./avatarUpload.html?raw";
+import { AuthStorage } from "../../services/auth/auth.storage";
 
 export class AvatarUpload extends BaseComponent {
     private authService: AuthService;
@@ -58,7 +59,7 @@ export class AvatarUpload extends BaseComponent {
                 method: "POST",
                 body: formData,
                 headers: {
-                    Authorization: `Bearer ${this.authService.getAuthToken()}`,
+                    Authorization: `Bearer ${AuthStorage.getToken()}`,
                 },
             });
 
