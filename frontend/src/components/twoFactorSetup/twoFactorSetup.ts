@@ -5,22 +5,36 @@ import twoFactorSetupTemplate from "./twoFactorSetup.html?raw";
 export class TwoFactorSetup extends BaseComponent {
     private verifyBtn: HTMLButtonElement;
     private tokenInput: HTMLInputElement;
+    private closeBtn: HTMLButtonElement;
     private onComplete?: () => void;
+    private onClose?: () => void;
 
-    constructor(qrCodeSvg: string, onComplete?: () => void) {
+    constructor(qrCodeSvg: string, onComplete?: () => void, onClose?: () => void) {
         super("div", "two-factor-setup");
         this.onComplete = onComplete;
+        this.onClose = onClose;
 
         this.container.innerHTML = twoFactorSetupTemplate.replace("{{qrCodeSvg}}", qrCodeSvg);
 
         this.verifyBtn = this.container.querySelector("#verify-2fa-btn")!;
         this.tokenInput = this.container.querySelector("#twofa-token")!;
+        this.closeBtn = this.container.querySelector("#close-2fa-setup")!;
 
         this.setupEventListeners();
     }
 
     private setupEventListeners() {
         this.addEventListenerWithCleanup(this.verifyBtn, "click", () => this.handleVerify());
+        this.addEventListenerWithCleanup(this.closeBtn, "click", () => this.handleClose());
+    }
+
+    private handleClose() {
+        console.log("handle close button");
+        if (this.onClose) {
+            this.onClose();
+        }
+        this.container.remove(); // Add this line
+        this.destroy();
     }
 
     private async handleVerify() {

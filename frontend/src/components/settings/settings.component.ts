@@ -15,25 +15,36 @@ export class Settings extends BaseComponent {
     }
 
     private setupEventListeners() {
-        this.addEventListenerWithCleanup(this.enable2FABtn, "click", () => this.handleEnable2FA());
+        this.addEventListenerWithCleanup(this.enable2FABtn, "click", this.handleEnable2FA.bind(this));
     }
 
     private async handleEnable2FA() {
+        this.enable2FABtn.disabled = true;
         try {
             const authController = AuthController.getInstance();
             const qrCodeSvg = await authController.initiate2FA();
 
-            this.twoFactorSetup = new TwoFactorSetup(qrCodeSvg, () => {
-                // Cleanup when 2FA setup is complete
-                this.twoFactorSetup?.destroy();
-                this.twoFactorSetup = null;
-            });
+            this.twoFactorSetup = new TwoFactorSetup(
+                qrCodeSvg,
+                () => {
+                    // Cleanup when 2FA setup is complete
+                    this.twoFactorSetup?.destroy();
+                    this.twoFactorSetup = null;
+                },
+                () => {
+                    // Re-enable button when setup is closed
+                    console.log("inside handler");
+                    this.enable2FABtn.disabled = false;
+                    this.twoFactorSetup = null;
+                },
+            );
 
             this.container.appendChild(this.twoFactorSetup.getContainer());
         } catch (error) {
             console.error("Error setting up 2FA:", error);
             const message = error instanceof Error ? error.message : "Failed to initiate 2FA";
             alert(`Failed to initiate 2FA: ${message}`);
+            this.enable2FABtn.disabled = false; // Re-enable on error
         }
     }
 
