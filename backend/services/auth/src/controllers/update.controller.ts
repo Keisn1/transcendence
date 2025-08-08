@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { genSaltSync, hashSync } from "bcrypt";
-import { UpdateUserBody, UpdateUserResponse, User } from "../types/auth.types";
+import { UpdateUserBody, UpdateUserResponse, Profile } from "../types/auth.types";
 
 export default async function update(request: FastifyRequest, reply: FastifyReply): Promise<UpdateUserResponse> {
     const id = request.user.id;
@@ -46,7 +46,7 @@ export default async function update(request: FastifyRequest, reply: FastifyRepl
             "SELECT id, username, email, avatar FROM users WHERE id = ?",
             [id],
         );
-        const updated = resultQuery[0] as User;
+        const updated = resultQuery[0] as Profile;
 
         return reply.status(200).send({ user: updated });
     } catch (err: any) {

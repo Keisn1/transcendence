@@ -5,7 +5,7 @@ export interface PublicUser {
     twoFaEnabled: boolean;
 }
 
-export interface User {
+export interface Profile {
     id: string;
     username: string;
     email: string;
