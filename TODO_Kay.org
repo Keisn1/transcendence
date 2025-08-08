@@ -7,12 +7,12 @@
    - have type SignupForm in frontend
 3. [X] redo the password confirmation
 4. [X] make the confirmPassword as in the backend (min_len = 8)
-5. [ ] Avatar usage
-   - [ ] rename signup route to register
-6. [ ] remove email from the login and register response
-7. [ ] integrate the tournament service
-8. [ ] test frontend with backend but without "make re"
-   - [ ] just find a better way of having the two together for development
-9. [ ] authToken delete should result in being logged out
-10. [ ] timeout on authToken
-11. [ ] navbar mobile view needs a revisit
+5. [X] Avatar usage
+   - [X] rename signup route to register
+6. [X] remove email from the login and register response
+7. [X] test frontend with backend but without "make re"
+   - [X] just find a better way of having the two together for development
+8. [X] authToken delete should result in being logged out
+9. [X] timeout on authToken
+10. [X] navbar mobile view needs a revisit
+11. [ ] integrate the tournament service

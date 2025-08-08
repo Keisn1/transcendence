@@ -43,18 +43,18 @@ this.ball = new Ball(canvas, config.ballConfig);
 - [ ] rather setup CORS with fastify and environment variables
   - right now it is vite, with a proxy server making it possible during developement
 
-- [ ] setup nginx and setup production environment
-- [ ] clean up navbar html
-  - [ ] set all the links and important attributes (everything that is not tailwind inside the component itsel)
+- [X] setup nginx and setup production environment
+- [X] clean up navbar html
+  - [X] set all the links and important attributes (everything that is not tailwind inside the component itsel)
 * TODO backend
-- [ ] define uuid before inserting
+- [X] define uuid before inserting
 * TODO UserStories
 ** DONE Login
 As a visitor to the website, I want to easily log in with my credentials, so I can access my account features and have a seamless authenticated experience.
 
 ** DONE Signup
 As a visitor to the website, I want to easily sign up email and password, so I can track my games.
-** TODO Avatar
+** DONE Avatar
 As a registered user of the website, I want to be able to navigate to my profile, where I can see my Username, my email and my avatar, so I can individualize my appearance on the website.
 * TODO Stats / Match History
 - we need to track outcomes of games being played
@@ -115,5 +115,3 @@ As a registered user of the website, I want to be able to navigate to my profile
 ** TODO Loser's Game
 ** TODO Announce next game
 ** TODO Final
-* TODO build process
-- [ ] pack den build process in nen dockerfile
