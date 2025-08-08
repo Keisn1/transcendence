@@ -44,8 +44,7 @@ export class Settings extends BaseComponent {
         enableBtn.disabled = true;
 
         try {
-            const authController = AuthController.getInstance();
-            const qrCodeSvg = await authController.initiate2FA();
+            const qrCodeSvg = await AuthController.getInstance().initiate2FA();
 
             this.twoFactorSetup = new TwoFactorSetup(
                 qrCodeSvg,
@@ -77,6 +76,7 @@ export class Settings extends BaseComponent {
             async (token) => {
                 const authController = AuthController.getInstance();
                 await authController.disable2FA(token);
+
                 this.twoFactorVerification?.getContainer().remove();
                 this.twoFactorVerification?.destroy();
                 this.twoFactorVerification = null; // Clean up reference

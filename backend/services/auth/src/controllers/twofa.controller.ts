@@ -3,6 +3,62 @@ import speakeasy from "speakeasy";
 import qrcode from "qrcode";
 import { complete2FABody } from "../types/auth.types";
 
+export async function disable2FA(request: FastifyRequest, reply: FastifyReply) {
+    const user = request.user;
+    const { token } = request.body as { token: string };
+
+    // First verify the 2FA token
+    const rows = await request.server.db.query(`SELECT twofa_secret FROM users WHERE id = ?`, [user.id]);
+    const row = rows[0];
+
+    const verified = speakeasy.totp.verify({
+        secret: row.twofa_secret,
+        encoding: "base32",
+        token,
+    });
+
+    if (!verified) {
+        return reply.status(400).send({ error: "Invalid 2FA code" });
+    }
+
+    // Disable 2FA
+    await request.server.db.run(
+        `UPDATE users SET twofa_enabled = 0, twofa_secret = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+        [user.id],
+    );
+
+    return reply.send({ success: true });
+}
+
+export async function verify2FA(request: FastifyRequest, reply: FastifyReply) {
+    const user = request.user;
+    if (!user?.twoFaEnabled) {
+        return reply.status(400).send({ error: "2FA not enabled" });
+    }
+
+    const { token } = request.body as { token: string };
+    if (!token) return reply.status(400).send({ error: "Missing token" });
+
+    const rows = await request.server.db.query(`SELECT twofa_secret FROM users WHERE id = ?`, [user.id]);
+    const row = rows[0];
+
+    if (!row?.twofa_secret) {
+        return reply.status(400).send({ error: "2FA not properly configured" });
+    }
+
+    const verified = speakeasy.totp.verify({
+        secret: row.twofa_secret,
+        encoding: "base32",
+        token,
+    });
+
+    if (!verified) {
+        return reply.status(400).send({ error: "Invalid 2FA code" });
+    }
+
+    return reply.send({ success: true });
+}
+
 // Create or update 2FA secret and return QR code
 export async function init2FA(request: FastifyRequest, reply: FastifyReply) {
     const user = request.user;

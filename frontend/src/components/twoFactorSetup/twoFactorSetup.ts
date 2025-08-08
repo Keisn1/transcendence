@@ -52,6 +52,8 @@ export class TwoFactorSetup extends BaseComponent {
                 return;
             }
 
+            this.verifyBtn.disabled = true; // Disable during verification
+
             const authController = AuthController.getInstance();
             await authController.complete2FA(token);
 
@@ -60,6 +62,8 @@ export class TwoFactorSetup extends BaseComponent {
             console.error("Error verifying 2FA:", error);
             const message = error instanceof Error ? error.message : "Invalid 2FA code";
             this.showError(message);
+
+            this.verifyBtn.disabled = false;
         }
     }
 

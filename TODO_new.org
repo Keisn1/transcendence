@@ -10,5 +10,6 @@
 - [X] do authorization in updateUser/updateProfile
   - find a way that only the actual user can change its data
 - [ ] actually implement 2fa verification (in login / disable and register)
+- [ ] implement disable-2fa verification
 - [ ] implement "api/auth/verify-player" (something like that)
 - [ ] make better updateProfile (everything)
