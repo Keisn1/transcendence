@@ -9,9 +9,11 @@ WORKDIR /app
 
 # Copy source code
 COPY src/ ./src/
+
 # Copy package files
 COPY tsconfig.json .
 COPY package*.json ./
+
 # Install
 RUN npm install
 RUN npm run build

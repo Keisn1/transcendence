@@ -1,0 +1,6 @@
+#+title: Todo New
+
+- [ ] Disabling to press enable2FA multiple times
+- [ ] what happens if the process is aborted?
+- [ ] disable enable2FA if the user has it already enabled
+- [ ] add 2faEnabled attribute on user
