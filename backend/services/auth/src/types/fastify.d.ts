@@ -3,7 +3,7 @@ import { User } from "./auth.types";
 
 declare module "fastify" {
     interface FastifyRequest {
-        jwtVerify(): Promise<{ id: string; username: string; email: string; avatar: string }>;
+        jwtVerify(): Promise<{ id: string; username: string; email: string; avatar: string; twoFaEnabled: boolean }>;
         user: User;
     }
     interface FastifyInstance {

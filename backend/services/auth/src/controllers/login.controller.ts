@@ -10,7 +10,7 @@ export default async function login(
 
     try {
         const userRecords = await request.server.db.query(
-            "SELECT id, username, email, password_hash, avatar FROM users WHERE email = ?",
+            "SELECT id, username, email, password_hash, avatar, twofa_enabled as twoFaEnabled FROM users WHERE email = ?",
             [email],
         );
 
@@ -55,6 +55,7 @@ export const loginSchema = {
                         username: { type: "string" },
                         email: { type: "string" },
                         avatar: { type: "string", format: "uri-reference" },
+                        twoFaEnabled: { type: "boolean" },
                     },
                     required: ["id", "username", "email", "avatar"],
                 },

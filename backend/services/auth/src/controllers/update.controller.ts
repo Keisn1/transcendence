@@ -80,6 +80,7 @@ export const updateUserSchema = {
                         username: { type: "string" },
                         email: { type: "string" },
                         avatar: { type: "string", format: "uri-reference" },
+                        twoFaEnabled: { type: "boolean" },
                     },
                     required: ["id", "username", "email", "avatar"],
                 },

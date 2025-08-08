@@ -22,6 +22,7 @@ export default fp<AuthPluginOptions>(async (fastify, opts: AuthPluginOptions) =>
                 username: decoded.username,
                 email: decoded.email,
                 avatar: decoded.avatar,
+                twoFaEnabled: decoded.twoFaEnabled,
             };
         } catch (err) {
             reply.status(401).send({ message: "Unauthorized" });

@@ -26,6 +26,7 @@ export default async function register(
             username: username,
             email: email,
             avatar: "/uploads/default-pfp.png",
+            twoFaEnabled: false,
         };
 
         // Generate JWT
@@ -71,6 +72,7 @@ export const registerSchema = {
                         username: { type: "string" },
                         email: { type: "string" },
                         avatar: { type: "string", format: "uri-reference" },
+                        twoFaEnabled: { type: "boolean" },
                     },
                     required: ["id", "username", "email", "avatar"],
                 },
