@@ -1,7 +1,7 @@
 import { TournamentEvent, TournamentMachine, TournamentState } from "./tournament.machine.ts";
 import Router from "../router";
 import { TournamentService } from "../services/tournament/tournament.service.ts";
-import type { GameResult, Match } from "../types/tournament.types.ts";
+import type { MatchResult, Match } from "../types/tournament.types.ts";
 import type { PublicUser } from "../types/auth.types.ts";
 import { v4 as uuidv4 } from "uuid";
 
@@ -23,7 +23,7 @@ export class Tournament {
         for (let i = 0; i < players.length; i += 2) {
             const p1 = players[i];
             const p2 = players[i + 1];
-            const initialResult: GameResult = { player1Score: 0, player2Score: 0 };
+            const initialResult: MatchResult = { player1Score: 0, player2Score: 0 };
 
             this.matches.push({
                 matchId: uuidv4(),
@@ -74,7 +74,6 @@ export class TournamentController {
         return TournamentController.instance;
     }
 
-
     public async createTournament(players: PublicUser[]): Promise<void> {
         const tournament = new Tournament(players);
 
@@ -99,7 +98,7 @@ export class TournamentController {
         this.router.navigateTo(`/tournament`);
     }
 
-    finishMatch(result: GameResult): void {
+    finishMatch(result: MatchResult): void {
         this.tournament.matches[this.tournament.nextMatchIdx].result = result;
         this.tournament.nextMatchIdx++;
         if (!this.tournament.hasMoreMatches()) this.tournament.generateNextRound();

@@ -2,7 +2,7 @@ import { Ball, type BallConfig } from "./ball";
 import { Paddle, type Paddles, type PaddleConfig } from "./paddle";
 import { InputManager } from "./inputManager";
 import { AiController } from "./aiController";
-import { type GameResult } from "../types/tournament.types";
+import { type MatchResult } from "../types/tournament.types";
 
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
@@ -42,7 +42,7 @@ export class PongGame {
     private paused: boolean = false;
     private justPaused = false;
     private requestAnimationFrame: number | null = null;
-    private result: GameResult;
+    private result: MatchResult;
     private onFinishCallback?: () => void;
 
     constructor(canvas: HTMLCanvasElement, config: GameConfig = {}, onFinish?: () => void) {
@@ -245,7 +245,7 @@ export class PongGame {
         this.requestAnimationFrame = requestAnimationFrame((t) => this.gameLoop(t, timestamp));
     }
 
-    public getResult(): GameResult {
+    public getResult(): MatchResult {
         return this.result;
     }
 

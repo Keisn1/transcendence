@@ -1,4 +1,8 @@
-<div class="relative flex items-center justify-center h-screen">
-  <canvas id="canvas" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black rounded-md"></canvas>
-  <script src="/src/components/game/game.ts" type="module"></script>
+<div class="flex flex-col items-center justify-center h-screen">
+  <div id="players-display" class="mb-6">
+    <!-- Player info will be populated here -->
+  </div>
+  <div class="relative">
+    <canvas id="canvas" class="bg-black rounded-md"></canvas>
+  </div>
 </div>

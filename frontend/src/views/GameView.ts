@@ -1,6 +1,6 @@
 import AbstractView from "./AbstractView.ts";
 import { Navbar } from "../components/navbar/navbar.ts";
-import { GameComponent } from "../components/gameComponent/gameComponent.ts";
+import { GameComponent } from "../components/gameComponent/game.component.ts";
 import Router from "../router.ts";
 import { GameControlsComponent } from "../components/gameControls/gameControlsGame/gameControls.ts";
 

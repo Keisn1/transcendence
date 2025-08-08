@@ -1,5 +1,5 @@
 import { BaseComponent } from "../../BaseComponent.ts";
-import { GameComponent } from "../../gameComponent/gameComponent.ts";
+import { GameComponent } from "../../gameComponent/game.component.ts";
 import { GameControlsTournamentComponent } from "../../gameControls/gameControlsTournament/gameControlsTournament.ts";
 import { TournamentController } from "../../../controllers/tournament.controller.ts";
 import { ExitBtn } from "../exitButton/exitBtn.ts";
@@ -14,7 +14,7 @@ export class TournamentMatchComponent extends BaseComponent {
     constructor() {
         super("div", "tournament-container");
         this.tournamentController = TournamentController.getInstance();
-        this.playerNamesDisplay = new PlayerNamesDisplay()
+        this.playerNamesDisplay = new PlayerNamesDisplay();
         this.gameComponent = new GameComponent(GameControlsTournamentComponent);
         this.exitBtn = new ExitBtn();
 

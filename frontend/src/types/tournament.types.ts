@@ -4,10 +4,10 @@ export interface Match {
     matchId: string;
     player1: PublicUser;
     player2: PublicUser;
-    result: GameResult;
+    result: MatchResult;
 }
 
-export type GameResult = {
+export type MatchResult = {
     player1Score: number;
     player2Score: number;
 };
@@ -15,4 +15,4 @@ export type GameResult = {
 export type TournamentBody = {
     tournamentId: string;
     playersId: string[];
-}
+};
