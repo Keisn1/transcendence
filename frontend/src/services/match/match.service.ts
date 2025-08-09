@@ -1,7 +1,6 @@
 import { AuthStorage } from "../auth/auth.storage";
 
 export interface MatchBody {
-    id: string;
     player1Id: string;
     player2Id: string;
     player1Score: number;

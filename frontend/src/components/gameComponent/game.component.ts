@@ -9,7 +9,6 @@ import type IGameControls from "../gameControls/IGameControls";
 import { MatchService, type MatchBody } from "../../services/match/match.service";
 import { AuthService } from "../../services/auth/auth.service";
 import { PlayersDisplay } from "../playersDisplay/playersDisplay.ts";
-import { v4 as uuidv4 } from "uuid";
 import type { PublicUser } from "../../types/auth.types.ts";
 
 type ControlsConstructor = (new () => GameControlsComponent) | (new () => GameControlsTournamentComponent);
@@ -104,7 +103,6 @@ export class GameComponent extends BaseComponent {
             const duration = Date.now() - this.gameStartTime;
 
             const matchBody: MatchBody = {
-                id: uuidv4(),
                 player1Id: user!.id,
                 player2Id: this.getPlayer2Name(),
                 player1Score: result.player1Score,
