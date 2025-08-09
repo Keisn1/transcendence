@@ -20,18 +20,18 @@ export class TournamentService {
             playersId: tournament.players.map((player) => player.id),
         };
 
-        const response = await fetch("/api/tournament", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${AuthStorage.getToken()}`,
-            },
-            body: JSON.stringify(tournamentBody),
-        });
+        // const response = await fetch("/api/tournament", {
+        //     method: "POST",
+        //     headers: {
+        //         "Content-Type": "application/json",
+        //         Authorization: `Bearer ${AuthStorage.getToken()}`,
+        //     },
+        //     body: JSON.stringify(tournamentBody),
+        // });
 
-        if (!response.ok) {
-            const errMsg = await response.text();
-            throw new Error(`Failed to save tournament: ${errMsg}`);
-        }
+        // if (!response.ok) {
+        //     const errMsg = await response.text();
+        //     throw new Error(`Failed to save tournament: ${errMsg}`);
+        // }
     }
 }

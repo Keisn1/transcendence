@@ -147,9 +147,7 @@ export function setupMockApi() {
         }
 
         if (urlString === "/api/tournament" && options?.method === "POST") {
-            const authHeader = options.headers
-                ? (options.headers as Record<string, string>)["Authorization"]
-                : null;
+            const authHeader = options.headers ? (options.headers as Record<string, string>)["Authorization"] : null;
             const token = authHeader || localStorage.getItem("authToken");
             if (!token) {
                 console.log("unauthorised");
@@ -172,7 +170,6 @@ export function setupMockApi() {
                 headers: { "Content-Type": "application/json" },
             });
         }
-
 
         return originalFetch(url, options);
     };
