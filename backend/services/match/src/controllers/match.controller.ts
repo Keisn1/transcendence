@@ -2,7 +2,7 @@ import { FastifyRequest, FastifyReply } from "fastify";
 import { MatchBody } from "../types/match.types";
 import { v4 as uuidv4 } from "uuid";
 
-export default async function recordMatch(
+export async function recordMatch(
     request: FastifyRequest<{ Body: MatchBody }>,
     reply: FastifyReply,
 ): Promise<void> {
@@ -48,6 +48,23 @@ export default async function recordMatch(
     }
 }
 
+export async function getMatchById(
+    request: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply
+): Promise<void> {
+    const { id } = request.params;
+    try {
+        const match = await request.server.db.query(`SELECT * FROM matches WHERE id = ?`, [id]);
+        if (!match) {
+            return reply.status(404).send({ error: "Match not found" });
+        }
+        return reply.send(match);
+    } catch (error) {
+        console.error("Failed to fetch match:", error);
+        return reply.status(500).send({ error: "Internal server error" });
+    }
+}
+
 export const recordMatchSchema = {
     body: {
         type: "object",
@@ -62,5 +79,13 @@ export const recordMatchSchema = {
         },
         required: ["player1Id", "player2Id", "player1Score", "player2Score", "gameMode"],
         additionalProperties: false,
+    },
+} as const;
+
+export const getMatchSchema = {
+    params: {
+        type: "object",
+        properties: { id: { type: "string", format: "uuid" } },
+        required: ["id"],
     },
 } as const;
