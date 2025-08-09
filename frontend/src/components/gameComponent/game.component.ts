@@ -43,12 +43,20 @@ export class GameComponent extends BaseComponent {
 
         this.gameControls = new ControlsClass() as IGameControls;
         this.gameControls.addToStartCallbacks(this.startCallback);
+        if (!this.options.tournamentPlayers && this.gameControls.addToSelectionChangeCallbacks) {
+            this.gameControls.addToSelectionChangeCallbacks(this.selectionChangeCallback);
+        }
+
         this.container.appendChild(this.gameControls.getContainer());
 
         this.playersDisplay = new PlayersDisplay(this.canvas.width, this.options.tournamentPlayers);
         const playersDisplayContainer = this.container.querySelector("#players-display")!;
         playersDisplayContainer.appendChild(this.playersDisplay.getContainer());
     }
+
+    private selectionChangeCallback = (level: AiLevel) => {
+        this.playersDisplay.updateGameMode(level);
+    };
 
     private startCallback = (level?: AiLevel) => {
         this.game.destroy();
@@ -137,6 +145,9 @@ export class GameComponent extends BaseComponent {
     destroy() {
         super.destroy();
         this.gameControls.removeFromStartCallbacks(this.startCallback);
+        if (this.gameControls.removeFromSelectionChangeCallbacks) {
+            this.gameControls.removeFromSelectionChangeCallbacks(this.selectionChangeCallback);
+        }
         this.playersDisplay.destroy();
         this.game.destroy();
         document.getElementById("game-container")?.remove();

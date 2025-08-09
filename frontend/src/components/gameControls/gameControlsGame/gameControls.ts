@@ -7,6 +7,7 @@ export class GameControlsComponent extends BaseComponent implements IGameControl
     public startBtn: HTMLButtonElement;
     private aiSelect: HTMLSelectElement;
     private startCallbacks: Array<(level: AiLevel) => void> = [];
+    private selectionChangeCallbacks: Array<(level: AiLevel) => void> = []; // Add this
 
     constructor() {
         super("div", "game-controls");
@@ -14,6 +15,20 @@ export class GameControlsComponent extends BaseComponent implements IGameControl
         this.aiSelect = this.container.querySelector("#ai-select") as HTMLSelectElement;
         this.startBtn = this.container.querySelector("#start-btn") as HTMLButtonElement;
         this.startBtn.addEventListener("click", this.handleStart.bind(this));
+        this.addEventListenerWithCleanup(this.aiSelect, "change", this.handleSelectionChange.bind(this));
+    }
+
+    addToSelectionChangeCallbacks(fn: (level: AiLevel) => void) {
+        this.selectionChangeCallbacks.push(fn);
+    }
+
+    removeFromSelectionChangeCallbacks(fn: (level: AiLevel) => void) {
+        this.selectionChangeCallbacks = this.selectionChangeCallbacks.filter((cb) => cb !== fn);
+    }
+
+    private handleSelectionChange() {
+        const level = this.aiSelect.value as AiLevel;
+        this.selectionChangeCallbacks.forEach((cb) => cb(level));
     }
 
     addToStartCallbacks(fn: (level?: AiLevel) => void) {

@@ -9,4 +9,6 @@ export default interface IGameControls {
     getContainer(): HTMLElement;
     reset(): void;
     toggleStartBtn?(): void;
+    addToSelectionChangeCallbacks?(fn: (level: AiLevel) => void): void;
+    removeFromSelectionChangeCallbacks?(fn: (level: AiLevel) => void): void;
 }
