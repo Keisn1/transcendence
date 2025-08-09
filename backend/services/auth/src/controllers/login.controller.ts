@@ -2,10 +2,7 @@ import { FastifyRequest, FastifyReply } from "fastify";
 import { compareSync } from "bcrypt";
 import { LoginBody, LoginResponse, VerifyResponse, VerifyBody } from "../types/auth.types";
 
-export async function login(
-    request: FastifyRequest<{ Body: LoginBody }>,
-    reply: FastifyReply,
-): Promise<LoginResponse> {
+export async function login(request: FastifyRequest<{ Body: LoginBody }>, reply: FastifyReply): Promise<LoginResponse> {
     const { email, password } = request.body;
 
     try {
@@ -26,7 +23,12 @@ export async function login(
         };
 
         // Generate JWT
-        const token = request.server.jwt.sign(user, { expiresIn: "1h" });
+        let token = "";
+        if (request.url === "/api/auth/login") {
+            token = request.server.jwt.sign(user, { expiresIn: "1h" });
+        } else {
+            token = request.server.jwt.sign(user, { expiresIn: "1s" });
+        }
         const response: LoginResponse = { token, user };
 
         // send response
@@ -36,70 +38,6 @@ export async function login(
         return reply.status(500).send({ error: "Login failed" });
     }
 }
-
-export async function verify(
-    request: FastifyRequest<{ Body: VerifyBody }>,
-    reply: FastifyReply,
-): Promise<VerifyResponse> {
-    const { email, password } = request.body;
-
-    try {
-        const userRecords = await request.server.db.query(
-            "SELECT id, username, email, password_hash, avatar, twofa_enabled as twoFaEnabled FROM users WHERE email = ?",
-            [email],
-        );
-
-        if (!userRecords.length || !compareSync(password, userRecords[0].password_hash)) {
-            // NOTE compareSync can be repladed with async compare for non blocking
-            return reply.status(401).send({ error: "Invalid credentials" });
-        }
-
-        const { password_hash: _, twoFaEnabled, email: __, ...userWithoutPasswordEmail } = userRecords[0];
-        const user = {
-            ...userWithoutPasswordEmail,
-            twoFaEnabled: Boolean(twoFaEnabled), // Convert 0/1 to false/true
-        };
-
-        // Generate JWT
-        const response: VerifyResponse = { user };
-
-        // send response
-        return reply.status(201).send(response);
-    } catch (error) {
-        console.error("Login error:", error);
-        return reply.status(500).send({ error: "Verification failed" });
-    }
-}
-
-export const verifySchema = {
-    body: {
-        type: "object",
-        properties: {
-            email: { type: "string", format: "email" },
-            password: { type: "string", minLength: 1 },
-        },
-        required: ["email", "password"],
-        additionalProperties: false,
-    },
-    response: {
-        200: {
-            type: "object",
-            properties: {
-                user: {
-                    type: "object",
-                    properties: {
-                        id: { type: "string" },
-                        username: { type: "string" },
-                        avatar: { type: "string", format: "uri-reference" },
-                        twoFaEnabled: { type: "boolean" },
-                    },
-                    required: ["id", "username", "email", "avatar"],
-                },
-            },
-            additionalProperties: false,
-        },
-    },
-} as const;
 
 export const loginSchema = {
     body: {
