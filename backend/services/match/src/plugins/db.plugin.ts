@@ -58,7 +58,7 @@ interface DatabasePlugin {
 }
 
 async function dbPlugin(server: FastifyInstance) {
-    const db = new sqlite3.Database("./db/auth.db");
+    const db = new sqlite3.Database("./db/match.db");
 
     const dbWrapper: DatabasePlugin = {
         query: (sql: string, params: any[] = []) => {
