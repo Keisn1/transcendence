@@ -18,7 +18,7 @@ export class TournamentService {
         const tournamentBody: TournamentBody = {
             tournamentId: tournament.id,
             playersId: tournament.players.map((player) => player.id),
-        }
+        };
 
         const response = await fetch("/api/tournament", {
             method: "POST",
