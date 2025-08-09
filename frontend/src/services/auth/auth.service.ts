@@ -11,7 +11,7 @@ import { AuthStorage } from "./auth.storage";
 
 export class AuthService {
     private pendingLoginData: { token: string; user: PublicUser } | null = null;
-    private pendingVerifyData: { user: PublicUser } | null = null;
+    private pendingVerifyData: { token: string; user: PublicUser } | null = null;
     private static instance: AuthService;
     private currentUser: PublicUser | null = null;
     private listeners: ((user: PublicUser | null) => void)[] = [];
@@ -96,6 +96,10 @@ export class AuthService {
 
     clearPendingLogin(): void {
         this.pendingLoginData = null;
+    }
+
+    clearPendingVerify(): void {
+        this.pendingVerifyData = null;
     }
 
     async signUp(credentials: SignupForm): Promise<void> {
@@ -222,39 +226,41 @@ export class AuthService {
         this.notifyListeners();
     }
 
-    async verifyUser(userCredentials: LoginBody): Promise<PublicUser>{
+    async verifyUser(credentials: LoginBody): Promise<PublicUser> {
         const response = await fetch("/api/auth/verify", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(userCredentials),
+            body: JSON.stringify(credentials),
         });
 
         if (!response.ok) {
-            const errMsg = await response.text();
-            throw new Error(`Player registration failed: ${errMsg}`);
+            throw new Error("Login failed");
         }
 
-        const { user } = (await response.json()) as { user: PublicUser };
+        const data: LoginResponse = await response.json();
+        const user: PublicUser = data.user;
 
         if (user.twoFaEnabled) {
-            this.pendingVerifyData = { user };
+            this.pendingVerifyData = { token: data.token, user };
+            console.log(this.pendingVerifyData);
         }
 
         return user;
     }
-    
-    async complete2FAVerify(token: string): Promise<void> {
+
+    async complete2FAVerify(token: string): Promise<PublicUser> {
         if (!this.pendingVerifyData) {
             throw new Error("No pending login session");
         }
+        console.log(this.pendingVerifyData);
 
         const response = await fetch("/api/auth/2fa/verify", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${AuthStorage.getToken()}`,
+                Authorization: `Bearer ${this.pendingVerifyData.token}`,
             },
             body: JSON.stringify({ token }),
         });
@@ -264,6 +270,8 @@ export class AuthService {
             throw new Error(error.error || "Invalid 2FA code");
         }
 
+        const user: PublicUser = this.pendingVerifyData.user;
         this.pendingLoginData = null;
+        return user;
     }
 }

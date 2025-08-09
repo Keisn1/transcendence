@@ -1,6 +1,6 @@
 import { AuthService } from "../services/auth/auth.service.ts";
 import Router from "../router";
-import { type LoginBody, type SignupForm, type PublicUser} from "../types/auth.types.ts";
+import { type LoginBody, type SignupForm, type PublicUser } from "../types/auth.types.ts";
 
 export class AuthController {
     private static instance: AuthController;
@@ -66,13 +66,20 @@ export class AuthController {
         this.authService.clearPendingLogin();
     }
 
+    public clearPendingVerify(): void {
+        this.authService.clearPendingVerify();
+    }
+
     public async signUp(formData: SignupForm): Promise<void> {
         await this.authService.signUp(formData);
         this.router.navigateTo("/profile");
     }
 
     public async verifyUser(userCredentials: LoginBody): Promise<PublicUser> {
-        const user = await this.authService.verifyUser(userCredentials);
-        return user;
+        return await this.authService.verifyUser(userCredentials);
+    }
+
+    public async complete2FAVerify(token: string): Promise<PublicUser> {
+        return await this.authService.complete2FAVerify(token);
     }
 }

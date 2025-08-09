@@ -27,7 +27,7 @@ export async function login(request: FastifyRequest<{ Body: LoginBody }>, reply:
         if (request.url === "/api/auth/login") {
             token = request.server.jwt.sign(user, { expiresIn: "1h" });
         } else {
-            token = request.server.jwt.sign(user, { expiresIn: "1s" });
+            token = request.server.jwt.sign(user, { expiresIn: "60s" });
         }
         const response: LoginResponse = { token, user };
 

@@ -5,7 +5,7 @@ import { TournamentController } from "../../../controllers/tournament.controller
 import type { PublicUser } from "../../../types/auth.types.ts";
 import { v4 as uuidv4 } from "uuid";
 import { AuthController } from "../../../controllers/auth.controller.ts";
-import { TwoFactorVerification } from "../../twoFactorVerification/twoFactorVerification.ts"; 
+import { TwoFactorVerification } from "../../twoFactorVerification/twoFactorVerification.ts";
 
 export class TournamentCreationPanel extends BaseComponent {
     private tournamentForm: HTMLFormElement;
@@ -89,7 +89,7 @@ export class TournamentCreationPanel extends BaseComponent {
                 }
             }
 
-            if (this.registeredPlayers.some(p => p.id === user.id)) throw new Error("Player already registered");
+            if (this.registeredPlayers.some((p) => p.id === user.id)) throw new Error("Player already registered");
             this.registeredPlayers.push(user);
             slot.dataset.playerId = user.id;
             this.showMessage("User registered successfully");
@@ -102,32 +102,32 @@ export class TournamentCreationPanel extends BaseComponent {
     private show2FAVerification(): Promise<boolean> {
         return new Promise((resolve) => {
             try {
-            const verification = new TwoFactorVerification(
-                "Enter your 2FA code to complete login:",
-                async (token) => {
-                try {
-                    await AuthController.getInstance().complete2FALogin(token);
-                    verification.getContainer().remove();
-                    verification.destroy();
-                    resolve(true); // success
-                } catch (err) {
-                    // let TwoFactorVerification show the error, keep modal open
-                    console.error("2FA verify failed:", err);
-                }
-                },
-                () => {
-                // cancelled
-                AuthController.getInstance().clearPendingLogin();
-                verification.getContainer().remove();
-                verification.destroy();
-                resolve(false);
-                },
-            );
+                const verification = new TwoFactorVerification(
+                    "Enter your 2FA code to complete login:",
+                    async (token) => {
+                        try {
+                            await AuthController.getInstance().complete2FAVerify(token);
+                            verification.getContainer().remove();
+                            verification.destroy();
+                            resolve(true); // success
+                        } catch (err) {
+                            // let TwoFactorVerification show the error, keep modal open
+                            console.error("2FA verify failed:", err);
+                        }
+                    },
+                    () => {
+                        // cancelled
+                        AuthController.getInstance().clearPendingLogin();
+                        verification.getContainer().remove();
+                        verification.destroy();
+                        resolve(false);
+                    },
+                );
 
-            document.body.appendChild(verification.getContainer());
+                document.body.appendChild(verification.getContainer());
             } catch (err) {
-            console.error("error creating 2FA modal:", err);
-            resolve(false);
+                console.error("error creating 2FA modal:", err);
+                resolve(false);
             }
         });
     }
