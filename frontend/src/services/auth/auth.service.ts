@@ -1,3 +1,4 @@
+// import { TwoFactorSetup } from "../../components/twoFactorSetup/twoFactorSetup";
 import type {
     PublicUser,
     LoginResponse,
@@ -10,6 +11,7 @@ import { AuthStorage } from "./auth.storage";
 
 export class AuthService {
     private pendingLoginData: { token: string; user: PublicUser } | null = null;
+    private pendingVerifyData: { user: PublicUser } | null = null;
     private static instance: AuthService;
     private currentUser: PublicUser | null = null;
     private listeners: ((user: PublicUser | null) => void)[] = [];
@@ -225,7 +227,6 @@ export class AuthService {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${AuthStorage.getToken()}`,
             },
             body: JSON.stringify(userCredentials),
         });
@@ -236,6 +237,33 @@ export class AuthService {
         }
 
         const { user } = (await response.json()) as { user: PublicUser };
+
+        if (user.twoFaEnabled) {
+            this.pendingVerifyData = { user };
+        }
+
         return user;
+    }
+    
+    async complete2FAVerify(token: string): Promise<void> {
+        if (!this.pendingVerifyData) {
+            throw new Error("No pending login session");
+        }
+
+        const response = await fetch("/api/auth/2fa/verify", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${AuthStorage.getToken()}`,
+            },
+            body: JSON.stringify({ token }),
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || "Invalid 2FA code");
+        }
+
+        this.pendingLoginData = null;
     }
 }

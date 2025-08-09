@@ -129,8 +129,8 @@ export class GameComponent extends BaseComponent {
             const duration = Date.now() - this.gameStartTime;
 
             const gameResultBody = {
-                player1Username: user?.username || "Player 1",
-                player2Username: this.getPlayer2Name(),
+                player1Id: user?.username || "Player 1",
+                player2Id: this.getPlayer2Name(),
                 player1Score: result.player1Score,
                 player2Score: result.player2Score,
                 gameMode: this.getGameModeString(),
