@@ -10,8 +10,13 @@ import { MatchService, type MatchBody } from "../../services/match/match.service
 import { AuthService } from "../../services/auth/auth.service";
 import { PlayersDisplay } from "../playersDisplay/playersDisplay.ts";
 import { v4 as uuidv4 } from "uuid";
+import type { PublicUser } from "../../types/auth.types.ts";
 
 type ControlsConstructor = (new () => GameControlsComponent) | (new () => GameControlsTournamentComponent);
+
+interface GameComponentOptions {
+    tournamentPlayers?: { player1: PublicUser; player2: PublicUser };
+}
 
 export class GameComponent extends BaseComponent {
     private canvas: HTMLCanvasElement;
@@ -23,9 +28,11 @@ export class GameComponent extends BaseComponent {
     private authService: AuthService;
     private currentGameMode: AiLevel = "none";
     private gameStartTime: number = 0;
+    private options: GameComponentOptions;
 
-    constructor(ControlsClass: ControlsConstructor) {
+    constructor(ControlsClass: ControlsConstructor, options: GameComponentOptions = {}) {
         super("div", "game-container");
+        this.options = options;
 
         this.container.innerHTML = gameTemplate;
         this.canvas = this.container.querySelector("#canvas")!;
@@ -38,7 +45,7 @@ export class GameComponent extends BaseComponent {
         this.gameControls.addToStartCallbacks(this.startCallback);
         this.container.appendChild(this.gameControls.getContainer());
 
-        this.playersDisplay = new PlayersDisplay(this.canvas.width);
+        this.playersDisplay = new PlayersDisplay(this.canvas.width, this.options.tournamentPlayers);
         const playersDisplayContainer = this.container.querySelector("#players-display")!;
         playersDisplayContainer.appendChild(this.playersDisplay.getContainer());
     }
@@ -49,7 +56,11 @@ export class GameComponent extends BaseComponent {
         ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         this.currentGameMode = level || "none";
-        this.playersDisplay.updateGameMode(this.currentGameMode);
+
+        if (!this.options.tournamentPlayers) {
+            this.playersDisplay.updateGameMode(this.currentGameMode);
+        }
+
         this.gameStartTime = Date.now();
 
         this.game = new PongGame(this.canvas, {}, this.onGameFinish);
@@ -126,6 +137,7 @@ export class GameComponent extends BaseComponent {
     destroy() {
         super.destroy();
         this.gameControls.removeFromStartCallbacks(this.startCallback);
+        this.playersDisplay.destroy();
         this.game.destroy();
         document.getElementById("game-container")?.remove();
     }

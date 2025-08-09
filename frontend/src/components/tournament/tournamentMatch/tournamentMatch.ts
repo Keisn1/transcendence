@@ -12,7 +12,18 @@ export class TournamentMatchComponent extends BaseComponent {
     constructor() {
         super("div", "tournament-container");
         this.tournamentController = TournamentController.getInstance();
-        this.gameComponent = new GameComponent(GameControlsTournamentComponent);
+
+        // Get current match players
+        const tournament = this.tournamentController.getTournament();
+        const currentMatch = tournament.matches[tournament.nextMatchIdx];
+
+        this.gameComponent = new GameComponent(GameControlsTournamentComponent, {
+            tournamentPlayers: {
+                player1: currentMatch.player1,
+                player2: currentMatch.player2,
+            },
+        });
+
         this.exitBtn = new ExitBtn();
 
         this.container.appendChild(this.gameComponent.getContainer());

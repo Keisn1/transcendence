@@ -2,17 +2,22 @@ import { BaseComponent } from "../BaseComponent";
 import playersDisplayTemplate from "./playersDisplay.html?raw";
 import { AuthService } from "../../services/auth/auth.service";
 import { type AiLevel } from "../../game/game";
+import type { PublicUser } from "../../types/auth.types";
 
 export class PlayersDisplay extends BaseComponent {
     private authService: AuthService;
     private canvasWidth: number;
 
-    constructor(canvasWidth: number) {
+    constructor(canvasWidth: number, tournamentPlayers?: { player1: PublicUser; player2: PublicUser }) {
         super("div", "players-display", "mb-6");
         this.authService = AuthService.getInstance();
         this.canvasWidth = canvasWidth;
 
-        this.render("none");
+        if (tournamentPlayers) {
+            this.renderTournament(tournamentPlayers);
+        } else {
+            this.render("none");
+        }
     }
 
     private render(gameMode: AiLevel) {
@@ -23,6 +28,21 @@ export class PlayersDisplay extends BaseComponent {
             .replace("{{canvasWidth}}", this.canvasWidth.toString())
             .replace("{{player1Name}}", user?.username || "Player 1")
             .replace("{{player1Avatar}}", user?.avatar || "/uploads/default-pfp.png")
+            .replace("{{player2Content}}", player2Content);
+    }
+
+    private renderTournament(players: { player1: PublicUser; player2: PublicUser }) {
+        const player2Content = `
+            <img src="${players.player2.avatar}"
+                 alt="${players.player2.username}"
+                 class="w-12 h-12 rounded-full border-2 border-white">
+            <span class="font-semibold text-lg">${players.player2.username}</span>
+        `;
+
+        this.container.innerHTML = playersDisplayTemplate
+            .replace("{{canvasWidth}}", this.canvasWidth.toString())
+            .replace("{{player1Name}}", players.player1.username)
+            .replace("{{player1Avatar}}", players.player1.avatar)
             .replace("{{player2Content}}", player2Content);
     }
 
