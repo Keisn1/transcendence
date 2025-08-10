@@ -2,11 +2,9 @@ import { FastifyRequest, FastifyReply } from "fastify";
 import { MatchBody } from "../types/match.types";
 import { v4 as uuidv4 } from "uuid";
 
-export async function recordMatch(
-    request: FastifyRequest<{ Body: MatchBody }>,
-    reply: FastifyReply,
-): Promise<void> {
+export async function recordMatch(request: FastifyRequest<{ Body: MatchBody }>, reply: FastifyReply): Promise<void> {
     const body = request.body;
+    console.log(body);
 
     if (
         !body ||
@@ -20,6 +18,7 @@ export async function recordMatch(
     }
 
     try {
+        const matchId = uuidv4();
         await request.server.db.run(
             `INSERT INTO matches
              (id, player1Id, player2Id, player1Score, player2Score, gameMode, duration)
@@ -35,7 +34,7 @@ export async function recordMatch(
             ],
         );
 
-        return reply.status(201);
+        return reply.status(201).send({ id: matchId, message: "Match recorded successfully" });
     } catch (err) {
         const error = err as Error;
         console.error("Save match error:", error);
@@ -50,7 +49,7 @@ export async function recordMatch(
 
 export async function getMatchById(
     request: FastifyRequest<{ Params: { id: string } }>,
-    reply: FastifyReply
+    reply: FastifyReply,
 ): Promise<void> {
     const { id } = request.params;
     try {
@@ -69,7 +68,6 @@ export const recordMatchSchema = {
     body: {
         type: "object",
         properties: {
-            id: { type: "string", format: "uuid" },
             player1Id: { type: "string" },
             player2Id: { type: "string" },
             player1Score: { type: "number" },

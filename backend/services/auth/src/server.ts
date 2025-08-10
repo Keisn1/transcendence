@@ -28,7 +28,6 @@ if (process.env.ENV === "production") {
         vault.token = result.auth.client_token;
     };
 
-
     const start = async () => {
         try {
             await loginWithAppRole();
@@ -61,7 +60,7 @@ if (process.env.ENV === "production") {
     server.register(dbPlugin);
     server.register(routes, { prefix: "api" });
     server.register(gdprPlugin, { prefix: "api" });
-    server.listen({ port: 3000 }, (err, address) => {
+    server.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
         if (err) {
             console.error(err);
             process.exit(1);

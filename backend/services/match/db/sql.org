@@ -1,5 +1,5 @@
 :PROPERTIES:
-:header-args:sqlite: :db auth.db :header yes
+:header-args:sqlite: :db match.db :header yes
 :END:
 #+title: Sql
 
@@ -11,12 +11,10 @@
 #+RESULTS:
 : schema_migrations  users
 
-* Users
-** get all users
+* Matches
+** get all Matches
 #+begin_src sqlite
-SELECT * FROM users;
+SELECT * FROM matches;
 #+end_src
 
 #+RESULTS:
-| id                                   | username | email   | password_hash                                                | avatar                   | twofa_secret                                         | created_at          | updated_at          | twofa_enabled |
-| 47514a87-b33c-49f6-b228-46eb77e233d6 | k        | k@x.com | $2b$10$DszW0jdauEFY2Uh3QspdN.wEp8bpFn2s6K7poTQp24sECa8RpT5Ru | /uploads/default-pfp.png | FEXUS2Z7PVGHOJLENNATY3CVPBEEYS2ELZKGI4KFOQ4XEZC3EFYQ | 2025-08-08 11:51:55 | 2025-08-08 11:52:22 |             1 |

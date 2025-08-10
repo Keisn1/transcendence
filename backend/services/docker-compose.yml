@@ -1,4 +1,28 @@
 services:
+  auth-service:
+    build:
+      context: ./auth
+      dockerfile: Dockerfile.dev # Use dev dockerfile
+    container_name: auth-service
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./auth:/app
+      - /app/node_modules # Prevent overwriting
+    command: npm run dev
+
+  match-service:
+    build:
+      context: ./match
+      dockerfile: Dockerfile.dev # Use dev dockerfile
+    container_name: match-service
+    ports:
+      - "3002:3002"
+    volumes:
+      - ./match:/app
+      - /app/node_modules # Prevent overwriting
+    command: npm run dev
+
   file-service:
     build:
       context: ./file

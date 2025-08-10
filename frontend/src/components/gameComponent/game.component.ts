@@ -6,10 +6,11 @@ import { type MatchResult } from "../../types/tournament.types";
 import { GameControlsComponent } from "../gameControls/gameControlsGame/gameControls";
 import { GameControlsTournamentComponent } from "../gameControls/gameControlsTournament/gameControlsTournament";
 import type IGameControls from "../gameControls/IGameControls";
-import { MatchService, type MatchBody } from "../../services/match/match.service";
+import { MatchService } from "../../services/match/match.service";
 import { AuthService } from "../../services/auth/auth.service";
 import { PlayersDisplay } from "../playersDisplay/playersDisplay.ts";
 import type { PublicUser } from "../../types/auth.types.ts";
+import type { MatchBody } from "../../types/match.types.ts";
 
 type ControlsConstructor = (new () => GameControlsComponent) | (new () => GameControlsTournamentComponent);
 
@@ -112,9 +113,9 @@ export class GameComponent extends BaseComponent {
             };
 
             await this.matchService.saveMatch(matchBody);
-            console.log("Game result saved successfully");
+            console.log("Match result saved successfully");
         } catch (error) {
-            console.error("Failed to save game result:", error);
+            console.error("Failed to save match result:", error);
         }
     }
 
