@@ -2,15 +2,15 @@ import gameTemplate from "./game.html?raw";
 import { PongGame } from "../../game/game";
 import { BaseComponent } from "../BaseComponent";
 import { type AiLevel } from "../../game/game";
-import { type MatchResult } from "../../types/tournament.types";
+import { type MatchResult } from "../../types/match.types.ts";
 import { GameControlsComponent } from "../gameControls/gameControlsGame/gameControls";
 import { GameControlsTournamentComponent } from "../gameControls/gameControlsTournament/gameControlsTournament";
 import type IGameControls from "../gameControls/IGameControls";
-import { MatchService, type MatchBody } from "../../services/match/match.service";
+import { MatchService } from "../../services/match/match.service";
 import { AuthService } from "../../services/auth/auth.service";
 import { PlayersDisplay } from "../playersDisplay/playersDisplay.ts";
-import { v4 as uuidv4 } from "uuid";
 import type { PublicUser } from "../../types/auth.types.ts";
+import type { MatchBody } from "../../types/match.types.ts";
 
 type ControlsConstructor = (new () => GameControlsComponent) | (new () => GameControlsTournamentComponent);
 
@@ -104,7 +104,6 @@ export class GameComponent extends BaseComponent {
             const duration = Date.now() - this.gameStartTime;
 
             const matchBody: MatchBody = {
-                id: uuidv4(),
                 player1Id: user!.id,
                 player2Id: this.getPlayer2Name(),
                 player1Score: result.player1Score,
@@ -113,10 +112,15 @@ export class GameComponent extends BaseComponent {
                 duration,
             };
 
+            if (this.options.tournamentPlayers) {
+                matchBody.player1Id = this.options.tournamentPlayers.player1.id;
+                matchBody.player2Id = this.options.tournamentPlayers.player2.id;
+            }
+
             await this.matchService.saveMatch(matchBody);
-            console.log("Game result saved successfully");
+            console.log("Match result saved successfully");
         } catch (error) {
-            console.error("Failed to save game result:", error);
+            console.error("Failed to save match result:", error);
         }
     }
 

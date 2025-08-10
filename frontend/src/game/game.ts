@@ -2,7 +2,7 @@ import { Ball, type BallConfig } from "./ball";
 import { Paddle, type Paddles, type PaddleConfig } from "./paddle";
 import { InputManager } from "./inputManager";
 import { AiController } from "./aiController";
-import { type MatchResult } from "../types/tournament.types";
+import { type MatchResult } from "../types/match.types";
 
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 

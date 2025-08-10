@@ -1,14 +1,5 @@
 import { AuthStorage } from "../auth/auth.storage";
-
-export interface MatchBody {
-    id: string;
-    player1Id: string;
-    player2Id: string;
-    player1Score: number;
-    player2Score: number;
-    gameMode: "pvp" | "ai-easy" | "ai-hard";
-    duration?: number;
-}
+import { type MatchBody } from "../../types/match.types";
 
 export class MatchService {
     private static instance: MatchService;
@@ -23,6 +14,7 @@ export class MatchService {
     }
 
     async saveMatch(match: MatchBody): Promise<void> {
+        console.log(match);
         const response = await fetch("/api/match", {
             method: "POST",
             headers: {
