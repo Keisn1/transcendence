@@ -110,14 +110,15 @@ export class TournamentCreationPanel extends BaseComponent {
                             verification.getContainer().remove();
                             verification.destroy();
                             resolve(true); // success
-                        } catch (err) {
+                        } catch (error) {
                             // let TwoFactorVerification show the error, keep modal open
-                            console.error("2FA verify failed:", err);
+                            console.error("2FA verify failed:", error);
+                            throw error; // Let TwoFactorVerification handle error display
                         }
                     },
                     () => {
                         // cancelled
-                        AuthController.getInstance().clearPendingLogin();
+                        AuthController.getInstance().clearPendingVerify();
                         verification.getContainer().remove();
                         verification.destroy();
                         resolve(false);

@@ -21,3 +21,5 @@
 - [ ] grey line on tournamentCreationPanel
 
 - [ ] proper return schema for postMatch
+- [X] bug: once 2fa is verified with wrong code, it is not working anymore (at least in tournament)
+  - in login view it seems to work
