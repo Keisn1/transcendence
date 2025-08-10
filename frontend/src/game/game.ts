@@ -24,8 +24,6 @@ export interface GameConfig {
 
 export type AiLevel = "none" | "easy" | "hard";
 
-// export type Winner = "player1" | "player2" | "none";
-
 export class PongGame {
     private inputManager: InputManager;
     private canvas: HTMLCanvasElement;

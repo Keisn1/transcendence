@@ -1,5 +1,6 @@
 import { AuthStorage } from "../auth/auth.storage";
-import { type MatchBody } from "../../types/match.types";
+import { type GetMatchResponse, type MatchBody } from "../../types/match.types";
+import { AuthService } from "../auth/auth.service";
 
 export class MatchService {
     private static instance: MatchService;
@@ -28,5 +29,22 @@ export class MatchService {
             const errMsg = await response.text();
             throw new Error(`Failed to save match result: ${errMsg}`);
         }
+    }
+
+    async getUserMatches(): Promise<GetMatchResponse[]> {
+        const userId = AuthService.getInstance().getCurrentUser()?.id;
+        if (!userId) throw new Error("User not authenticated");
+
+        const response = await fetch(`/api/match/user/${userId}`, {
+            headers: {
+                Authorization: `Bearer ${AuthStorage.getToken()}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch matches");
+        }
+
+        return response.json();
     }
 }

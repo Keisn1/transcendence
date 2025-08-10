@@ -66,6 +66,56 @@ export async function getMatchById(
     }
 }
 
+export async function getUserMatches(
+    request: FastifyRequest<{ Params: { userId: string } }>,
+    reply: FastifyReply,
+): Promise<GetMatchResponse[]> {
+    const { userId } = request.params;
+
+    try {
+        const matches = await request.server.db.query(
+            `SELECT * FROM matches
+             WHERE player1Id = ? OR player2Id = ?
+             ORDER BY created_at DESC`,
+            [userId, userId],
+        );
+
+        return reply.status(200).send(matches);
+    } catch (error) {
+        console.error("Failed to fetch user matches:", error);
+        return reply.status(500).send({ error: "Failed to fetch matches" });
+    }
+}
+
+export const getUserMatchesSchema = {
+    params: {
+        type: "object",
+        properties: {
+            userId: { type: "string", format: "uuid" },
+        },
+        required: ["userId"],
+    },
+    response: {
+        200: {
+            type: "array",
+            items: {
+                type: "object",
+                properties: {
+                    id: { type: "string", format: "uuid" },
+                    player1Id: { type: "string", format: "uuid" },
+                    player2Id: { type: "string", format: "uuid" },
+                    player1Score: { type: "number" },
+                    player2Score: { type: "number" },
+                    gameMode: { type: "string" },
+                    duration: { type: "number" },
+                    created_at: { type: "string" },
+                },
+                required: ["id", "player1Id", "player2Id", "player1Score", "player2Score", "gameMode", "created_at"],
+            },
+        },
+    },
+} as const;
+
 export const postMatchSchema = {
     body: {
         type: "object",
