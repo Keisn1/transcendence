@@ -1,10 +1,10 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { MatchBody } from "../types/match.types";
+import { PostMatchBody } from "../types/match.types";
 import { v4 as uuidv4 } from "uuid";
+import { GetMatchResponse } from "../types/match.types";
 
-export async function postMatch(request: FastifyRequest<{ Body: MatchBody }>, reply: FastifyReply): Promise<void> {
+export async function postMatch(request: FastifyRequest<{ Body: PostMatchBody }>, reply: FastifyReply): Promise<void> {
     const body = request.body;
-    console.log(body);
 
     if (
         !body ||
@@ -24,7 +24,7 @@ export async function postMatch(request: FastifyRequest<{ Body: MatchBody }>, re
              (id, player1Id, player2Id, player1Score, player2Score, gameMode, duration)
              VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [
-                uuidv4(),
+                matchId,
                 body.player1Id,
                 body.player2Id,
                 body.player1Score,
@@ -50,14 +50,16 @@ export async function postMatch(request: FastifyRequest<{ Body: MatchBody }>, re
 export async function getMatchById(
     request: FastifyRequest<{ Params: { id: string } }>,
     reply: FastifyReply,
-): Promise<void> {
+): Promise<GetMatchResponse> {
     const { id } = request.params;
     try {
-        const match = await request.server.db.query(`SELECT * FROM matches WHERE id = ?`, [id]);
-        if (!match) {
+        const response = await request.server.db.query(`SELECT * FROM matches WHERE id = ?`, [id]);
+        if (!response.length) {
             return reply.status(404).send({ error: "Match not found" });
         }
-        return reply.send(match);
+        console.log(response[0]);
+        const matchResponse: GetMatchResponse = response[0];
+        return reply.status(200).send(matchResponse);
     } catch (error) {
         console.error("Failed to fetch match:", error);
         return reply.status(500).send({ error: "Internal server error" });
@@ -68,8 +70,8 @@ export const postMatchSchema = {
     body: {
         type: "object",
         properties: {
-            player1Id: { type: "string" },
-            player2Id: { type: "string" },
+            player1Id: { type: "string", format: "uuid" },
+            player2Id: { type: "string", format: "uuid" },
             player1Score: { type: "number" },
             player2Score: { type: "number" },
             gameMode: { type: "string", enum: ["pvp", "ai-easy", "ai-hard"] },
@@ -78,6 +80,16 @@ export const postMatchSchema = {
         required: ["player1Id", "player2Id", "player1Score", "player2Score", "gameMode"],
         additionalProperties: false,
     },
+    response: {
+        201: {
+            type: "object",
+            properties: {
+                id: { type: "string", format: "uuid" },
+                message: { type: "string" },
+            },
+            required: ["id", "message"],
+        },
+    },
 } as const;
 
 export const getMatchSchema = {
@@ -85,5 +97,30 @@ export const getMatchSchema = {
         type: "object",
         properties: { id: { type: "string", format: "uuid" } },
         required: ["id"],
+    },
+    response: {
+        200: {
+            type: "object",
+            properties: {
+                id: { type: "string", format: "uuid" },
+                player1Id: { type: "string", format: "uuid" },
+                player2Id: { type: "string", format: "uuid" },
+                player1Score: { type: "number" },
+                player2Score: { type: "number" },
+                gameMode: { type: "string" },
+                duration: { type: "number" },
+                created_at: { type: "string", format: "timestamp" },
+            },
+            required: [
+                "id",
+                "player1Id",
+                "player2Id",
+                "player1Score",
+                "player2Score",
+                "gameMode",
+                "duration",
+                "created_at",
+            ],
+        },
     },
 } as const;

@@ -13,18 +13,26 @@
 - [X] implement disable-2fa verification
 - [X] make better updateProfile (everything)
 
-- [ ] implement "api/auth/verify" (something like that)
-  - [ ] this is for the tournament
-  - [ ] also will use 2fa
+- [X] implement "api/auth/verify" (something like that)
+  - [X] this is for the tournament
+  - [X] also will use 2fa
 
-- [ ] change prefix for updateProfile
-- [ ] grey line on tournamentCreationPanel
-
+- [X] change prefix for updateProfile
 - [X] bug: once 2fa is verified with wrong code, it is not working anymore (at least in tournament)
   - in login view it seems to work
-- [ ] proper return schema for postMatch
+- [X] have craetedAt timestamp at match
+- [X] proper return schema for postMatch
 - [ ] make email and username changeable in profile
+
 - [ ] add statistics in profile
 - [ ] add match history view
   - [ ] make the matchHistory link visible in profile
   - [ ] when clicking on a user in matchView or tournamentView or in the matchHistoryView, it should lead to the match history of that user
+- [ ] grey line on tournamentCreationPanel
+- [ ] treating the security hole that a logged in user can actually post a tournament with any valid uuids
+  - [ ] need to check if the users exist
+  - [ ] need to have some token verification
+    - maybe soomething like
+      #+begin_src typescript
+        const token = request.server.jwt.sign({userId: asdf, verified: true}, { expiresIn: "5min" });
+      #+end_src
