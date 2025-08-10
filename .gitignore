@@ -21,3 +21,4 @@
 !/backend/services/file/uploads/default-pfp.png
 /backend/services/auth/db/*
 !/backend/services/auth/db/sql.org
+/backend/services/match/db/match.db

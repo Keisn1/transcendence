@@ -35,6 +35,11 @@ export default defineConfig({
                 changeOrigin: true,
                 secure: false,
             },
+            "/api/tournament": {
+                target: "http://localhost:3002",
+                changeOrigin: true,
+                secure: false,
+            },
         },
     },
 });

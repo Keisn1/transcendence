@@ -9,7 +9,7 @@
 #+end_src
 
 #+RESULTS:
-: schema_migrations  users
+: matches            schema_migrations
 
 * Matches
 ** get all Matches
@@ -18,3 +18,92 @@ SELECT * FROM matches;
 #+end_src
 
 #+RESULTS:
+| id                                   | player1Id                            | player2Id                            | player1Score | player2Score | gameMode | duration |
+| b4286d4a-b923-40d9-b1c8-44a3503176bc | d3541b13-c938-4e29-aaf3-f1bd83e907eb | unknown                              |            5 |            2 | pvp      |    12896 |
+| d345db25-40c4-4448-bb83-6642a9bed101 | d3541b13-c938-4e29-aaf3-f1bd83e907eb | unknown                              |            3 |            5 | pvp      |    14312 |
+| efd25027-c7a2-4583-9895-bca8ae901bc3 | d3541b13-c938-4e29-aaf3-f1bd83e907eb | aiEasy                               |            0 |            5 | ai-easy  |    22311 |
+| a1e7805f-84af-4357-912f-b9b39a16f821 | d3541b13-c938-4e29-aaf3-f1bd83e907eb | unknown                              |            5 |            4 | pvp      |    14282 |
+| affe92eb-92ee-42eb-8d6f-31250b1de378 | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | unknown                              |            1 |            5 | pvp      |    15829 |
+| 411aaabf-4ea2-45ec-bc46-9898d3213f13 | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | unknown                              |            2 |            5 | pvp      |    14394 |
+| 94d8996b-af03-4db4-be08-814f63eccea4 | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | unknown                              |            1 |            5 | pvp      |    12628 |
+| d39421ec-2050-4097-af59-3c6b7f55b694 | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | unknown                              |            1 |            5 | pvp      |    12628 |
+| ace5d607-dfe6-4f5c-b56e-6141ce083202 | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | unknown                              |            1 |            5 | pvp      |    12628 |
+| c84f50ad-3472-4bda-a90f-126e8885d252 | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | unknown                              |            3 |            5 | pvp      |    14448 |
+| 65e3d598-997d-439a-bd0e-57fd5cb854d9 | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | aiEasy                               |            0 |            5 | ai-easy  |    16502 |
+| d0032364-4ecb-485b-9c7c-da2df77d46fd | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | aiHard                               |            0 |            5 | ai-hard  |    19791 |
+| 6c0cec42-5d75-4178-90bd-29af6b6531d1 | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | unknown                              |            0 |            5 | pvp      |    12580 |
+| 8fbd90ed-d1f1-4186-ae4b-2f1a7ef547dd | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | unknown                              |            5 |            3 | pvp      |    19938 |
+| 29c00d73-f658-4600-b971-5c17ef25cb94 | f13e547b-9c63-4e97-b8dc-366550d49717 | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 |            2 |            5 | pvp      |    14530 |
+
+** get match by userId
+* Tournaments
+** get all tournaments
+#+begin_src sqlite
+SELECT * FROM tournaments;
+#+end_src
+
+#+RESULTS:
+| id                                   | name | player_count | status  | created_at          |
+| 89f4e71e-7e8a-4c78-8b6a-1e05b51a626a |      |            2 | pending | 2025-08-10 11:34:30 |
+| c68cb18a-cfbe-42ed-b32b-637632a689ff |      |            2 | pending | 2025-08-10 11:55:51 |
+
+** get all tournaments_participants
+
+#+begin_src sqlite
+SELECT * FROM tournament_participants;
+#+end_src
+
+#+RESULTS:
+| tournament_id                        | player_id                            |
+| 89f4e71e-7e8a-4c78-8b6a-1e05b51a626a | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 |
+| 89f4e71e-7e8a-4c78-8b6a-1e05b51a626a | f13e547b-9c63-4e97-b8dc-366550d49717 |
+| c68cb18a-cfbe-42ed-b32b-637632a689ff | f13e547b-9c63-4e97-b8dc-366550d49717 |
+| c68cb18a-cfbe-42ed-b32b-637632a689ff | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 |
+
+** get participants of the tournament
+#+begin_src sqlite
+SELECT player_id
+FROM tournament_participants
+WHERE tournament_id = 'c68cb18a-cfbe-42ed-b32b-637632a689ff'
+#+end_src
+
+#+RESULTS:
+| player_id                            |
+| 36a67ec1-cd9b-4f9d-974a-807051e1dab8 |
+| f13e547b-9c63-4e97-b8dc-366550d49717 |
+
+*** more difficult query
+#+begin_src sqlite
+SELECT
+    tournament_id,
+    MAX(CASE WHEN rn = 1 THEN player_id END) as player_id1,
+    MAX(CASE WHEN rn = 2 THEN player_id END) as player_id2,
+    MAX(CASE WHEN rn = 3 THEN player_id END) as player_id3,
+    MAX(CASE WHEN rn = 4 THEN player_id END) as player_id4
+FROM (
+    SELECT
+        tournament_id,
+        player_id,
+        ROW_NUMBER() OVER (PARTITION BY tournament_id ORDER BY player_id) as rn
+    FROM tournament_participants
+) ranked
+GROUP BY tournament_id;
+#+end_src
+
+#+RESULTS:
+| tournament_id                        | player_id1                           | player_id2                           | player_id3 | player_id4 |
+| 89f4e71e-7e8a-4c78-8b6a-1e05b51a626a | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | f13e547b-9c63-4e97-b8dc-366550d49717 |            |            |
+
+**** inner query
+#+begin_src sqlite
+SELECT 
+       tournament_id, 
+       player_id,
+       ROW_NUMBER() OVER (PARTITION BY tournament_id ORDER BY player_id) as rn
+FROM tournament_participants
+#+end_src
+
+#+RESULTS:
+| tournament_id                        | player_id                            | rn |
+| 89f4e71e-7e8a-4c78-8b6a-1e05b51a626a | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 |  1 |
+| 89f4e71e-7e8a-4c78-8b6a-1e05b51a626a | f13e547b-9c63-4e97-b8dc-366550d49717 |  2 |

@@ -1,5 +1,4 @@
 import "fastify";
-import { PublicUser } from "./match.types";
 
 declare module "fastify" {
     interface FastifyRequest {

@@ -2,7 +2,7 @@ import { FastifyRequest, FastifyReply } from "fastify";
 import { MatchBody } from "../types/match.types";
 import { v4 as uuidv4 } from "uuid";
 
-export async function recordMatch(request: FastifyRequest<{ Body: MatchBody }>, reply: FastifyReply): Promise<void> {
+export async function postMatch(request: FastifyRequest<{ Body: MatchBody }>, reply: FastifyReply): Promise<void> {
     const body = request.body;
     console.log(body);
 
@@ -64,7 +64,7 @@ export async function getMatchById(
     }
 }
 
-export const recordMatchSchema = {
+export const postMatchSchema = {
     body: {
         type: "object",
         properties: {

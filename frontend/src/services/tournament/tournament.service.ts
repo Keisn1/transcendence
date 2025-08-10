@@ -1,5 +1,5 @@
 import { Tournament } from "../../controllers/tournament.controller.ts";
-import { type TournamentBody } from "../../types/tournament.types.ts";
+import { type PostTournamentResponse, type PostTournamentBody } from "../../types/tournament.types.ts";
 import { AuthStorage } from "../auth/auth.storage.ts";
 
 export class TournamentService {
@@ -14,10 +14,9 @@ export class TournamentService {
         return TournamentService.instance;
     }
 
-    async createTournament(tournament: Tournament): Promise<void> {
-        const tournamentBody: TournamentBody = {
-            tournamentId: tournament.id,
-            playersId: tournament.players.map((player) => player.id),
+    async createTournament(tournament: Tournament): Promise<string> {
+        const tournamentBody: PostTournamentBody = {
+            playerIds: tournament.players.map((player) => player.id),
         };
 
         const response = await fetch("/api/tournament", {
@@ -33,5 +32,7 @@ export class TournamentService {
             const errMsg = await response.text();
             throw new Error(`Failed to save tournament: ${errMsg}`);
         }
+        const data: PostTournamentResponse = await response.json();
+        return data.id;
     }
 }
