@@ -20,7 +20,7 @@
 - [ ] change prefix for updateProfile
 - [ ] grey line on tournamentCreationPanel
 
-- [ ] bug: once 2fa is verified with wrong code, it is not working anymore (at least in tournament)
+- [X] bug: once 2fa is verified with wrong code, it is not working anymore (at least in tournament)
   - in login view it seems to work
 - [ ] proper return schema for postMatch
 - [ ] make email and username changeable in profile

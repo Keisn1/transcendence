@@ -2,7 +2,7 @@ import { FastifyInstance } from "fastify";
 import healthRoute from "./health";
 import { login, loginSchema } from "../controllers/login.controller";
 import register, { registerSchema } from "../controllers/register.controller";
-import updateProfile, { updateProfileSchema } from "../controllers/updateProfile.controller";
+import updateUser, { updateProfileSchema as updateUserSchema } from "../controllers/updateUser.controller";
 import getProfile, { getCurrentUserSchema } from "../controllers/getProfile.controller";
 
 import { complete2FASchema, disable2FA, verify2FA } from "../controllers/twofa.controller";
@@ -29,7 +29,7 @@ export async function routes(fastify: FastifyInstance) {
     );
     fastify.register(
         (fastify: FastifyInstance) => {
-            fastify.put("", { preHandler: fastify.jwtAuth, schema: updateProfileSchema }, updateProfile);
+            fastify.put("", { preHandler: fastify.jwtAuth, schema: updateUserSchema }, updateUser);
             fastify.get("/health", healthRoute);
         },
         { prefix: "user" },

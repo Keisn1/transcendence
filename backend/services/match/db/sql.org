@@ -34,6 +34,7 @@ SELECT * FROM matches;
 | 6c0cec42-5d75-4178-90bd-29af6b6531d1 | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | unknown                              |            0 |            5 | pvp      |    12580 |
 | 8fbd90ed-d1f1-4186-ae4b-2f1a7ef547dd | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | unknown                              |            5 |            3 | pvp      |    19938 |
 | 29c00d73-f658-4600-b971-5c17ef25cb94 | f13e547b-9c63-4e97-b8dc-366550d49717 | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 |            2 |            5 | pvp      |    14530 |
+| e1cff8e3-3563-4e5b-8bf9-e5c026edbec2 | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | f13e547b-9c63-4e97-b8dc-366550d49717 |            5 |            0 | pvp      |    11436 |
 
 ** get match by userId
 * Tournaments
