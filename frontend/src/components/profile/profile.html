@@ -4,16 +4,42 @@
       <div id="avatar-container"></div>
       <div class="flex-1">
         <h1 class="text-2xl font-bold text-gray-900">Profile Information</h1>
-        <div class="mt-4 space-y-3">
+
+        <!-- View Mode -->
+        <div id="view-mode" class="mt-4 space-y-3">
           <div>
             <label class="text-sm font-medium text-gray-500">Username</label>
             <p id="profile-username" class="text-lg text-gray-900">Loading...</p>
           </div>
-
           <div>
             <label class="text-sm font-medium text-gray-500">Email</label>
             <p id="profile-email" class="text-lg text-gray-900">Loading...</p>
           </div>
+          <button id="edit-profile-btn" class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+            Edit Profile
+          </button>
+        </div>
+
+        <!-- Edit Mode -->
+        <div id="edit-mode" class="mt-4 space-y-3 hidden">
+          <form id="profile-form">
+            <div>
+              <label class="text-sm font-medium text-gray-500">Username</label>
+              <input id="edit-username" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+            </div>
+            <div>
+              <label class="text-sm font-medium text-gray-500">Email</label>
+              <input id="edit-email" type="email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+            </div>
+            <div class="flex space-x-2 mt-4">
+              <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                Save Changes
+              </button>
+              <button type="button" id="cancel-edit-btn" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
+                Cancel
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

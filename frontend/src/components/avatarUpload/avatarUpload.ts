@@ -1,22 +1,21 @@
 import { BaseComponent } from "../BaseComponent";
 import { AuthService } from "../../services/auth/auth.service";
-import { ProfileService } from "../../services/profile/profile.service";
 import avatarUploadTemplate from "./avatarUpload.html?raw";
 import { AuthStorage } from "../../services/auth/auth.storage";
 
 export class AvatarUpload extends BaseComponent {
     private authService: AuthService;
-    private profileService: ProfileService;
     private onAvatarChange?: (avatarUrl: string) => void;
+    private editModeOnly: boolean = false;
 
     private fileInput!: HTMLInputElement;
     private preview!: HTMLImageElement;
 
-    constructor(onAvatarChange?: (avatarUrl: string) => void) {
+    constructor(onAvatarChange?: (avatarUrl: string) => void, editModeOnly: boolean = false) {
         super("div", "avatar-upload", "flex flex-col items-center space-y-4");
 
+        this.editModeOnly = editModeOnly;
         this.authService = AuthService.getInstance();
-        this.profileService = ProfileService.getInstance();
         this.onAvatarChange = onAvatarChange;
 
         this.container.innerHTML = avatarUploadTemplate;
@@ -32,6 +31,13 @@ export class AvatarUpload extends BaseComponent {
 
     private setupEvents() {
         this.addEventListenerWithCleanup(this.fileInput, "change", (e) => {
+            if (this.editModeOnly) {
+                const editMode = document.querySelector("#edit-mode");
+                if (editMode?.classList.contains("hidden")) {
+                    return; // Don't allow upload in view mode
+                }
+            }
+
             const file = (e.target as HTMLInputElement).files?.[0];
             if (file) {
                 // Preview immediately
@@ -67,8 +73,8 @@ export class AvatarUpload extends BaseComponent {
 
             const data = await response.json();
 
-            // Step 2: Update profile with new avatar URL
-            await this.profileService.updateProfile({ avatar: data.url });
+            // // Step 2: Update profile with new avatar URL
+            // await this.profileService.updateProfile({ avatar: data.url });
 
             // Notify parent component
             if (this.onAvatarChange) {
