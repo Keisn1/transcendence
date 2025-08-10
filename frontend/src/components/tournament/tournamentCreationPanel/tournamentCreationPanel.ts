@@ -125,7 +125,7 @@ export class TournamentCreationPanel extends BaseComponent {
                     },
                 );
 
-                document.body.appendChild(verification.getContainer());
+                this.container.appendChild(verification.getContainer());
             } catch (err) {
                 console.error("error creating 2FA modal:", err);
                 resolve(false);

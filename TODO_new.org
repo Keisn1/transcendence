@@ -20,6 +20,11 @@
 - [ ] change prefix for updateProfile
 - [ ] grey line on tournamentCreationPanel
 
-- [ ] proper return schema for postMatch
-- [X] bug: once 2fa is verified with wrong code, it is not working anymore (at least in tournament)
+- [ ] bug: once 2fa is verified with wrong code, it is not working anymore (at least in tournament)
   - in login view it seems to work
+- [ ] proper return schema for postMatch
+- [ ] make email and username changeable in profile
+- [ ] add statistics in profile
+- [ ] add match history view
+  - [ ] make the matchHistory link visible in profile
+  - [ ] when clicking on a user in matchView or tournamentView or in the matchHistoryView, it should lead to the match history of that user
