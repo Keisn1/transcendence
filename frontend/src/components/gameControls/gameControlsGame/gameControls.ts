@@ -32,7 +32,7 @@ export class GameControlsComponent extends BaseComponent implements IGameControl
     }
 
     addToStartCallbacks(fn: (mode: GameMode) => void) {
-        this.startCallbacks.push((level) => fn(level));
+        this.startCallbacks.push((mode) => fn(mode));
     }
 
     removeFromStartCallbacks(fn: (mode: GameMode) => void) {

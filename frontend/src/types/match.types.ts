@@ -1,4 +1,5 @@
 import { type PublicUser } from "./auth.types";
+import type { GameMode } from "./game.types";
 
 export interface Match {
     matchId: string;
@@ -17,7 +18,7 @@ export interface PostMatchBody {
     player2Id: string;
     player1Score: number;
     player2Score: number;
-    gameMode: "pvp" | "ai-easy" | "ai-hard";
+    gameMode: GameMode;
     duration?: number;
 }
 
@@ -27,7 +28,7 @@ export interface GetMatchResponse {
     player2Id: string;
     player1Score: number;
     player2Score: number;
-    gameMode: "pvp" | "ai-easy" | "ai-hard";
+    gameMode: GameMode;
     duration?: number;
     created_at: string;
 }

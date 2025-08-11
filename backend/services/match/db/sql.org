@@ -18,30 +18,15 @@ SELECT * FROM matches;
 #+end_src
 
 #+RESULTS:
-| id                                   | player1Id                            | player2Id                            | player1Score | player2Score | gameMode | duration | created_at          |
-| b4286d4a-b923-40d9-b1c8-44a3503176bc | d3541b13-c938-4e29-aaf3-f1bd83e907eb | unknown                              |            5 |            2 | pvp      |    12896 | 2025-08-10 13:22:04 |
-| d345db25-40c4-4448-bb83-6642a9bed101 | d3541b13-c938-4e29-aaf3-f1bd83e907eb | unknown                              |            3 |            5 | pvp      |    14312 | 2025-08-10 13:22:04 |
-| efd25027-c7a2-4583-9895-bca8ae901bc3 | d3541b13-c938-4e29-aaf3-f1bd83e907eb | aiEasy                               |            0 |            5 | ai-easy  |    22311 | 2025-08-10 13:22:04 |
-| a1e7805f-84af-4357-912f-b9b39a16f821 | d3541b13-c938-4e29-aaf3-f1bd83e907eb | unknown                              |            5 |            4 | pvp      |    14282 | 2025-08-10 13:22:04 |
-| affe92eb-92ee-42eb-8d6f-31250b1de378 | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | unknown                              |            1 |            5 | pvp      |    15829 | 2025-08-10 13:22:04 |
-| 411aaabf-4ea2-45ec-bc46-9898d3213f13 | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | unknown                              |            2 |            5 | pvp      |    14394 | 2025-08-10 13:22:04 |
-| 94d8996b-af03-4db4-be08-814f63eccea4 | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | unknown                              |            1 |            5 | pvp      |    12628 | 2025-08-10 13:22:04 |
-| d39421ec-2050-4097-af59-3c6b7f55b694 | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | unknown                              |            1 |            5 | pvp      |    12628 | 2025-08-10 13:22:04 |
-| ace5d607-dfe6-4f5c-b56e-6141ce083202 | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | unknown                              |            1 |            5 | pvp      |    12628 | 2025-08-10 13:22:04 |
-| c84f50ad-3472-4bda-a90f-126e8885d252 | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | unknown                              |            3 |            5 | pvp      |    14448 | 2025-08-10 13:22:04 |
-| 65e3d598-997d-439a-bd0e-57fd5cb854d9 | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | aiEasy                               |            0 |            5 | ai-easy  |    16502 | 2025-08-10 13:22:04 |
-| d0032364-4ecb-485b-9c7c-da2df77d46fd | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | aiHard                               |            0 |            5 | ai-hard  |    19791 | 2025-08-10 13:22:04 |
-| 6c0cec42-5d75-4178-90bd-29af6b6531d1 | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | unknown                              |            0 |            5 | pvp      |    12580 | 2025-08-10 13:22:04 |
-| 8fbd90ed-d1f1-4186-ae4b-2f1a7ef547dd | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | unknown                              |            5 |            3 | pvp      |    19938 | 2025-08-10 13:22:04 |
-| 29c00d73-f658-4600-b971-5c17ef25cb94 | f13e547b-9c63-4e97-b8dc-366550d49717 | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 |            2 |            5 | pvp      |    14530 | 2025-08-10 13:22:04 |
-| e1cff8e3-3563-4e5b-8bf9-e5c026edbec2 | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | f13e547b-9c63-4e97-b8dc-366550d49717 |            5 |            0 | pvp      |    11436 | 2025-08-10 13:22:04 |
-| b7922ca5-09c2-4858-bb99-58bc44229801 | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | 00000000-0000-0000-0000-000000000000 |            1 |            5 | pvp      |    12628 | 2025-08-10 13:22:04 |
-| 901e10e8-0512-42ab-abd6-5fdc800d6581 | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | 00000000-0000-0000-0000-000000000000 |            1 |            5 | pvp      |    12628 |                     |
-| ab780103-8cb8-452a-860d-1c7a7fa9f71e | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | 00000000-0000-0000-0000-000000000000 |            1 |            5 | pvp      |    12628 | 2025-08-10 13:25:25 |
-| 9767d9d2-4f4b-4b5d-8945-852f83c94889 | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | 00000000-0000-0000-0000-000000000000 |            1 |            5 | pvp      |    12628 | 2025-08-10 13:27:20 |
-| aabdf44c-3334-442a-82f8-8876cd3a62ac | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | 00000000-0000-0000-0000-000000000000 |            1 |            5 | pvp      |    12628 | 2025-08-10 13:34:07 |
-| c6e5783d-9863-4368-9913-109eca0b049a | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | 00000000-0000-0000-0000-000000000000 |            1 |            5 | pvp      |    12628 | 2025-08-10 13:35:11 |
-| c8722db4-e5c0-457b-9d5e-c75e7cc5abfd | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | 00000000-0000-0000-0000-000000000000 |            1 |            5 | pvp      |    12628 | 2025-08-10 13:35:44 |
+| id                                   | player1Id                            |                            player2Id | player1Score | player2Score | gameMode   | duration | created_at          |
+| 24ca6b8f-07b5-4c7f-a00c-8c952d5eb29e | c56c4312-6cde-4058-ad37-2ef02e7477a7 | bbf99621-cbd7-4246-ad30-ce53bf6ab83e |            3 |            5 | pvp        |    17136 | 2025-08-11 08:48:35 |
+| ce756e21-0b31-4423-9d34-dfd85d6096f0 | c56c4312-6cde-4058-ad37-2ef02e7477a7 | 00000000-0000-0000-0000-000000000000 |            5 |            4 | pvp        |    17635 | 2025-08-11 08:56:25 |
+| 2ff0209b-40d9-45c9-a98e-6781b250b5fb | c56c4312-6cde-4058-ad37-2ef02e7477a7 | 00000000-0000-0000-0000-000000000001 |            2 |            5 | ai-easy    |    34264 | 2025-08-11 09:01:25 |
+| 110df3ee-d4a8-45f8-8856-b8495b678638 | c56c4312-6cde-4058-ad37-2ef02e7477a7 | 00000000-0000-0000-0000-000000000002 |            0 |            5 | ai-hard    |    19965 | 2025-08-11 09:17:34 |
+| 1c00a0e8-bb0d-484d-9f17-bf128e28b4f7 | c56c4312-6cde-4058-ad37-2ef02e7477a7 | 00000000-0000-0000-0000-000000000001 |            5 |            4 | ai-easy    |    33427 | 2025-08-11 09:18:15 |
+| e6c0ed8d-3b9d-4b11-b271-439f52aea819 | c56c4312-6cde-4058-ad37-2ef02e7477a7 | 00000000-0000-0000-0000-000000000000 |            5 |            0 | pvp        |    11059 | 2025-08-11 09:18:33 |
+| de72a182-9010-4d9f-8e04-b3bd98a9d11d | c56c4312-6cde-4058-ad37-2ef02e7477a7 | bbf99621-cbd7-4246-ad30-ce53bf6ab83e |            5 |            2 | tournament |    12756 | 2025-08-11 09:25:18 |
+
 
 ** get match by userId
 #+begin_src sqlite
@@ -62,10 +47,8 @@ SELECT * FROM tournaments;
 
 #+RESULTS:
 | id                                   | name | player_count | status  | created_at          |
-| 89f4e71e-7e8a-4c78-8b6a-1e05b51a626a |      |            2 | pending | 2025-08-10 11:34:30 |
-| c68cb18a-cfbe-42ed-b32b-637632a689ff |      |            2 | pending | 2025-08-10 11:55:51 |
-| a017f250-009e-4900-a585-abff2069a0a9 |      |            2 | pending | 2025-08-10 12:11:43 |
-| a018a28e-84bf-4466-b7de-2fdc8a3fa4d0 |      |            2 | pending | 2025-08-10 12:45:03 |
+| 460922a9-c011-46fd-b63c-50c599a10642 |      |            2 | pending | 2025-08-11 08:46:24 |
+
 
 ** get all tournaments_participants
 
@@ -75,10 +58,8 @@ SELECT * FROM tournament_participants;
 
 #+RESULTS:
 | tournament_id                        | player_id                            |
-| 89f4e71e-7e8a-4c78-8b6a-1e05b51a626a | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 |
-| 89f4e71e-7e8a-4c78-8b6a-1e05b51a626a | f13e547b-9c63-4e97-b8dc-366550d49717 |
-| c68cb18a-cfbe-42ed-b32b-637632a689ff | f13e547b-9c63-4e97-b8dc-366550d49717 |
-| c68cb18a-cfbe-42ed-b32b-637632a689ff | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 |
+| 460922a9-c011-46fd-b63c-50c599a10642 | c56c4312-6cde-4058-ad37-2ef02e7477a7 |
+| 460922a9-c011-46fd-b63c-50c599a10642 | bbf99621-cbd7-4246-ad30-ce53bf6ab83e |
 
 ** get participants of the tournament
 #+begin_src sqlite
@@ -86,11 +67,6 @@ SELECT player_id
 FROM tournament_participants
 WHERE tournament_id = 'c68cb18a-cfbe-42ed-b32b-637632a689ff'
 #+end_src
-
-#+RESULTS:
-| player_id                            |
-| 36a67ec1-cd9b-4f9d-974a-807051e1dab8 |
-| f13e547b-9c63-4e97-b8dc-366550d49717 |
 
 *** more difficult query
 #+begin_src sqlite

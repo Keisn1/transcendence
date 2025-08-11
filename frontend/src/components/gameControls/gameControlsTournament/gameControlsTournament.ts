@@ -1,6 +1,7 @@
 import { BaseComponent } from "../../BaseComponent";
 import gameControlsTemplate from "./gameControlsTournament.html?raw";
 import type IGameControls from "../IGameControls";
+import type { GameMode } from "../../../types/game.types";
 
 export class GameControlsTournamentComponent extends BaseComponent implements IGameControls {
     public startBtn: HTMLButtonElement;
@@ -15,11 +16,11 @@ export class GameControlsTournamentComponent extends BaseComponent implements IG
         this.startBtn.addEventListener("click", this.handleClick.bind(this));
     }
 
-    addToStartCallbacks(fn: (level?: any) => void) {
-        this.startCallbacks.push(() => fn());
+    addToStartCallbacks(fn: (mode: GameMode) => void) {
+        this.startCallbacks.push(() => fn("tournament"));
     }
 
-    removeFromStartCallbacks(fn: (level?: any) => void) {
+    removeFromStartCallbacks(fn: (mode: GameMode) => void) {
         this.startCallbacks = this.startCallbacks.filter((cb) => cb !== fn);
     }
 
