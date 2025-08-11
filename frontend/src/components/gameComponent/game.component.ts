@@ -10,7 +10,7 @@ import { MatchService } from "../../services/match/match.service";
 import { AuthService } from "../../services/auth/auth.service";
 import { PlayersDisplay } from "../playersDisplay/playersDisplay.ts";
 import type { PublicUser } from "../../types/auth.types.ts";
-import type { MatchBody } from "../../types/match.types.ts";
+import type { PostMatchBody } from "../../types/match.types.ts";
 
 type ControlsConstructor = (new () => GameControlsComponent) | (new () => GameControlsTournamentComponent);
 
@@ -103,7 +103,7 @@ export class GameComponent extends BaseComponent {
             const user = this.authService.getCurrentUser();
             const duration = Date.now() - this.gameStartTime;
 
-            const matchBody: MatchBody = {
+            const matchBody: PostMatchBody = {
                 player1Id: user!.id,
                 player2Id: this.getPlayer2Name(),
                 player1Score: result.player1Score,
@@ -131,7 +131,7 @@ export class GameComponent extends BaseComponent {
             case "hard":
                 return "aiHard";
             default:
-                return "unknown";
+                return "00000000-0000-0000-0000-000000000000";
         }
     }
 

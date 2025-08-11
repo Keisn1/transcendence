@@ -1,5 +1,5 @@
 import { AuthStorage } from "../auth/auth.storage";
-import { type GetMatchResponse, type MatchBody } from "../../types/match.types";
+import { type GetMatchResponse, type PostMatchBody } from "../../types/match.types";
 import { AuthService } from "../auth/auth.service";
 
 export class MatchService {
@@ -14,7 +14,7 @@ export class MatchService {
         return MatchService.instance;
     }
 
-    async saveMatch(match: MatchBody): Promise<void> {
+    async saveMatch(match: PostMatchBody): Promise<void> {
         console.log(match);
         const response = await fetch("/api/match", {
             method: "POST",

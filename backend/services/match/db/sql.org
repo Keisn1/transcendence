@@ -41,8 +41,19 @@ SELECT * FROM matches;
 | 9767d9d2-4f4b-4b5d-8945-852f83c94889 | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | 00000000-0000-0000-0000-000000000000 |            1 |            5 | pvp      |    12628 | 2025-08-10 13:27:20 |
 | aabdf44c-3334-442a-82f8-8876cd3a62ac | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | 00000000-0000-0000-0000-000000000000 |            1 |            5 | pvp      |    12628 | 2025-08-10 13:34:07 |
 | c6e5783d-9863-4368-9913-109eca0b049a | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | 00000000-0000-0000-0000-000000000000 |            1 |            5 | pvp      |    12628 | 2025-08-10 13:35:11 |
+| c8722db4-e5c0-457b-9d5e-c75e7cc5abfd | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | 00000000-0000-0000-0000-000000000000 |            1 |            5 | pvp      |    12628 | 2025-08-10 13:35:44 |
 
 ** get match by userId
+#+begin_src sqlite
+SELECT * FROM matches WHERE player1Id = 'f13e547b-9c63-4e97-b8dc-366550d49717' OR player2ID = 'f13e547b-9c63-4e97-b8dc-366550d49717';
+#+end_src
+
+#+RESULTS:
+| id                                   | player1Id                            | player2Id                            | player1Score | player2Score | gameMode | duration | created_at          |
+| 29c00d73-f658-4600-b971-5c17ef25cb94 | f13e547b-9c63-4e97-b8dc-366550d49717 | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 |            2 |            5 | pvp      |    14530 | 2025-08-10 13:22:04 |
+| e1cff8e3-3563-4e5b-8bf9-e5c026edbec2 | 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | f13e547b-9c63-4e97-b8dc-366550d49717 |            5 |            0 | pvp      |    11436 | 2025-08-10 13:22:04 |
+| 6667097c-6cec-4319-ad61-0a42a8f68109 | f13e547b-9c63-4e97-b8dc-366550d49717 | 00000000-0000-0000-0000-000000000000 |            5 |            2 | pvp      |    16364 | 2025-08-11 05:40:10 |
+
 * Tournaments
 ** get all tournaments
 #+begin_src sqlite
