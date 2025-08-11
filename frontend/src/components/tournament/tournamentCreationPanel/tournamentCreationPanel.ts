@@ -46,7 +46,6 @@ export class TournamentCreationPanel extends BaseComponent {
 
         removeBtn.addEventListener("click", (ev) => {
             this.removeHandler(ev, slot);
-            registerBtn.disabled = false;
         });
         registerBtn.addEventListener("click", async (ev) => {
             this.registerHandler(ev, slot, slotId);
