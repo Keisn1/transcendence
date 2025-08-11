@@ -1,14 +1,14 @@
-import type { AiLevel } from "../../game/game";
+import type { GameMode } from "../../types/game.types";
 
 export default interface IGameControls {
     startBtn: HTMLButtonElement;
-    addToStartCallbacks(fn: (level?: AiLevel) => void): void;
+    addToStartCallbacks(fn: (mode: GameMode) => void): void;
     addToFinishCallbacks(fn: () => void): void;
-    removeFromStartCallbacks(fn: (level?: AiLevel) => void): void;
+    removeFromStartCallbacks(fn: (mode: GameMode) => void): void;
     removeFromFinishCallbacks(fn: () => void): void;
     getContainer(): HTMLElement;
     reset(): void;
     toggleStartBtn?(): void;
-    addToSelectionChangeCallbacks?(fn: (level: AiLevel) => void): void;
-    removeFromSelectionChangeCallbacks?(fn: (level: AiLevel) => void): void;
+    addToSelectionChangeCallbacks?(fn: (mode: GameMode) => void): void;
+    removeFromSelectionChangeCallbacks?(fn: (mode: GameMode) => void): void;
 }

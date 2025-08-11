@@ -1,7 +1,6 @@
 import gameTemplate from "./game.html?raw";
 import { PongGame } from "../../game/game";
 import { BaseComponent } from "../BaseComponent";
-import { type AiLevel } from "../../game/game";
 import { type MatchResult } from "../../types/match.types.ts";
 import { GameControlsComponent } from "../gameControls/gameControlsGame/gameControls";
 import { GameControlsTournamentComponent } from "../gameControls/gameControlsTournament/gameControlsTournament";
@@ -11,6 +10,7 @@ import { AuthService } from "../../services/auth/auth.service";
 import { PlayersDisplay } from "../playersDisplay/playersDisplay.ts";
 import type { PublicUser } from "../../types/auth.types.ts";
 import type { PostMatchBody } from "../../types/match.types.ts";
+import type { GameMode } from "../../types/game.types.ts";
 
 type ControlsConstructor = (new () => GameControlsComponent) | (new () => GameControlsTournamentComponent);
 
@@ -26,7 +26,7 @@ export class GameComponent extends BaseComponent {
 
     private matchService: MatchService;
     private authService: AuthService;
-    private currentGameMode: AiLevel = "none";
+    private currentGameMode: GameMode = "pvp";
     private gameStartTime: number = 0;
     private options: GameComponentOptions;
 
@@ -54,16 +54,16 @@ export class GameComponent extends BaseComponent {
         playersDisplayContainer.appendChild(this.playersDisplay.getContainer());
     }
 
-    private selectionChangeCallback = (level: AiLevel) => {
-        this.playersDisplay.updateGameMode(level);
+    private selectionChangeCallback = (mode: GameMode) => {
+        this.playersDisplay.updateGameMode(mode);
     };
 
-    private startCallback = (level?: AiLevel) => {
+    private startCallback = (mode: GameMode) => {
         this.game.destroy();
         const ctx = this.canvas.getContext("2d")!;
         ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        this.currentGameMode = level || "none";
+        this.currentGameMode = mode;
 
         if (!this.options.tournamentPlayers) {
             this.playersDisplay.updateGameMode(this.currentGameMode);
@@ -72,8 +72,11 @@ export class GameComponent extends BaseComponent {
         this.gameStartTime = Date.now();
 
         this.game = new PongGame(this.canvas, {}, this.onGameFinish);
-        if (level !== undefined) {
-            this.game.setAiLevel(level);
+        if (mode === "ai-easy") {
+            this.game.setAiDifficulty("easy");
+        }
+        if (mode === "ai-hard") {
+            this.game.setAiDifficulty("hard");
         }
         this.play();
     };
@@ -108,7 +111,7 @@ export class GameComponent extends BaseComponent {
                 player2Id: this.getPlayer2Name(),
                 player1Score: result.player1Score,
                 player2Score: result.player2Score,
-                gameMode: this.getGameModeString(),
+                gameMode: this.currentGameMode,
                 duration,
             };
 
@@ -126,23 +129,12 @@ export class GameComponent extends BaseComponent {
 
     private getPlayer2Name(): string {
         switch (this.currentGameMode) {
-            case "easy":
-                return "aiEasy";
-            case "hard":
-                return "aiHard";
+            case "ai-easy":
+                return "00000000-0000-0000-0000-000000000001";
+            case "ai-hard":
+                return "00000000-0000-0000-0000-000000000002";
             default:
                 return "00000000-0000-0000-0000-000000000000";
-        }
-    }
-
-    private getGameModeString(): "pvp" | "ai-easy" | "ai-hard" {
-        switch (this.currentGameMode) {
-            case "easy":
-                return "ai-easy";
-            case "hard":
-                return "ai-hard";
-            default:
-                return "pvp";
         }
     }
 

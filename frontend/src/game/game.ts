@@ -3,6 +3,7 @@ import { Paddle, type Paddles, type PaddleConfig } from "./paddle";
 import { InputManager } from "./inputManager";
 import { AiController } from "./aiController";
 import { type MatchResult } from "../types/match.types";
+import type { AiDifficulty } from "../types/game.types";
 
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
@@ -21,8 +22,6 @@ export interface GameConfig {
 
     controls?: ControlsConfig;
 }
-
-export type AiLevel = "none" | "easy" | "hard";
 
 export class PongGame {
     private inputManager: InputManager;
@@ -88,13 +87,14 @@ export class PongGame {
         this.result = { player1Score: 0, player2Score: 0 };
     }
 
-    public setAiLevel(level: AiLevel) {
+    public setAiDifficulty(difficulty: AiDifficulty | null) {
         if (this.aiController) {
             this.aiController.destroy();
             this.aiController = null;
         }
-        if (level !== "none") {
-            if (level == "easy") this.feedFrequency = 1300; // not the best solution
+
+        if (difficulty) {
+            if (difficulty === "easy") this.feedFrequency = 1300;
             this.setupAi();
         }
     }
