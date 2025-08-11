@@ -24,6 +24,18 @@ declare module "fastify" {
                 lastID: number; // Auto-generated ID
                 changes: number; // Rows affected
             }>;
+            // 2FA encryption methods
+            store2FASecret(userId: string, secret: string): Promise<void>;
+            get2FASecret(userId: string): Promise<string | null>;
+            enable2FA(userId: string): Promise<void>;
+            disable2FA(userId: string): Promise<void>;
+        };
+
+        // Encryption plugin methods
+        encryption: {
+            encrypt2FASecret(secret: string): Promise<string>;
+            decrypt2FASecret(encryptedSecret: string): Promise<string>;
+            isEncryptionReady(): boolean;
         };
     }
 }
