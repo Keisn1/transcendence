@@ -7,13 +7,14 @@ RUN apt-get update && apt-get install -y jq
 # Set working directory
 WORKDIR /app
 
-# Copy everything
+# Copy source code
 COPY src/ ./src/
-RUN mkdir db
 
-# Copy backend
+# Copy package files
 COPY tsconfig.json .
-COPY package*.json .
+COPY package*.json ./
+
+# Install
 RUN npm install
 RUN npm run build
 
@@ -22,7 +23,7 @@ COPY /entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Expose port
-EXPOSE 3000
+EXPOSE 3002
 
 # Use custom entrypoint to wait for Vault setup
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

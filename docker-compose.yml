@@ -22,6 +22,17 @@ services:
       - ./backend/services/file/uploads:/app/uploads
       - ./vault/init:/vault/init
 
+  match-service:
+    build:
+      context: ./backend/services/match
+    container_name: match-service
+    ports:
+      - "3002:3002"
+    environment:
+      - ENV=production
+    volumes:
+      - ./vault/init:/vault/init
+
   nginx:
     build: ./nginx
     container_name: nginx

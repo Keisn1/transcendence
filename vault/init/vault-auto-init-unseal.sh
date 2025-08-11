@@ -102,6 +102,25 @@ vault write auth/approle/role/fileservice-role \
 
 #approle end
 
+#approle for match-service read only
+cat <<EOF > /vault/init/matchservice-policy.hcl
+# Allow reading the JWT secret
+path "secret/data/jwt" {
+  capabilities = ["read"]
+}
+path "pki/*" {
+  capabilities = ["read"]
+}
+EOF
+vault policy write matchservice-policy /vault/init/matchservice-policy.hcl || echo "policy has already been written."
+
+vault write auth/approle/role/matchservice-role \
+    token_policies="matchservice-policy" \
+    token_ttl=1h \
+    token_max_ttl=4h
+
+
+#approle end
 
 
 
@@ -208,12 +227,41 @@ echo "$KEY" > "$INTKEY_PATH"
 echo "Internal cert and key saved to $INTCERT_PATH and $INTKEY_PATH"
 #FILESERVICE CERTS END
 
+#NEW FOR MATCHSERVICE CERTS
+# --- Issue certificate and save .crt and .key for matchservice connection ---
+INTERNAL_DOMAIN="matchservice.localhost"
+INTCERT_PATH="/vault/init/${INTERNAL_DOMAIN}.crt"
+INTKEY_PATH="/vault/init/${INTERNAL_DOMAIN}.key"
+
+echo "Requesting internal certificate for $INTERNAL_DOMAIN..."
+vault write -format=json pki/issue/https-cert-role \
+    common_name="$INTERNAL_DOMAIN" \
+    ttl="72h" > /vault/init/matchservice-cert.json
+
+# Extract cert, issuing CA, and private key
+CRT=$(jq -r '.data.certificate' /vault/init/matchservice-cert.json)
+CA=$(jq -r '.data.issuing_ca' /vault/init/matchservice-cert.json)
+KEY=$(jq -r '.data.private_key' /vault/init/matchservice-cert.json)
+
+# Save cert and key to shared init dir
+echo "$CRT" > "$INTCERT_PATH"
+echo "$CA" >> "$INTCERT_PATH"
+echo "$KEY" > "$INTKEY_PATH"
+
+echo "Internal cert and key saved to $INTCERT_PATH and $INTKEY_PATH"
+#MATCHSERVICE CERTS END
+
+
+
 # --- Fetch Role ID and Secret ID ---
 export ROLE_ID=$(vault read -field=role_id auth/approle/role/backend-role/role-id)
 export SECRET_ID=$(vault write -f -field=secret_id auth/approle/role/backend-role/secret-id)
 
 export ROLEFILESERVICE_ID=$(vault read -field=role_id auth/approle/role/fileservice-role/role-id)
 export SECRETFILESERVICE_ID=$(vault write -f -field=secret_id auth/approle/role/fileservice-role/secret-id)
+
+export ROLEMATCHSERVICE_ID=$(vault read -field=role_id auth/approle/role/matchservice-role/role-id)
+export SECRETMATCHSERVICE_ID=$(vault write -f -field=secret_id auth/approle/role/matchservice-role/secret-id)
 
 
 echo "catting EVEN harder rn."
@@ -223,12 +271,16 @@ VAULT_FILESERVICESECRET_ID=$SECRETFILESERVICE_ID
 
 VAULT_ROLE_ID=$ROLE_ID
 VAULT_SECRET_ID=$SECRET_ID
+
+VAULT_MATCHSERVICE_ID=$ROLEMATCHSERVICE_ID
+VAULT_MATCHSERVICESECRET_ID=$SECRETMATCHSERVICE_ID
+
 EOF
 echo "AppRole credentials retrieved."
-echo "VAULT_TOKEN before is: $VAULT_TOKEN"
+echo "VAULT_TOKEN before is: $VAULT_TOKEN" #DISABLE IN PROD
 # --- Authenticate using AppRole ---
 VAULT_TOKEN=$(vault write -field=token auth/approle/login role_id="$ROLE_ID" secret_id="$SECRET_ID")
 echo "Logged in with AppRole token."
-echo "VAULT_TOKEN after is: $VAULT_TOKEN"
+echo "VAULT_TOKEN after is: $VAULT_TOKEN" #DISABLE IN PROD
 echo "Vault KV and policies setup complete."
 

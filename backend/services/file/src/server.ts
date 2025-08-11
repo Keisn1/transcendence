@@ -3,7 +3,7 @@ import Fastify from "fastify";
 import { routes } from "./routes/routes";
 import jwtPlugin from "./plugins/auth.plugin";
 
-// //THIS IS NEW SHIT THAT CHRIS PUT HERE TO MAKE HTTPS WORK
+//https
 import fs from "fs";
 import vaultLib from "node-vault";
 

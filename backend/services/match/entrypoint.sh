@@ -1,10 +1,10 @@
 #!/bin/sh
 set -e
 
-CERT_SRC="/vault/init/pong.localhost.crt"
-KEY_SRC="/vault/init/pong.localhost.key"
-CERT_DST="/etc/ssl/certs/auth-service.crt"
-KEY_DST="/etc/ssl/private/auth-service.key"
+CERT_SRC="/vault/init/matchservice.localhost.crt"
+KEY_SRC="/vault/init/matchservice.localhost.key"
+CERT_DST="/etc/ssl/certs/matchservice.crt"
+KEY_DST="/etc/ssl/private/matchservice.key"
 
 echo "⏳ Waiting for Vault to respond and /vault/init/.env to exist..."
 
@@ -21,8 +21,8 @@ done
 
 echo "✅ Vault is responding and /vault/init/.env exists."
 . /vault/init/.env
-export VAULT_ROLE_ID
-export VAULT_SECRET_ID
+export VAULT_MATCHSERVICE_ID
+export VAULT_MATCHSERVICESECRET_ID
 
 ## Securely shred the .env file after loading secrets
 #if [ -f /vault/init/.env ]; then
@@ -37,10 +37,10 @@ while [ ! -f "$CERT_SRC" ] || [ ! -f "$KEY_SRC" ]; do
   sleep 2
 done
 
-# Copy to target SSL paths (used by auth-service)
+# Copy to target SSL paths (used by match-service)
 cp "$CERT_SRC" "$CERT_DST"
 cp "$KEY_SRC" "$KEY_DST"
-echo "✅ Copied certificate and key to auth-service container."
+echo "✅ Copied certificate and key to match-service container."
 
-echo "🚀 Starting auth-service server..."
+echo "🚀 Starting Matchservice server..."
 exec npm start

@@ -23,16 +23,27 @@ user has the rights to know what data is stored, and for how long // read up on 
 
 
 
-todo
-setup link to /settings in navbar instead of the html
-
-
-implement 2fa in registration 
-be able to confirm the 2fa is working
-
-
-
+new 11.8
+gdpr endpoints need to update/delete matchstats, played matches whatever
 new encrypt/decrypt key for 2fa secrets in vault abrufbar
+
+
+
+done:
+new service needs certificates and jwtsecret anbindung done
+
+getting checked by kay:
+2fa check for gdpr deletion/anonymization done
+
+actually done:
+
+devbuild:
+backend :
+frontend -> npm install, npm run dev:proxy
+new terminal
+backend -> docker compose build
+docker compose up -d 
+
 
 
 
