@@ -87,8 +87,12 @@ export class TournamentController {
         return this.tournament;
     }
 
-    getTournamentMachine(): TournamentMachine {
+    getTournamentMachine(): TournamentMachine { // should this be public?
         return this.tournamentMachine;
+    }
+
+    public getTournamentId() {
+        return this.tournament.id;
     }
 
     // Controller handles state transitions

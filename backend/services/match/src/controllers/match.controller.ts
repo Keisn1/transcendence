@@ -34,6 +34,13 @@ export async function postMatch(request: FastifyRequest<{ Body: PostMatchBody }>
             ],
         );
 
+        if (body.gameMode === "tournament") {
+            await request.server.db.run(
+                `INSERT INTO tournament_matches (tournament_id, match_id) VALUES (?, ?)`,
+                [body.tournamentId, matchId]
+            );
+        }
+
         return reply.status(201).send({ id: matchId, message: "Match recorded successfully" });
     } catch (err) {
         const error = err as Error;
@@ -126,6 +133,7 @@ export const postMatchSchema = {
             player2Score: { type: "number" },
             gameMode: { type: "string", enum: ["pvp", "ai-easy", "ai-hard", "tournament"] },
             duration: { type: "number" },
+            tournamentId: { type: "string" },
         },
         required: ["player1Id", "player2Id", "player1Score", "player2Score", "gameMode"],
         additionalProperties: false,
