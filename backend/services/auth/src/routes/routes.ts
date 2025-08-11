@@ -31,6 +31,7 @@ export async function routes(fastify: FastifyInstance) {
         (fastify: FastifyInstance) => {
             fastify.put("", { preHandler: fastify.jwtAuth, schema: updateUserSchema }, updateUser);
             fastify.get("/health", healthRoute);
+            // fastify.get("/:id", getUserById);
         },
         { prefix: "user" },
     );

@@ -22,12 +22,28 @@
   - in login view it seems to work
 - [X] have craetedAt timestamp at match
 - [X] proper return schema for postMatch
-- [ ] make email and username changeable in profile
+- [X] make email and username changeable in profile
 
-- [ ] add statistics in profile
+- [ ] new table
+  - [ ] create migration with new table
+    #+begin_src sqlite
+  CREATE TABLE tournament_matches (
+      tournament_id TEXT NOT NULL,
+      match_id TEXT NOT NULL,
+      FOREIGN KEY (tournament_id) REFERENCES tournaments(id),
+      FOREIGN KEY (match_id) REFERENCES matches(id),
+  );
+    #+end_src
+  - [ ] when a match is saved, and it was part of a tournament (GameMode = "tournament"), it should be added to this table
+  - [ ] remove column "status" from tournaments
+- [ ] when usual game is played, player2 avatar shall be the default avatar as well
+
 - [ ] add match history view
+  - [ ] change PublicUser to something more strict (without twoFaEnabled)
+  - [ ] have a real PublicUser (only id, username, avatar)
   - [ ] make the matchHistory link visible in profile
   - [ ] when clicking on a user in matchView or tournamentView or in the matchHistoryView, it should lead to the match history of that user
+- [ ] add statistics in profile
 - [ ] grey line on tournamentCreationPanel
 - [ ] treating the security hole that a logged in user can actually post a tournament with any valid uuids
   - [ ] need to check if the users exist
