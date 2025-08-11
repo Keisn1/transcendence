@@ -5,6 +5,7 @@ export interface PostMatchBody {
     player2Score: number;
     gameMode: "pvp" | "ai-easy" | "ai-hard" | "tournament";
     duration?: number;
+    tournamentId: string;
 }
 
 export interface GetMatchResponse {

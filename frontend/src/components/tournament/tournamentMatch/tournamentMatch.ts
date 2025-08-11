@@ -16,13 +16,14 @@ export class TournamentMatchComponent extends BaseComponent {
         // Get current match players
         const tournament = this.tournamentController.getTournament();
         const currentMatch = tournament.matches[tournament.nextMatchIdx];
+        const tournamentId = this.tournamentController.getTournamentId();
 
         this.gameComponent = new GameComponent(GameControlsTournamentComponent, {
             tournamentPlayers: {
                 player1: currentMatch.player1,
                 player2: currentMatch.player2,
             },
-        });
+        }, tournamentId);
 
         this.exitBtn = new ExitBtn();
 
