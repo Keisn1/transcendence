@@ -51,3 +51,8 @@ export interface SignupForm {
     password: string;
     confirmPassword?: string;
 }
+
+export interface Complete2FaResponse {
+    token: string;
+    user: PublicUser;
+}

@@ -1,7 +1,7 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import speakeasy from "speakeasy";
 import qrcode from "qrcode";
-import { complete2FABody } from "../types/auth.types";
+import { complete2FABody, Complete2FaResponse } from "../types/auth.types";
 
 export async function disable2FA(request: FastifyRequest, reply: FastifyReply) {
     const user = request.user;
@@ -79,7 +79,7 @@ export async function init2FA(request: FastifyRequest, reply: FastifyReply) {
 }
 
 // Complete setup by verifying token and enabling 2FA
-export async function complete2FA(request: FastifyRequest, reply: FastifyReply) {
+export async function complete2FA(request: FastifyRequest, reply: FastifyReply): Promise<Complete2FaResponse> {
     const user = request.user;
     if (!user) return reply.status(401).send({ error: "Unauthorized" });
 
@@ -105,10 +105,13 @@ export async function complete2FA(request: FastifyRequest, reply: FastifyReply) 
         user.id,
     ]);
 
-    return reply.send({ success: true });
+    user.twoFaEnabled = true;
+    const jwtToken = request.server.jwt.sign(user, { expiresIn: "1h" });
+    const response: Complete2FaResponse = { token: jwtToken, user: user };
+    return reply.status(200).send(response);
 }
 
-export const complete2FASchema = {
+export const verify2FASchema = {
     body: {
         type: "object",
         properties: {
@@ -124,6 +127,36 @@ export const complete2FASchema = {
                 success: { type: "boolean" },
             },
             required: ["success"],
+            additionalProperties: false,
+        },
+    },
+} as const;
+
+export const complete2FASchema = {
+    body: {
+        type: "object",
+        properties: {
+            token: { type: "string" },
+        },
+        required: ["token"],
+        additionalProperties: false,
+    },
+    response: {
+        200: {
+            type: "object",
+            properties: {
+                token: { type: "string" },
+                user: {
+                    type: "object",
+                    properties: {
+                        id: { type: "string" },
+                        username: { type: "string" },
+                        avatar: { type: "string", format: "uri-reference" },
+                        twoFaEnabled: { type: "boolean" },
+                    },
+                    required: ["id", "username", "avatar", "twoFaEnabled"],
+                },
+            },
             additionalProperties: false,
         },
     },

@@ -38,6 +38,7 @@
   - [ ] remove column "status" from tournaments
 - [ ] when usual game is played, player2 avatar shall be the default avatar as well
 
+- [ ] bug: in TournamentCreationPanel: clicking on register multiple times will open verification multiple times
 - [ ] add match history view
   - [ ] change PublicUser to something more strict (without twoFaEnabled)
   - [ ] have a real PublicUser (only id, username, avatar)

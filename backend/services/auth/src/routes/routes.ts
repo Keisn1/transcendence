@@ -5,7 +5,7 @@ import register, { registerSchema } from "../controllers/register.controller";
 import updateUser, { updateProfileSchema as updateUserSchema } from "../controllers/updateUser.controller";
 import getProfile, { getCurrentUserSchema } from "../controllers/getProfile.controller";
 
-import { complete2FASchema, disable2FA, verify2FA } from "../controllers/twofa.controller";
+import { complete2FASchema, disable2FA, verify2FA, verify2FASchema } from "../controllers/twofa.controller";
 import { init2FA, complete2FA } from "../controllers/twofa.controller";
 
 export async function routes(fastify: FastifyInstance) {
@@ -19,8 +19,8 @@ export async function routes(fastify: FastifyInstance) {
                 (fastify: FastifyInstance) => {
                     fastify.post("/init", { preHandler: fastify.jwtAuth }, init2FA);
                     fastify.post("/complete", { preHandler: fastify.jwtAuth, schema: complete2FASchema }, complete2FA);
-                    fastify.post("/verify", { preHandler: fastify.jwtAuth, schema: complete2FASchema }, verify2FA);
-                    fastify.post("/disable", { preHandler: fastify.jwtAuth, schema: complete2FASchema }, disable2FA);
+                    fastify.post("/verify", { preHandler: fastify.jwtAuth, schema: verify2FASchema }, verify2FA);
+                    fastify.post("/disable", { preHandler: fastify.jwtAuth, schema: verify2FASchema }, disable2FA);
                 },
                 { prefix: "2fa" },
             );

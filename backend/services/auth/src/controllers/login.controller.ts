@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { compareSync } from "bcrypt";
-import { LoginBody, LoginResponse, VerifyResponse, VerifyBody } from "../types/auth.types";
+import { LoginBody, LoginResponse } from "../types/auth.types";
 
 export async function login(request: FastifyRequest<{ Body: LoginBody }>, reply: FastifyReply): Promise<LoginResponse> {
     const { email, password } = request.body;
@@ -62,7 +62,7 @@ export const loginSchema = {
                         avatar: { type: "string", format: "uri-reference" },
                         twoFaEnabled: { type: "boolean" },
                     },
-                    required: ["id", "username", "email", "avatar"],
+                    required: ["id", "username", "avatar", "twoFaEnabled"],
                 },
             },
             additionalProperties: false,

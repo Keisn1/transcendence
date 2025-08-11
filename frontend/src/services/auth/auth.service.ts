@@ -6,6 +6,7 @@ import type {
     SignupForm,
     RegisterBody,
     RegisterResponse,
+    Complete2FaResponse,
 } from "../../types/auth.types";
 import { AuthStorage } from "./auth.storage";
 
@@ -215,11 +216,14 @@ export class AuthService {
             throw new Error(error.error || "Invalid 2FA code");
         }
 
-        const user = this.getCurrentUser();
-        if (user) {
-            user.twoFaEnabled = true;
-            this.updateCurrentUser(user);
-        }
+        const data: Complete2FaResponse = await response.json();
+        const user: PublicUser = data.user;
+
+        // Complete login immediately
+        this.currentUser = user;
+        AuthStorage.saveUser(user);
+        AuthStorage.saveToken(data.token);
+        return;
     }
 
     // way of consumer to subscribe to changes in the AuthService
