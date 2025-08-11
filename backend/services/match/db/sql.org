@@ -27,7 +27,6 @@ SELECT * FROM matches;
 | e6c0ed8d-3b9d-4b11-b271-439f52aea819 | c56c4312-6cde-4058-ad37-2ef02e7477a7 | 00000000-0000-0000-0000-000000000000 |            5 |            0 | pvp        |    11059 | 2025-08-11 09:18:33 |
 | de72a182-9010-4d9f-8e04-b3bd98a9d11d | c56c4312-6cde-4058-ad37-2ef02e7477a7 | bbf99621-cbd7-4246-ad30-ce53bf6ab83e |            5 |            2 | tournament |    12756 | 2025-08-11 09:25:18 |
 
-
 ** get match by userId
 #+begin_src sqlite
 SELECT * FROM matches WHERE player1Id = 'f13e547b-9c63-4e97-b8dc-366550d49717' OR player2ID = 'f13e547b-9c63-4e97-b8dc-366550d49717';
@@ -48,7 +47,6 @@ SELECT * FROM tournaments;
 #+RESULTS:
 | id                                   | name | player_count | status  | created_at          |
 | 460922a9-c011-46fd-b63c-50c599a10642 |      |            2 | pending | 2025-08-11 08:46:24 |
-
 
 ** get all tournaments_participants
 

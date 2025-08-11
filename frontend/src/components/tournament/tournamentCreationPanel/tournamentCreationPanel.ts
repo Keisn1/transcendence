@@ -46,6 +46,7 @@ export class TournamentCreationPanel extends BaseComponent {
 
         removeBtn.addEventListener("click", (ev) => {
             this.removeHandler(ev, slot);
+            registerBtn.disabled = false;
         });
         registerBtn.addEventListener("click", async (ev) => {
             this.registerHandler(ev, slot, slotId);
@@ -67,6 +68,8 @@ export class TournamentCreationPanel extends BaseComponent {
 
     private async registerHandler(ev: Event, slot: HTMLElement, slotId: string) {
         ev.preventDefault();
+        const registerBtn = ev.target as HTMLButtonElement;
+        registerBtn.disabled = true;
 
         const emailInput = slot.querySelector<HTMLInputElement>(`#email-${slotId}`);
         const passwordInput = slot.querySelector<HTMLInputElement>(`#password-${slotId}`);
@@ -85,6 +88,7 @@ export class TournamentCreationPanel extends BaseComponent {
             if (user.twoFaEnabled) {
                 const ok = await this.show2FAVerification();
                 if (!ok) {
+                    registerBtn.disabled = false;
                     return this.showMessage("2FA not completed — registration aborted", "error");
                 }
             }
@@ -95,6 +99,7 @@ export class TournamentCreationPanel extends BaseComponent {
             this.showMessage("User registered successfully");
         } catch (err: any) {
             this.showMessage(err.message || "Registration failed", "error");
+            registerBtn.disabled = false;
         }
         console.log("After registration:", this.registeredPlayers);
     }
@@ -117,7 +122,6 @@ export class TournamentCreationPanel extends BaseComponent {
                         }
                     },
                     () => {
-                        // cancelled
                         AuthController.getInstance().clearPendingVerify();
                         verification.getContainer().remove();
                         verification.destroy();
