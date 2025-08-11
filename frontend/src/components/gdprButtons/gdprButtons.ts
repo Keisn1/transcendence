@@ -5,9 +5,9 @@ import { GdprWarningModal } from "../gdprWarningModal/gdprWarningModal.ts";
 export class GdprButtons extends BaseComponent {
     private deleteButton: HTMLElement;
     private anonymizeButton: HTMLElement;
-    private onGdprAction?: (action: "delete" | "anonymize") => void;
+    private onGdprAction?: (action: "delete" | "anonymize", twoFAToken?: string) => void;
 
-    constructor(onGdprAction?: (action: "delete" | "anonymize") => void) {
+    constructor(onGdprAction?: (action: "delete" | "anonymize", twoFAToken?: string) => void) {
         super("div", "gdpr-buttons-container");
         this.onGdprAction = onGdprAction;
         this.container.innerHTML = gdprButtonsTemplate;
@@ -29,9 +29,9 @@ export class GdprButtons extends BaseComponent {
     }
 
     private showWarning(action: "delete" | "anonymize") {
-        const modal = new GdprWarningModal(action, (confirmedAction) => {
+        const modal = new GdprWarningModal(action, (confirmedAction, twoFAToken) => {
             if (this.onGdprAction) {
-                this.onGdprAction(confirmedAction);
+                this.onGdprAction(confirmedAction, twoFAToken);
             }
         });
         modal.show();

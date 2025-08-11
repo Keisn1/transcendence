@@ -20,16 +20,7 @@ export default class extends AbstractView {
         document.body.appendChild(this.gdprButtons.getContainer());
     }
 
-    private async handleGdprAction(action: "delete" | "anonymize") {
-        // Handle 2FA check
-        const isTwoFAEnabled = localStorage.getItem("isTwoFAEnabled") === "true";
-        let twoFACode = "";
-
-        if (isTwoFAEnabled) {
-            twoFACode = prompt("Enter your 2FA code to confirm this action:") || "";
-            if (!twoFACode) return;
-        }
-
+    private async handleGdprAction(action: "delete" | "anonymize", twoFACode?: string) {
         try {
             const response = await fetch("/api/user/gdpr-action", {
                 method: "POST",
@@ -37,7 +28,7 @@ export default class extends AbstractView {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${localStorage.getItem("authToken")}`,
                 },
-                body: JSON.stringify({ action, twoFACode }),
+                body: JSON.stringify({ action, twoFACode: twoFACode || "" }),
             });
 
             const result = await response.json();

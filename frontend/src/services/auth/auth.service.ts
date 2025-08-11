@@ -160,6 +160,22 @@ export class AuthService {
         }
     }
 
+    async verify2FA(token: string): Promise<void> {
+        const response = await fetch("/api/auth/2fa/verify", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${AuthStorage.getToken()}`,
+            },
+            body: JSON.stringify({ token }),
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || "Invalid 2FA code");
+        }
+    }
+
     async initiate2FA(): Promise<string> {
         const response = await fetch("/api/auth/2fa/init", {
             method: "POST",
