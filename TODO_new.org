@@ -52,3 +52,8 @@
       #+begin_src typescript
         const token = request.server.jwt.sign({userId: asdf, verified: true}, { expiresIn: "5min" });
       #+end_src
+* notes eriki_tournament_matches
+- instead of giving tournamendId as string in constructor of the GameComponent, use the GameComponentOptions
+- delete getTournamentId (we already have getTournament)
+- tournamentId? inside the type
+- outfactor default-pfp.png (it is present in some places of the code, we should factor this out to somewhere, where it can be defined application wide)
