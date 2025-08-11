@@ -1,5 +1,5 @@
 import { AuthStorage } from "../auth/auth.storage";
-import { type MatchBody } from "../../types/match.types";
+import { type PostMatchBody } from "../../types/match.types";
 
 export class MatchService {
     private static instance: MatchService;
@@ -13,7 +13,7 @@ export class MatchService {
         return MatchService.instance;
     }
 
-    async saveMatch(match: MatchBody): Promise<void> {
+    async saveMatch(match: PostMatchBody): Promise<void> {
         console.log(match);
         const response = await fetch("/api/match", {
             method: "POST",

@@ -12,7 +12,7 @@ export type MatchResult = {
     player2Score: number;
 };
 
-export interface MatchBody {
+export interface PostMatchBody {
     player1Id: string;
     player2Id: string;
     player1Score: number;
