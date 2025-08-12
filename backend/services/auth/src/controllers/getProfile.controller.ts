@@ -30,7 +30,7 @@ export default async function getProfile(request: FastifyRequest, reply: Fastify
     }
 }
 
-export const getCurrentUserSchema = {
+export const getProfileSchema = {
     response: {
         200: {
             type: "object",

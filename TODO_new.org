@@ -24,8 +24,8 @@
 - [X] proper return schema for postMatch
 - [X] make email and username changeable in profile
 
-- [ ] new table
-  - [ ] create migration with new table
+- [X] new table
+  - [X] create migration with new table
     #+begin_src sqlite
   CREATE TABLE tournament_matches (
       tournament_id TEXT NOT NULL,
@@ -34,18 +34,21 @@
       FOREIGN KEY (match_id) REFERENCES matches(id),
   );
     #+end_src
-  - [ ] when a match is saved, and it was part of a tournament (GameMode = "tournament"), it should be added to this table
-  - [ ] remove column "status" from tournaments
-- [ ] when usual game is played, player2 avatar shall be the default avatar as well
+  - [X] when a match is saved, and it was part of a tournament (GameMode = "tournament"), it should be added to this table
+  - [X] remove column "status" from tournaments
+- [X] when usual game is played, player2 avatar shall be the default avatar as well
+  - solution with default-pfp -> look into notes
 
-- [ ] bug: in TournamentCreationPanel: clicking on register multiple times will open verification multiple times
+- [X] bug: in TournamentCreationPanel: clicking on register multiple times will open verification multiple times
+- [ ] add statistics in profile
+- [ ] grey line on tournamentCreationPanel
+
 - [ ] add match history view
   - [ ] change PublicUser to something more strict (without twoFaEnabled)
   - [ ] have a real PublicUser (only id, username, avatar)
   - [ ] make the matchHistory link visible in profile
   - [ ] when clicking on a user in matchView or tournamentView or in the matchHistoryView, it should lead to the match history of that user
-- [ ] add statistics in profile
-- [ ] grey line on tournamentCreationPanel
+
 - [ ] treating the security hole that a logged in user can actually post a tournament with any valid uuids
   - [ ] need to check if the users exist
   - [ ] need to have some token verification
@@ -58,3 +61,14 @@
 - delete getTournamentId (we already have getTournament)
 - tournamentId? inside the type
 - outfactor default-pfp.png (it is present in some places of the code, we should factor this out to somewhere, where it can be defined application wide)
+* notes on new user type
+- auth routes that need to send back twoFaEnabled or not (those where the frontend will set the current user)
+  - /signup (always false)
+  - /login
+  - /2fa/complete
+
+- the ones that send back a PublicUser object but don't need the twoFaEnabled in the frontend
+  - GET /profile
+  - POST /api/user - updateUser
+  - POST /auth/verify
+    - in frontend/auth/auth.service ts verifyUser returns a PublicUser object which is not necessary, should only return id/username/avatar
