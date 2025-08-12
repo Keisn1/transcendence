@@ -3,7 +3,7 @@ import { routes } from "./routes/routes";
 import jwtPlugin from "./plugins/auth.plugin";
 import dbPlugin from "./plugins/db.plugin";
 import gdprPlugin from "./plugins/gdpr.plugin";
-import encryptionPlugin from "./plugins/encryption.plugin";
+import encryptionPlugin, { encryptionPluginDev } from "./plugins/encryption.plugin";
 
 import fs from "fs";
 import vaultLib from "node-vault";
@@ -60,6 +60,7 @@ if (process.env.ENV === "production") {
 
     server.register(jwtPlugin, { jwtSecret }); // jwtAuth decorator only
     server.register(dbPlugin);
+    server.register(encryptionPluginDev);
     server.register(routes, { prefix: "api" });
     server.register(gdprPlugin, { prefix: "api" });
     server.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
