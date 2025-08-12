@@ -15,7 +15,6 @@
     "type": "commonjs",
     "devDependencies": {
         "@types/bcrypt": "^6.0.0",
-        "@types/node": "^24.2.1",
         "@types/qrcode": "^1.5.5",
         "@types/speakeasy": "^2.0.10",
         "ts-node": "^10.9.2",
