@@ -16,6 +16,8 @@ export async function routes(fastify: FastifyInstance) {
             fastify.post("/login", { schema: loginSchema }, login);
             fastify.post("/verify", { schema: loginSchema }, login);
             fastify.get("/health", healthRoute);
+            fastify.get("/gdpr/delete", { preHandler: fastify.jwtAuth }, deleteUser);
+            fastify.get("/gdpr/anonymize", { preHandler: fastify.jwtAuth }, anonymizeUser);
             fastify.register(
                 (fastify: FastifyInstance) => {
                     fastify.post("/init", { preHandler: fastify.jwtAuth }, init2FA);
@@ -43,13 +45,5 @@ export async function routes(fastify: FastifyInstance) {
             fastify.get("/health", healthRoute);
         },
         { prefix: "profile" },
-    );
-
-    fastify.register(
-        (fastify: FastifyInstance) => {
-            fastify.get("/delete", { preHandler: fastify.jwtAuth }, deleteUser);
-            fastify.get("/anonymize", { preHandler: fastify.jwtAuth }, anonymizeUser);
-        },
-        { prefix: "gdpr" },
     );
 }

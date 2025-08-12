@@ -34,6 +34,9 @@ exec-nginx:
 exec-vault:
 	docker exec -it vault sh
 
+exec-match:
+	docker exec -it match-service bash
+
 clean-vol:
 	docker compose down -v
 	docker volume prune -f
@@ -84,3 +87,6 @@ vaultcmd:
 
 copy-db:
 	docker cp auth:/app/db/auth.db .
+
+copy-matchhistory:
+	docker cp match-service:/app/db/match.db .
