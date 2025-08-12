@@ -7,12 +7,14 @@ export async function disable2FA(request: FastifyRequest, reply: FastifyReply) {
     const user = request.user;
     const { token } = request.body as { token: string };
 
-    // First verify the 2FA token
-    const rows = await request.server.db.query(`SELECT twofa_secret FROM users WHERE id = ?`, [user.id]);
-    const row = rows[0];
+    // First verify the 2FA token using encrypted secret
+    const secret = await request.server.db.get2FASecret(user.id);
+    if (!secret) {
+        return reply.status(400).send({ error: "2FA not configured" });
+    }
 
     const verified = speakeasy.totp.verify({
-        secret: row.twofa_secret,
+        secret: secret,
         encoding: "base32",
         token,
     });
@@ -21,33 +23,33 @@ export async function disable2FA(request: FastifyRequest, reply: FastifyReply) {
         return reply.status(400).send({ error: "Invalid 2FA code" });
     }
 
-    // Disable 2FA
-    await request.server.db.run(
-        `UPDATE users SET twofa_enabled = 0, twofa_secret = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
-        [user.id],
-    );
+    // Disable 2FA using the new method
+    await request.server.db.disable2FA(user.id);
 
     return reply.send({ success: true });
 }
 
 export async function verify2FA(request: FastifyRequest, reply: FastifyReply) {
     const user = request.user;
-    if (!user?.twoFaEnabled) {
-        return reply.status(400).send({ error: "2FA not enabled" });
-    }
-
     const { token } = request.body as { token: string };
     if (!token) return reply.status(400).send({ error: "Missing token" });
 
-    const rows = await request.server.db.query(`SELECT twofa_secret FROM users WHERE id = ?`, [user.id]);
+    // Check if 2FA is enabled and get encrypted secret
+    const rows = await request.server.db.query(`SELECT twofa_enabled FROM users WHERE id = ?`, [user.id]);
     const row = rows[0];
 
-    if (!row?.twofa_secret) {
+    if (!row?.twofa_enabled) {
+        return reply.status(400).send({ error: "2FA not enabled" });
+    }
+
+    // Get decrypted secret
+    const secret = await request.server.db.get2FASecret(user.id);
+    if (!secret) {
         return reply.status(400).send({ error: "2FA not properly configured" });
     }
 
     const verified = speakeasy.totp.verify({
-        secret: row.twofa_secret,
+        secret: secret,
         encoding: "base32",
         token,
     });
@@ -70,10 +72,8 @@ export async function init2FA(request: FastifyRequest, reply: FastifyReply) {
 
     const qrCodeSvg = await qrcode.toString(secret.otpauth_url!, { type: "svg" });
 
-    await request.server.db.run(`UPDATE users SET twofa_secret = ? , updated_at = CURRENT_TIMESTAMP WHERE id = ?`, [
-        secret.base32,
-        user.id,
-    ]);
+    // Store encrypted secret using the new method
+    await request.server.db.store2FASecret(user.id, secret.base32);
 
     return reply.send({ qrCodeSvg });
 }
@@ -86,13 +86,12 @@ export async function complete2FA(request: FastifyRequest, reply: FastifyReply):
     const { token } = request.body as complete2FABody;
     if (!token) return reply.status(400).send({ error: "Missing token" });
 
-    const rows = await request.server.db.query(`SELECT twofa_secret FROM users WHERE id = ?`, [user.id]);
-
-    const row = rows[0];
-    if (!row?.twofa_secret) return reply.status(400).send({ error: "No 2FA setup in progress" });
+    // Get decrypted secret to verify
+    const secret = await request.server.db.get2FASecret(user.id);
+    if (!secret) return reply.status(400).send({ error: "No 2FA setup in progress" });
 
     const verified = speakeasy.totp.verify({
-        secret: row.twofa_secret,
+        secret: secret,
         encoding: "base32",
         token,
     });
@@ -101,9 +100,8 @@ export async function complete2FA(request: FastifyRequest, reply: FastifyReply):
         return reply.status(400).send({ error: "Invalid 2FA code" });
     }
 
-    await request.server.db.run(`UPDATE users SET twofa_enabled = 1 , updated_at = CURRENT_TIMESTAMP WHERE id = ?`, [
-        user.id,
-    ]);
+    // Enable 2FA using the new method
+    await request.server.db.enable2FA(user.id);
 
     user.twoFaEnabled = true;
     const jwtToken = request.server.jwt.sign(user, { expiresIn: "1h" });

@@ -1,5 +1,6 @@
 import "fastify";
 import { User } from "./auth.types";
+import { EncryptionPlugin } from "../plugins/encryption.plugin";
 
 declare module "fastify" {
     interface FastifyRequest {
@@ -24,6 +25,14 @@ declare module "fastify" {
                 lastID: number; // Auto-generated ID
                 changes: number; // Rows affected
             }>;
+            // 2FA encryption methods
+            store2FASecret(userId: string, secret: string): Promise<void>;
+            get2FASecret(userId: string): Promise<string | null>;
+            enable2FA(userId: string): Promise<void>;
+            disable2FA(userId: string): Promise<void>;
         };
+
+        // Encryption plugin methods
+        encryption: EncryptionPlugin;
     }
 }

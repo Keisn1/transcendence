@@ -70,6 +70,15 @@ path "pki/roles/https-cert-role" {
 path "secret/data/jwt" {
   capabilities = ["read"]
 }
+path "transit/encrypt/twofa-encryption" {
+  capabilities = ["update"]
+}
+path "transit/decrypt/twofa-encryption" {
+  capabilities = ["update"]
+}
+path "auth/token/lookup-self" {
+  capabilities = ["read"]
+}
 EOF
 
 echo "Writing user-policy..."
@@ -91,6 +100,9 @@ path "secret/data/jwt" {
 path "pki/*" {
   capabilities = ["read"]
 }
+path "auth/token/lookup-self" {
+  capabilities = ["read"]
+}
 EOF
 vault policy write fileservice-policy /vault/init/fileservice-policy.hcl || echo "policy has already been written."
 
@@ -109,6 +121,9 @@ path "secret/data/jwt" {
   capabilities = ["read"]
 }
 path "pki/*" {
+  capabilities = ["read"]
+}
+path "auth/token/lookup-self" {
   capabilities = ["read"]
 }
 EOF
@@ -277,6 +292,25 @@ VAULT_MATCHSERVICESECRET_ID=$SECRETMATCHSERVICE_ID
 
 EOF
 echo "AppRole credentials retrieved."
+
+
+
+
+# Enable transit secrets engine for encryption as a service (using root token)
+echo "Enabling transit secrets engine..."
+vault secrets enable transit || echo "Transit already enabled."
+
+# Create encryption key for 2FA secrets (using root token)
+echo "Creating 2FA encryption key in transit engine..."
+vault write -f transit/keys/twofa-encryption
+
+echo "2FA encryption key 'twofa-encryption' created in transit engine"
+
+
+
+
+
+
 echo "VAULT_TOKEN before is: $VAULT_TOKEN" #DISABLE IN PROD
 # --- Authenticate using AppRole ---
 VAULT_TOKEN=$(vault write -field=token auth/approle/login role_id="$ROLE_ID" secret_id="$SECRET_ID")
