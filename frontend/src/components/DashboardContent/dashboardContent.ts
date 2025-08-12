@@ -45,9 +45,9 @@ export class DashboardContent extends BaseComponent {
                 }
             } else {
                 // fetching other user
-                const profile = await this.userService.getUserById(this.userId);
-                this.userAvatar.src = profile.avatar;
-                this.userName.textContent = profile.username;
+                const publicUser = await this.userService.getUserById(this.userId);
+                this.userAvatar.src = publicUser.avatar;
+                this.userName.textContent = publicUser.username;
             }
         } catch (err) {
             console.error("Failed to load user info:", err);
