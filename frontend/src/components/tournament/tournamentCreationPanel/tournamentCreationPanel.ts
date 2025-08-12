@@ -2,7 +2,7 @@ import playerSlotTemplate from "./playerSlot.html?raw";
 import tournamentCreationPanelTemplate from "./tournamentCreationPanel.html?raw";
 import { BaseComponent } from "../../BaseComponent.ts";
 import { TournamentController } from "../../../controllers/tournament.controller.ts";
-import type { PublicUser } from "../../../types/auth.types.ts";
+import type { RealPublicUser } from "../../../types/auth.types.ts";
 import { v4 as uuidv4 } from "uuid";
 import { AuthController } from "../../../controllers/auth.controller.ts";
 import { TwoFactorVerification } from "../../twoFactorVerification/twoFactorVerification.ts";
@@ -12,7 +12,7 @@ export class TournamentCreationPanel extends BaseComponent {
     private playersContainer: HTMLElement;
     private addPlayerBtn: HTMLButtonElement;
     private addedPlayersCount: number = 0;
-    private registeredPlayers: PublicUser[] = [];
+    private registeredPlayers: RealPublicUser[] = [];
 
     constructor() {
         super("div", "tournament-container");
@@ -92,8 +92,15 @@ export class TournamentCreationPanel extends BaseComponent {
                 }
             }
 
-            if (this.registeredPlayers.some((p) => p.id === user.id)) throw new Error("Player already registered");
-            this.registeredPlayers.push(user);
+            const publicUser: RealPublicUser = {
+                id: user.id,
+                username: user.username,
+                avatar: user.avatar,
+            };
+
+            if (this.registeredPlayers.some((p) => p.id === publicUser.id))
+                throw new Error("Player already registered");
+            this.registeredPlayers.push(publicUser);
             slot.dataset.playerId = user.id;
             this.showMessage("User registered successfully");
         } catch (err: any) {

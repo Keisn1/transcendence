@@ -2,23 +2,23 @@ import { TournamentEvent, TournamentMachine, TournamentState } from "./tournamen
 import Router from "../router";
 import { TournamentService } from "../services/tournament/tournament.service.ts";
 import type { MatchResult, Match } from "../types/match.types.ts";
-import type { PublicUser } from "../types/auth.types.ts";
+import type { RealPublicUser } from "../types/auth.types.ts";
 import { v4 as uuidv4 } from "uuid";
 
 export class Tournament {
     id: string = "";
-    players: PublicUser[] = [];
+    players: RealPublicUser[] = [];
     matches: Match[] = [];
     nextMatchIdx: number = 0;
     state: string = TournamentState.UNINITIALIZED;
 
-    constructor(players?: PublicUser[]) {
+    constructor(players?: RealPublicUser[]) {
         if (!players) return;
         this.players = players;
         this.buildRound(players);
     }
 
-    buildRound(players: PublicUser[]) {
+    buildRound(players: RealPublicUser[]) {
         for (let i = 0; i < players.length; i += 2) {
             const p1 = players[i];
             const p2 = players[i + 1];
@@ -73,7 +73,7 @@ export class TournamentController {
         return TournamentController.instance;
     }
 
-    public async createTournament(players: PublicUser[]): Promise<void> {
+    public async createTournament(players: RealPublicUser[]): Promise<void> {
         const tournament = new Tournament(players);
 
         tournament.id = await this.tournamentService.createTournament(tournament);
@@ -87,7 +87,8 @@ export class TournamentController {
         return this.tournament;
     }
 
-    getTournamentMachine(): TournamentMachine { // should this be public?
+    getTournamentMachine(): TournamentMachine {
+        // should this be public?
         return this.tournamentMachine;
     }
 

@@ -76,3 +76,4 @@
     - but here we have a Profile type, and i just deleted twoFaEnabled on it
   - POST /auth/verify
     - in frontend/auth/auth.service ts verifyUser returns a PublicUser object which is not necessary, should only return id/username/avatar
+    - actually verify can stay like this, but the user object returned by authService.verifyUser should be a real PublicUser

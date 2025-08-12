@@ -1,3 +1,9 @@
+export interface RealPublicUser {
+    id: string;
+    username: string;
+    avatar: string;
+}
+
 export interface PublicUser {
     id: string;
     username: string;

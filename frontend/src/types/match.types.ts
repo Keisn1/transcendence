@@ -1,10 +1,10 @@
-import { type PublicUser } from "./auth.types";
+import { type RealPublicUser } from "./auth.types";
 import type { GameMode } from "./game.types";
 
 export interface Match {
     matchId: string;
-    player1: PublicUser;
-    player2: PublicUser;
+    player1: RealPublicUser;
+    player2: RealPublicUser;
     result: MatchResult;
 }
 
