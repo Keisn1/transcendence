@@ -4,6 +4,7 @@ import { login, loginSchema } from "../controllers/login.controller";
 import register, { registerSchema } from "../controllers/register.controller";
 import updateUser, { updateProfileSchema as updateUserSchema } from "../controllers/updateUser.controller";
 import getProfile, { getCurrentUserSchema } from "../controllers/getProfile.controller";
+import { deleteUser, anonymizeUser } from "../controllers/gpdr.controller";
 
 import { complete2FASchema, disable2FA, verify2FA, verify2FASchema } from "../controllers/twofa.controller";
 import { init2FA, complete2FA } from "../controllers/twofa.controller";
@@ -42,5 +43,13 @@ export async function routes(fastify: FastifyInstance) {
             fastify.get("/health", healthRoute);
         },
         { prefix: "profile" },
+    );
+
+    fastify.register(
+        (fastify: FastifyInstance) => {
+            fastify.get("/delete", { preHandler: fastify.jwtAuth }, deleteUser);
+            fastify.get("/anonymize", { preHandler: fastify.jwtAuth }, anonymizeUser);
+        },
+        { prefix: "gdpr" },
     );
 }

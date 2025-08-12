@@ -22,13 +22,10 @@ export default class extends AbstractView {
 
     private async handleGdprAction(action: "delete" | "anonymize") {
         try {
-            const response = await fetch("/api/user/gdpr-action", {
-                method: "POST",
+            const response = await fetch("/api/gdpr/" + action, {
                 headers: {
-                    "Content-Type": "application/json",
                     Authorization: `Bearer ${localStorage.getItem("authToken")}`,
                 },
-                body: JSON.stringify({ action }),
             });
 
             const result = await response.json();

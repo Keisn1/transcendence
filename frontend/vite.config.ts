@@ -10,6 +10,11 @@ export default defineConfig({
                 changeOrigin: true,
                 secure: false,
             },
+            "/api/gdpr": {
+                target: "http://localhost:3000",
+                changeOrigin: true,
+                secure: false,
+            },
             "/api/user": {
                 target: "http://localhost:3000",
                 changeOrigin: true,
