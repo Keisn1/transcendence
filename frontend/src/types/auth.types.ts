@@ -10,7 +10,6 @@ export interface Profile {
     username: string;
     email: string;
     avatar: string;
-    twoFaEnabled: boolean;
 }
 
 export interface LoginResponse {

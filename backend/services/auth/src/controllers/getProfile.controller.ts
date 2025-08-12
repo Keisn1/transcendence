@@ -20,7 +20,6 @@ export default async function getProfile(request: FastifyRequest, reply: Fastify
             username: user.username,
             email: user.email,
             avatar: user.avatar,
-            twoFaEnabled: Boolean(user.twofa_enabled),
         };
 
         return reply.status(200).send({ profile });
@@ -42,7 +41,6 @@ export const getProfileSchema = {
                         username: { type: "string" },
                         email: { type: "string", format: "email" },
                         avatar: { type: "string", format: "uri-reference" },
-                        twoFaEnabled: { type: "boolean" },
                     },
                     required: ["id", "username", "email", "avatar"],
                 },
