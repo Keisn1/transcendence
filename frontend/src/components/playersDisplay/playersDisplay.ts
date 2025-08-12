@@ -1,14 +1,14 @@
 import { BaseComponent } from "../BaseComponent";
 import playersDisplayTemplate from "./playersDisplay.html?raw";
 import { AuthService } from "../../services/auth/auth.service";
-import type { RealPublicUser } from "../../types/auth.types";
+import type { PublicUser } from "../../types/auth.types";
 import type { GameMode } from "../../types/game.types";
 
 export class PlayersDisplay extends BaseComponent {
     private authService: AuthService;
     private canvasWidth: number;
 
-    constructor(canvasWidth: number, tournamentPlayers?: { player1: RealPublicUser; player2: RealPublicUser }) {
+    constructor(canvasWidth: number, tournamentPlayers?: { player1: PublicUser; player2: PublicUser }) {
         super("div", "players-display", "mb-6");
         this.authService = AuthService.getInstance();
         this.canvasWidth = canvasWidth;
@@ -31,7 +31,7 @@ export class PlayersDisplay extends BaseComponent {
             .replace("{{player2Content}}", player2Content);
     }
 
-    private renderTournament(players: { player1: RealPublicUser; player2: RealPublicUser }) {
+    private renderTournament(players: { player1: PublicUser; player2: PublicUser }) {
         const player2Content = `
             <img src="${players.player2.avatar}"
                  alt="${players.player2.username}"

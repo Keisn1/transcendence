@@ -2,7 +2,7 @@ import { BaseComponent } from "../../BaseComponent.ts";
 import { TournamentController } from "../../../controllers/tournament.controller.ts";
 import leaderboardTemplate from "./leaderboard.html?raw";
 import leaderboardEntryTemplate from "./leaderboardEntry.html?raw";
-import type { RealPublicUser } from "../../../types/auth.types.ts";
+import type { PublicUser } from "../../../types/auth.types.ts";
 
 export class Leaderboard extends BaseComponent {
     private tournamentController: TournamentController;
@@ -18,10 +18,10 @@ export class Leaderboard extends BaseComponent {
         this.fillLeaderboard();
     }
 
-    private getPlayerScores(): { player: RealPublicUser; count: number }[] {
+    private getPlayerScores(): { player: PublicUser; count: number }[] {
         const tournament = this.tournamentController.getTournament()!;
 
-        const playerScores = new Map<string, { player: RealPublicUser; count: number }>();
+        const playerScores = new Map<string, { player: PublicUser; count: number }>();
 
         for (const player of tournament.players) {
             playerScores.set(player.id, { player: player, count: 0 });

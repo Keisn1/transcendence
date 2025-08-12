@@ -1,10 +1,10 @@
-export interface RealPublicUser {
+export interface PublicUser {
     id: string;
     username: string;
     avatar: string;
 }
 
-export interface PublicUser {
+export interface User {
     id: string;
     username: string;
     avatar: string;
@@ -20,7 +20,7 @@ export interface Profile {
 
 export interface LoginResponse {
     token: string;
-    user: PublicUser;
+    user: User;
 }
 
 export interface LoginBody {
@@ -36,7 +36,7 @@ export interface RegisterBody {
 
 export interface RegisterResponse {
     token: string;
-    user: PublicUser;
+    user: User;
 }
 
 export interface UpdateUserBody {
@@ -47,7 +47,7 @@ export interface UpdateUserBody {
 }
 
 export interface UpdateUserResponse {
-    user: PublicUser;
+    user: User;
 }
 
 export interface SignupForm {
@@ -59,5 +59,5 @@ export interface SignupForm {
 
 export interface Complete2FaResponse {
     token: string;
-    user: PublicUser;
+    user: User;
 }

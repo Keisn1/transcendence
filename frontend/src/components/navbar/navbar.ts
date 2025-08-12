@@ -2,7 +2,7 @@ import navbarTemplate from "./navbar.html?raw";
 import { BaseComponent } from "../BaseComponent";
 import { AuthService } from "../../services/auth/auth.service.ts";
 import { AuthController } from "../../controllers/auth.controller.ts";
-import type { PublicUser } from "../../types/auth.types.ts";
+import type { User } from "../../types/auth.types.ts";
 
 export class Navbar extends BaseComponent {
     private authService: AuthService;
@@ -62,7 +62,7 @@ export class Navbar extends BaseComponent {
     updateNavbarState() {
         console.log("updating navbar");
         const isAuthenticated = this.authService.isAuthenticated();
-        const user: PublicUser = this.authService.getCurrentUser()!;
+        const user: User = this.authService.getCurrentUser()!;
 
         const authButtons = this.container.querySelector("#auth-buttons");
         const avatarImg = this.container.querySelector("#navbar-avatar") as HTMLImageElement;

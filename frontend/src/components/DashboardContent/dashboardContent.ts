@@ -68,7 +68,6 @@ export class DashboardContent extends BaseComponent {
     private renderMatch(match: GetMatchResponse): string {
         const user = this.authService.getCurrentUser()!;
         // make call to /api/user/:id
-        // const player2: PublicUser = fetch..
         const isPlayer1 = match.player1Id === user.id;
         const userScore = isPlayer1 ? match.player1Score : match.player2Score;
         const opponentScore = isPlayer1 ? match.player2Score : match.player1Score;

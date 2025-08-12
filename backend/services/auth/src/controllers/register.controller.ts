@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { genSaltSync, hashSync } from "bcrypt";
-import { RegisterBody, RegisterResponse, PublicUser } from "../types/auth.types";
+import { RegisterBody, RegisterResponse, User } from "../types/auth.types";
 import { v4 as uuidv4 } from "uuid";
 
 export default async function register(
@@ -21,7 +21,7 @@ export default async function register(
             [userId, username, email, passwordHash, "/uploads/default-pfp.png"],
         );
 
-        const user: PublicUser = {
+        const user: User = {
             id: userId, // Use generated UUID instead of result.lastID
             username: username,
             avatar: "/uploads/default-pfp.png",

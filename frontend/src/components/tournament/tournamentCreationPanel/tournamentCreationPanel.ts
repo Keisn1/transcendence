@@ -2,7 +2,7 @@ import playerSlotTemplate from "./playerSlot.html?raw";
 import tournamentCreationPanelTemplate from "./tournamentCreationPanel.html?raw";
 import { BaseComponent } from "../../BaseComponent.ts";
 import { TournamentController } from "../../../controllers/tournament.controller.ts";
-import type { RealPublicUser } from "../../../types/auth.types.ts";
+import type { PublicUser } from "../../../types/auth.types.ts";
 import { v4 as uuidv4 } from "uuid";
 import { AuthController } from "../../../controllers/auth.controller.ts";
 import { TwoFactorVerification } from "../../twoFactorVerification/twoFactorVerification.ts";
@@ -12,7 +12,7 @@ export class TournamentCreationPanel extends BaseComponent {
     private playersContainer: HTMLElement;
     private addPlayerBtn: HTMLButtonElement;
     private addedPlayersCount: number = 0;
-    private registeredPlayers: RealPublicUser[] = [];
+    private registeredPlayers: PublicUser[] = [];
 
     constructor() {
         super("div", "tournament-container");
@@ -92,7 +92,7 @@ export class TournamentCreationPanel extends BaseComponent {
                 }
             }
 
-            const publicUser: RealPublicUser = {
+            const publicUser: PublicUser = {
                 id: user.id,
                 username: user.username,
                 avatar: user.avatar,

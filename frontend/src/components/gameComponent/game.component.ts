@@ -8,14 +8,14 @@ import type IGameControls from "../gameControls/IGameControls";
 import { MatchService } from "../../services/match/match.service";
 import { AuthService } from "../../services/auth/auth.service";
 import { PlayersDisplay } from "../playersDisplay/playersDisplay.ts";
-import type { RealPublicUser } from "../../types/auth.types.ts";
+import type { PublicUser } from "../../types/auth.types.ts";
 import type { PostMatchBody } from "../../types/match.types.ts";
 import type { GameMode } from "../../types/game.types.ts";
 
 type ControlsConstructor = (new () => GameControlsComponent) | (new () => GameControlsTournamentComponent);
 
 interface GameComponentOptions {
-    tournamentPlayers?: { player1: RealPublicUser; player2: RealPublicUser };
+    tournamentPlayers?: { player1: PublicUser; player2: PublicUser };
 }
 
 export class GameComponent extends BaseComponent {

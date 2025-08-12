@@ -1,6 +1,6 @@
 // import { TwoFactorSetup } from "../../components/twoFactorSetup/twoFactorSetup";
 import type {
-    PublicUser,
+    User,
     LoginResponse,
     LoginBody,
     SignupForm,
@@ -11,11 +11,11 @@ import type {
 import { AuthStorage } from "./auth.storage";
 
 export class AuthService {
-    private pendingLoginData: { token: string; user: PublicUser } | null = null;
-    private pendingVerifyData: { token: string; user: PublicUser } | null = null;
+    private pendingLoginData: { token: string; user: User } | null = null;
+    private pendingVerifyData: { token: string; user: User } | null = null;
     private static instance: AuthService;
-    private currentUser: PublicUser | null = null;
-    private listeners: ((user: PublicUser | null) => void)[] = [];
+    private currentUser: User | null = null;
+    private listeners: ((user: User | null) => void)[] = [];
 
     private constructor() {
         this.currentUser = AuthStorage.loadUser();
@@ -28,7 +28,7 @@ export class AuthService {
         return AuthService.instance;
     }
 
-    getCurrentUser(): PublicUser | null {
+    getCurrentUser(): User | null {
         return this.currentUser;
     }
 
@@ -52,7 +52,7 @@ export class AuthService {
         }
 
         const data: LoginResponse = await response.json();
-        const user: PublicUser = data.user;
+        const user: User = data.user;
 
         if (user.twoFaEnabled) {
             // Store login data temporarily
@@ -123,7 +123,7 @@ export class AuthService {
         }
 
         const data: RegisterResponse = await response.json();
-        const user: PublicUser = data.user;
+        const user: User = data.user;
         this.currentUser = user;
         AuthStorage.saveUser(user);
         AuthStorage.saveToken(data.token);
@@ -217,7 +217,7 @@ export class AuthService {
         }
 
         const data: Complete2FaResponse = await response.json();
-        const user: PublicUser = data.user;
+        const user: User = data.user;
 
         // Complete login immediately
         this.currentUser = user;
@@ -227,7 +227,7 @@ export class AuthService {
     }
 
     // way of consumer to subscribe to changes in the AuthService
-    onAuthChange(callback: (user: PublicUser | null) => void): () => void {
+    onAuthChange(callback: (user: User | null) => void): () => void {
         this.listeners.push(callback);
         // Return cleanup function
         return () => {
@@ -240,13 +240,13 @@ export class AuthService {
         this.listeners.forEach((listener) => listener(this.currentUser));
     }
 
-    updateCurrentUser(user: PublicUser): void {
+    updateCurrentUser(user: User): void {
         this.currentUser = user;
         AuthStorage.saveUser(user);
         this.notifyListeners();
     }
 
-    async verifyUser(credentials: LoginBody): Promise<PublicUser> {
+    async verifyUser(credentials: LoginBody): Promise<User> {
         const response = await fetch("/api/auth/verify", {
             method: "POST",
             headers: {
@@ -260,7 +260,7 @@ export class AuthService {
         }
 
         const data: LoginResponse = await response.json();
-        const user: PublicUser = data.user;
+        const user: User = data.user;
 
         if (user.twoFaEnabled) {
             this.pendingVerifyData = { token: data.token, user };
@@ -270,7 +270,7 @@ export class AuthService {
         return user;
     }
 
-    async complete2FAVerify(token: string): Promise<PublicUser> {
+    async complete2FAVerify(token: string): Promise<User> {
         if (!this.pendingVerifyData) {
             throw new Error("No pending login session");
         }
@@ -290,7 +290,7 @@ export class AuthService {
             throw new Error(error.error || "Invalid 2FA code");
         }
 
-        const user: PublicUser = this.pendingVerifyData.user;
+        const user: User = this.pendingVerifyData.user;
         this.pendingLoginData = null;
         return user;
     }
