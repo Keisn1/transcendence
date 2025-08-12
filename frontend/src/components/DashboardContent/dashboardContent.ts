@@ -1,20 +1,28 @@
 import { BaseComponent } from "../BaseComponent.ts";
 import { AuthService } from "../../services/auth/auth.service.ts";
 import { MatchService } from "../../services/match/match.service.ts";
+import { UserService } from "../../services/user/user.service.ts";
 import dashboardContentTemplate from "./dashboardContent.html?raw";
 import type { GetMatchResponse } from "../../types/match.types.ts";
 
 export class DashboardContent extends BaseComponent {
     private authService: AuthService;
     private matchService: MatchService;
+    private userService: UserService;
+
+    private userId?: string; // the user whose dashboard we render
+
     private userAvatar: HTMLImageElement;
     private userName: HTMLElement;
     private matchHistoryContent: HTMLElement;
 
-    constructor() {
+    constructor(userId?: string) {
         super("div", "dashboard-content");
+        this.userId = userId;
+
         this.authService = AuthService.getInstance();
         this.matchService = MatchService.getInstance();
+        this.userService = UserService.getInstance();
 
         this.container.innerHTML = dashboardContentTemplate;
 
@@ -26,17 +34,34 @@ export class DashboardContent extends BaseComponent {
         this.loadMatchHistory();
     }
 
-    private loadUserInfo() {
-        const user = this.authService.getCurrentUser();
-        if (user) {
-            this.userAvatar.src = user.avatar;
-            this.userName.textContent = user.username;
+    private async loadUserInfo() {
+        try {
+            if (!this.userId) {
+                // current user
+                const user = this.authService.getCurrentUser();
+                if (user) {
+                    this.userAvatar.src = user.avatar;
+                    this.userName.textContent = user.username;
+                }
+            } else {
+                // fetching other user
+                const profile = await this.userService.getUserById(this.userId);
+                this.userAvatar.src = profile.avatar;
+                this.userName.textContent = profile.username;
+            }
+        } catch (err) {
+            console.error("Failed to load user info:", err);
         }
     }
 
+
     private async loadMatchHistory() {
         try {
-            const matches = await this.matchService.getUserMatches();
+            // use different getMatches method
+            const matches = this.userId
+                ? await this.matchService.getMatchesByUser(this.userId)
+                : await this.matchService.getUserMatches();
+
             this.renderMatches(matches);
         } catch (error) {
             console.error("Failed to load match history:", error);

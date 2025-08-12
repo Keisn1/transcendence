@@ -7,6 +7,7 @@ import SignUpView from "./views/SignUpView.ts";
 import TournamentView from "./views/TournamentView.ts";
 import GdprSettingsView from "./views/GdprSettingsView";
 import SettingsView from "./views/SettingsView";
+import UserView from "./views/UserView.ts";
 export default class Router {
     private currentView: AbstractView | null = null;
 
@@ -53,6 +54,10 @@ export default class Router {
             {
                 path: "/settings/gdpr",
                 view: GdprSettingsView,
+            },
+            {
+                path: "/user/:id",
+                view: UserView,
             }
         ];
 
