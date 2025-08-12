@@ -81,3 +81,6 @@ vaultcmd:
 	docker exec -it vault vault $(filter-out $@,$(MAKECMDGOALS))
 %:
 	@:
+
+copy-db:
+	docker cp auth:/app/db/auth.db .
