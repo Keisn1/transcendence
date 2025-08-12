@@ -27,20 +27,18 @@ export async function deleteUser(request: FastifyRequest, reply: FastifyReply) {
         };
 
         // 1. Delete from match-service
-        try {
-            const matchServiceUrl = getServiceUrl("match-service", 3002);
-            const matchResponse = await fetch(`${matchServiceUrl}/gdpr/delete/${userId}`, {
-                method: "DELETE",
-                headers: {
-                    Authorization: `Bearer ${generateServiceToken()}`,
-                },
-            });
+        const matchServiceUrl = getServiceUrl("match-service", 3002);
 
-            if (!matchResponse.ok) {
-                console.warn(`GDPR: Match-service deletion failed: ${matchResponse.status}`);
-            }
-        } catch (error: any) {
-            console.error("GDPR: Match-service deletion error:", error);
+        const matchResponse = await fetch(`${matchServiceUrl}/gdpr/delete/${userId}`, {
+            method: "DELETE",
+            headers: {
+                Authorization: `Bearer ${generateServiceToken()}`,
+            },
+        });
+
+        if (!matchResponse.ok) {
+            const errorText = await matchResponse.text().catch(() => "Unknown error");
+            throw new Error(`Match-service deletion failed: ${matchResponse.status} - ${errorText}`);
         }
 
         // 3. Finally delete from auth-service (users table)
@@ -55,7 +53,10 @@ export async function deleteUser(request: FastifyRequest, reply: FastifyReply) {
         });
     } catch (error: any) {
         console.error("GDPR: Complete user deletion error:", error);
-        return reply.status(500).send({ error: "User deletion failed" });
+        return reply.status(500).send({
+            error: "User deletion failed",
+            details: error.message,
+        });
     }
 }
 

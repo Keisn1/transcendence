@@ -4,15 +4,15 @@ export async function deleteUserData(request: any, reply: any) {
     try {
         // Delete all matches where user participated
         const anonymousPlayerId = "00000000-0000-0000-0000-000000000000";
-        const matchResult1 = await request.server.db.run(
-            `UPDATE matches SET player1Id  = ?, updated_at = CURRENT_TIMESTAMP WHERE player1Id = ? `,
-            [anonymousPlayerId, userId],
-        );
+        const matchResult1 = await request.server.db.run(`UPDATE matches SET player1Id  = ? WHERE player1Id = ? `, [
+            anonymousPlayerId,
+            userId,
+        ]);
 
-        const matchResult2 = await request.server.db.run(
-            `UPDATE matches SET player2Id  = ?, updated_at = CURRENT_TIMESTAMP WHERE player2Id = ? `,
-            [anonymousPlayerId, userId],
-        );
+        const matchResult2 = await request.server.db.run(`UPDATE matches SET player2Id  = ? WHERE player2Id = ? `, [
+            anonymousPlayerId,
+            userId,
+        ]);
 
         // Delete tournament participations if table exists
         let tournamentResult = { changes: 0 };
