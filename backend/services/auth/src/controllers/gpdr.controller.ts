@@ -12,28 +12,28 @@ export async function deleteUser(request: FastifyRequest, reply: FastifyReply) {
 
     try {
         console.log(`GDPR: Starting complete deletion for user ${userId}`);
-        
+
         // Helper function to generate service token using Fastify's JWT
         const generateServiceToken = () => {
             return (request.server as any).jwt.sign(
-                { 
-                    iss: 'auth-service',
-                    aud: 'internal-services',
-                    sub: 'system',
-                    scope: 'gdpr:delete'
+                {
+                    iss: "auth-service",
+                    aud: "internal-services",
+                    sub: "system",
+                    scope: "gdpr:delete",
                 },
-                { expiresIn: '5m' }
+                { expiresIn: "5m" },
             );
         };
 
         // 1. Delete from match-service
         try {
-            const matchServiceUrl = getServiceUrl('match-service', 3002);
-            const matchResponse = await fetch(`${matchServiceUrl}/api/user/${userId}/gdpr`, {
-                method: 'DELETE',
+            const matchServiceUrl = getServiceUrl("match-service", 3002);
+            const matchResponse = await fetch(`${matchServiceUrl}/gdpr/delete/${userId}`, {
+                method: "DELETE",
                 headers: {
-                    'Authorization': `Bearer ${generateServiceToken()}`
-                }
+                    Authorization: `Bearer ${generateServiceToken()}`,
+                },
             });
 
             if (!matchResponse.ok) {
@@ -43,34 +43,16 @@ export async function deleteUser(request: FastifyRequest, reply: FastifyReply) {
             console.error("GDPR: Match-service deletion error:", error);
         }
 
-        // 2. Delete from match-service (if it exists)
-        try {
-            const matchServiceUrl = getServiceUrl('match-service', 3002);
-            const matchResponse = await fetch(`${matchServiceUrl}/api/match/user/${userId}/gdpr`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${generateServiceToken()}`
-                }
-            });
-
-            if (!matchResponse.ok) {
-                console.warn(`GDPR: Match-service deletion failed: ${matchResponse.status}`);
-            }
-        } catch (error: any) {
-            console.warn("GDPR: Match-service deletion error (continuing anyway):", error.message || String(error));
-        }
-
         // 3. Finally delete from auth-service (users table)
         // Note: Avatar files become orphaned but inaccessible since user row is deleted
         const authResult = await (request.server as any).db.run("DELETE FROM users WHERE id = ?", [userId]);
-        
+
         console.log(`GDPR: Complete user deletion finished - ${authResult.changes} user record deleted`);
 
-        reply.status(200).send({ 
+        reply.status(200).send({
             success: true,
-            message: "User completely deleted from all services"
+            message: "User completely deleted from all services",
         });
-
     } catch (error: any) {
         console.error("GDPR: Complete user deletion error:", error);
         return reply.status(500).send({ error: "User deletion failed" });
@@ -82,52 +64,38 @@ export async function anonymizeUser(request: FastifyRequest, reply: FastifyReply
 
     try {
         console.log("GDPR: Anonymizing user ID:", userId);
-        
+
         // Helper function to generate service token using Fastify's JWT
         const generateServiceToken = () => {
             return (request.server as any).jwt.sign(
-                { 
-                    iss: 'auth-service',
-                    aud: 'internal-services',
-                    sub: 'system',
-                    scope: 'gdpr:anonymize'
+                {
+                    iss: "auth-service",
+                    aud: "internal-services",
+                    sub: "system",
+                    scope: "gdpr:anonymize",
                 },
-                { expiresIn: '5m' }
+                { expiresIn: "5m" },
             );
         };
 
         // 1. Anonymize in match-service
         try {
-            const matchServiceUrl = getServiceUrl('match-service', 3002);
-            const matchResponse = await fetch(`${matchServiceUrl}/api/user/${userId}/anonymize`, {
-                method: 'PUT',
+            const matchServiceUrl = getServiceUrl("match-service", 3002);
+            const matchResponse = await fetch(`${matchServiceUrl}/api/gdpr/anonymize/${userId}`, {
+                method: "PUT",
                 headers: {
-                    'Authorization': `Bearer ${generateServiceToken()}`
-                }
+                    Authorization: `Bearer ${generateServiceToken()}`,
+                },
             });
 
             if (!matchResponse.ok) {
                 console.warn(`GDPR: Match-service anonymization failed: ${matchResponse.status}`);
             }
         } catch (error: any) {
-            console.warn("GDPR: Match-service anonymization error (continuing anyway):", error.message || String(error));
-        }
-
-        // 2. Anonymize in match-service (if it exists)
-        try {
-            const matchServiceUrl = getServiceUrl('match-service', 3002);
-            const matchResponse = await fetch(`${matchServiceUrl}/api/match/user/${userId}/anonymize`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${generateServiceToken()}`
-                }
-            });
-
-            if (!matchResponse.ok) {
-                console.warn(`GDPR: Match-service anonymization failed: ${matchResponse.status}`);
-            }
-        } catch (error: any) {
-            console.warn("GDPR: Match-service anonymization error (continuing anyway):", error.message || String(error));
+            console.warn(
+                "GDPR: Match-service anonymization error (continuing anyway):",
+                error.message || String(error),
+            );
         }
 
         // 3. Finally anonymize in auth-service (users table)
@@ -138,10 +106,10 @@ export async function anonymizeUser(request: FastifyRequest, reply: FastifyReply
         );
 
         console.log("GDPR: User anonymized across all services, rows affected:", result.changes);
-        
-        reply.status(200).send({ 
+
+        reply.status(200).send({
             success: true,
-            message: "User anonymized successfully across all services"
+            message: "User anonymized successfully across all services",
         });
     } catch (error: any) {
         console.error("GDPR: Anonymization error:", error);

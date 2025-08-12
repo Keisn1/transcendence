@@ -40,8 +40,9 @@ export async function routes(fastify: FastifyInstance) {
         },
         { prefix: "tournament" },
     );
+}
 
-    // GDPR routes for service-to-service calls
-    fastify.delete("/user/:userId/gdpr", deleteUserData);
-    fastify.put("/user/:userId/anonymize", anonymizeUserData);
+export async function gdprRoutes(fastify: FastifyInstance) {
+    fastify.delete("/delete/:userId", deleteUserData);
+    fastify.put("/anonymize/:userId", anonymizeUserData);
 }

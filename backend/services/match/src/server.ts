@@ -1,6 +1,6 @@
 // backend/services/file/src/index.ts
 import Fastify from "fastify";
-import { routes } from "./routes/routes";
+import { gdprRoutes, routes } from "./routes/routes";
 import jwtPlugin from "./plugins/auth.plugin";
 
 //https
@@ -38,6 +38,7 @@ if (process.env.ENV === "production") {
             server.register(jwtPlugin, { jwtSecret });
             server.register(dbPlugin);
             server.register(routes, { prefix: "api" });
+            server.register(gdprRoutes);
 
             await server.listen({ port: 3002, host: "0.0.0.0" });
             console.log("✅ Production server started");
@@ -59,6 +60,7 @@ if (process.env.ENV === "production") {
     server.register(jwtPlugin, { jwtSecret }); // jwtAuth decorator only
     server.register(dbPlugin);
     server.register(routes, { prefix: "api" });
+    server.register(gdprRoutes);
 
     server.listen({ port: 3002, host: "0.0.0.0" }, (err, address) => {
         if (err) {
