@@ -4,11 +4,13 @@ import type { Profile } from "../../types/auth.types";
 import { AvatarUpload } from "../avatarUpload/avatarUpload";
 import { AuthStorage } from "../../services/auth/auth.storage";
 import { ProfileService } from "../../services/profile/profile.service";
+import { ProfileStatsComponent } from "../profileStats/profileStats";
 
 export class ProfileComponent extends BaseComponent {
     private profile: Profile | null = null;
     private avatarUpload: AvatarUpload | null = null;
     private pendingAvatarUrl: string | null = null; // Store pending avatar changes
+    private profileStats: ProfileStatsComponent | null = null;
 
     // View mode elements
     private usernameEl: HTMLElement;
@@ -48,6 +50,10 @@ export class ProfileComponent extends BaseComponent {
         this.setupEventListeners();
         this.setupAvatarUpload();
         this.loadProfile();
+
+        // add stats to profile
+        this.profileStats = new ProfileStatsComponent();
+        this.container.appendChild(this.profileStats.getContainer());
     }
 
     private setupEventListeners() {
@@ -169,6 +175,7 @@ export class ProfileComponent extends BaseComponent {
 
     destroy(): void {
         this.avatarUpload?.destroy();
+        this.profileStats?.destroy();
         super.destroy();
     }
 }
