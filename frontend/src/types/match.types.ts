@@ -20,7 +20,7 @@ export interface PostMatchBody {
     player2Score: number;
     gameMode: GameMode;
     duration?: number;
-    tournamentId: string; // either "" or proper id, maybe "?" not needed
+    tournamentId: string | undefined; // either "" or proper id, maybe "?" not needed
 }
 
 export interface GetMatchResponse {

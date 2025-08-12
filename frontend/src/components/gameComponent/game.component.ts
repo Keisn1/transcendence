@@ -16,6 +16,7 @@ type ControlsConstructor = (new () => GameControlsComponent) | (new () => GameCo
 
 interface GameComponentOptions {
     tournamentPlayers?: { player1: PublicUser; player2: PublicUser };
+    tournamentId?: string;
 }
 
 export class GameComponent extends BaseComponent {
@@ -29,12 +30,10 @@ export class GameComponent extends BaseComponent {
     private currentGameMode: GameMode = "pvp";
     private gameStartTime: number = 0;
     private options: GameComponentOptions;
-    private tournamentId: string;
 
-    constructor(ControlsClass: ControlsConstructor, options: GameComponentOptions = {}, tournamentId: string = "") {
+    constructor(ControlsClass: ControlsConstructor, options: GameComponentOptions = {}) {
         super("div", "game-container");
         this.options = options;
-        this.tournamentId = tournamentId;
 
         this.container.innerHTML = gameTemplate;
         this.canvas = this.container.querySelector("#canvas")!;
@@ -115,7 +114,7 @@ export class GameComponent extends BaseComponent {
                 player2Score: result.player2Score,
                 gameMode: this.currentGameMode,
                 duration,
-                tournamentId: this.tournamentId,
+                tournamentId: this.options.tournamentId,
             };
 
             if (this.options.tournamentPlayers) {
