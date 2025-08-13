@@ -8,8 +8,9 @@ export default class extends AbstractView {
     private navbar: Navbar | null = null;
     private userContent: UserContent | null = null;
 
-    constructor(router?: Router) {
-        super(router);
+    constructor(router?: Router, params?: any[]) {
+        super(router, params);
+        console.log(params);
         this.setTitle("User");
     }
 
@@ -19,13 +20,10 @@ export default class extends AbstractView {
             return;
         }
 
-        // TODO: erik: super hardcoded, I guess there should be something like this.router.getParam()
-        const userId = "36a67ec1-cd9b-4f9d-974a-807051e1dab8";
-
         this.navbar = new Navbar();
         document.body.appendChild(this.navbar.getContainer());
 
-        this.userContent = new UserContent(userId);
+        this.userContent = new UserContent(this.params.id);
         document.body.appendChild(this.userContent.getContainer());
     }
 

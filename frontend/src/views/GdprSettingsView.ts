@@ -2,13 +2,14 @@ import AbstractView from "./AbstractView";
 import { Navbar } from "../components/navbar/navbar";
 import { GdprButtons } from "../components/gdprButtons/gdprButtons";
 import { AuthController } from "../controllers/auth.controller";
+import type Router from "../router";
 
 export default class extends AbstractView {
     private navbar: Navbar | null = null;
     private gdprButtons: GdprButtons | null = null;
 
-    constructor(router?: any) {
-        super(router);
+    constructor(router?: Router, params?: any[]) {
+        super(router, params);
         this.setTitle("GDPR Settings");
     }
 

@@ -8,8 +8,8 @@ export default class extends AbstractView {
     private navbar: Navbar | null = null;
     private profileComponent: ProfileComponent | null = null;
 
-    constructor(router?: Router) {
-        super(router);
+    constructor(router?: Router, params?: any[]) {
+        super(router, params);
         this.setTitle("Profile");
     }
 

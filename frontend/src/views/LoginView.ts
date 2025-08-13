@@ -7,8 +7,8 @@ export default class extends AbstractView {
     private navbar: Navbar | null = null;
     private login: Login | null = null;
 
-    constructor(router?: Router) {
-        super(router);
+    constructor(router?: Router, params?: any[]) {
+        super(router, params);
         this.setTitle("Login");
     }
 

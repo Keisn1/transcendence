@@ -2,13 +2,14 @@ import AbstractView from "./AbstractView.ts";
 import { Navbar } from "../components/navbar/navbar.ts";
 import { Settings } from "../components/settings/settings.component.ts";
 import { AuthService } from "../services/auth/auth.service.ts";
+import type Router from "../router.ts";
 
 export default class extends AbstractView {
     private navbar: Navbar | null = null;
     private settings: Settings | null = null;
 
-    constructor(router?: any) {
-        super(router);
+    constructor(router?: Router, params?: any[]) {
+        super(router, params);
         this.setTitle("Settings");
     }
 
