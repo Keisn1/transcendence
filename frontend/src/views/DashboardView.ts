@@ -3,7 +3,7 @@ import { Navbar } from "../components/navbar/navbar.ts";
 import { AdLightBox } from "../components/adLightbox/adLightbox.ts";
 import type Router from "../router.ts";
 import { AuthService } from "../services/auth/auth.service.ts";
-import { DashboardContent } from "../components/DashboardContent/dashboardContent.ts";
+import { DashboardContent } from "../components/dashboardContent/dashboard.component.ts";
 
 export default class extends AbstractView {
     private navbar: Navbar | null = null;

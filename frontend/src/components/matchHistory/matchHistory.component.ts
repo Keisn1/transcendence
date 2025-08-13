@@ -1,63 +1,32 @@
 import { BaseComponent } from "../BaseComponent.ts";
 import { AuthService } from "../../services/auth/auth.service.ts";
 import { MatchService } from "../../services/match/match.service.ts";
-import { UserService } from "../../services/user/user.service.ts";
-import dashboardContentTemplate from "./dashboardContent.html?raw";
+import matchHistoryTemplate from "./matchHistory.component.html?raw";
 import type { GetMatchResponse } from "../../types/match.types.ts";
 
-export class DashboardContent extends BaseComponent {
+export class MatchHistoryComponent extends BaseComponent {
     private authService: AuthService;
     private matchService: MatchService;
-    private userService: UserService;
+    private userId?: string;
 
-    private userId?: string; // the user whose dashboard we render
-
-    private userAvatar: HTMLImageElement;
-    private userName: HTMLElement;
     private matchHistoryContent: HTMLElement;
 
     constructor(userId?: string) {
-        super("div", "dashboard-content");
+        super("div", "match-history");
         this.userId = userId;
 
         this.authService = AuthService.getInstance();
         this.matchService = MatchService.getInstance();
-        this.userService = UserService.getInstance();
 
-        this.container.innerHTML = dashboardContentTemplate;
+        this.container.innerHTML = matchHistoryTemplate;
 
-        this.userAvatar = this.container.querySelector("#user-avatar")!;
-        this.userName = this.container.querySelector("#user-name")!;
         this.matchHistoryContent = this.container.querySelector("#match-history-content")!;
 
-        this.loadUserInfo();
         this.loadMatchHistory();
     }
 
-    private async loadUserInfo() {
-        try {
-            if (!this.userId) {
-                // current user
-                const user = this.authService.getCurrentUser();
-                if (user) {
-                    this.userAvatar.src = user.avatar;
-                    this.userName.textContent = user.username;
-                }
-            } else {
-                // fetching other user
-                const publicUser = await this.userService.getUserById(this.userId);
-                this.userAvatar.src = publicUser.avatar;
-                this.userName.textContent = publicUser.username;
-            }
-        } catch (err) {
-            console.error("Failed to load user info:", err);
-        }
-    }
-
-
     private async loadMatchHistory() {
         try {
-            // use different getMatches method
             const matches = this.userId
                 ? await this.matchService.getMatchesByUser(this.userId)
                 : await this.matchService.getUserMatches();
@@ -92,7 +61,6 @@ export class DashboardContent extends BaseComponent {
 
     private renderMatch(match: GetMatchResponse): string {
         const user = this.authService.getCurrentUser()!;
-        // make call to /api/user/:id
         const isPlayer1 = match.player1Id === user.id;
         const userScore = isPlayer1 ? match.player1Score : match.player2Score;
         const opponentScore = isPlayer1 ? match.player2Score : match.player1Score;
@@ -143,12 +111,8 @@ export class DashboardContent extends BaseComponent {
     }
 
     private getOpponentName(opponentId: string): string {
-        // For AI opponents
         if (opponentId === "aiEasy") return "AI Easy";
         if (opponentId === "aiHard") return "AI Hard";
-
-        // For real players, you might want to fetch their names
-        // For now, just show the ID
         return `Player ${opponentId.substring(0, 8)}...`;
     }
 
@@ -158,9 +122,5 @@ export class DashboardContent extends BaseComponent {
                 <p class="text-red-500">${message}</p>
             </div>
         `;
-    }
-
-    destroy(): void {
-        super.destroy();
     }
 }
