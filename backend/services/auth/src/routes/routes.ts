@@ -7,11 +7,7 @@ import { deleteUser, anonymizeUser } from "../controllers/gpdr.controller";
 
 import { complete2FASchema, disable2FA, verify2FA, verify2FASchema } from "../controllers/twofa.controller";
 import { init2FA, complete2FA } from "../controllers/twofa.controller";
-import updateProfile, {
-    getUserById,
-    getUserByIdSchema,
-    updateProfileSchema,
-} from "../controllers/updateUser.controller";
+import updateUser, { getUserById, getUserByIdSchema, updateUserSchema } from "../controllers/updateUser.controller";
 
 export async function routes(fastify: FastifyInstance) {
     fastify.register(
@@ -34,7 +30,7 @@ export async function routes(fastify: FastifyInstance) {
     );
     fastify.register(
         (fastify: FastifyInstance) => {
-            fastify.put("", { preHandler: fastify.jwtAuth, schema: updateProfileSchema }, updateProfile);
+            fastify.put("", { preHandler: fastify.jwtAuth, schema: updateUserSchema }, updateUser);
             fastify.get<{ Params: { userId: string } }>(
                 "/:userId",
                 { preHandler: fastify.jwtAuth, schema: getUserByIdSchema },

@@ -23,7 +23,7 @@ export async function getUserById(
     }
 }
 
-export default async function updateProfile(request: FastifyRequest, reply: FastifyReply): Promise<UpdateUserResponse> {
+export default async function updateUser(request: FastifyRequest, reply: FastifyReply): Promise<UpdateUserResponse> {
     const id = request.user.id;
     const { username, email, password, avatar } = request.body as UpdateUserBody;
 
@@ -79,7 +79,7 @@ export default async function updateProfile(request: FastifyRequest, reply: Fast
     }
 }
 
-export const updateProfileSchema = {
+export const updateUserSchema = {
     body: {
         type: "object",
         properties: {

@@ -6,6 +6,7 @@
 #+startup: overview
 
 SPAs
+https://www.youtube.com/watch?v=OstALBk-jTc
 
 An application that loads a single HTML pages and updates the contents dynamically rather then loading new pages from the server.
 
