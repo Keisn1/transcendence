@@ -54,6 +54,7 @@
 - [ ] do user not by id but by username
 
 - [ ] have tournamentsystem without registration
+- [ ] change to /user/id to /user/username
 
 - [ ] treating the security hole that a logged in user can actually post a tournament with any valid uuids
   - [ ] need to check if the users exist
