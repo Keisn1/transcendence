@@ -150,11 +150,8 @@ export class MatchHistoryComponent extends BaseComponent {
         e.preventDefault();
 
         const target = e.target as HTMLElement;
-        const link = target.closest('[data-user-id]') as HTMLElement | null;
 
-        if (!link) return;
-
-        const userId = link.dataset.userId;
+        const userId = target.dataset.userId;
         if (!userId) return;
 
         UserController.getInstance().navigateToUser(`/user/${encodeURIComponent(userId)}`);
