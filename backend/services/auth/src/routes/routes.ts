@@ -4,7 +4,7 @@ import { login, loginSchema } from "../controllers/login.controller";
 import register, { registerSchema } from "../controllers/register.controller";
 import updateUser, { updateProfileSchema as updateUserSchema } from "../controllers/updateUser.controller";
 import getProfile, { getProfileSchema } from "../controllers/getProfile.controller";
-import { deleteUser, anonymizeUser } from "../controllers/gpdr.controller";
+import { deleteUser, anonymizeUser } from "../controllers/gdpr.controller";
 
 import { complete2FASchema, disable2FA, verify2FA, verify2FASchema } from "../controllers/twofa.controller";
 import { init2FA, complete2FA } from "../controllers/twofa.controller";
