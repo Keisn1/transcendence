@@ -31,7 +31,8 @@ export class ProfileStatsComponent extends BaseComponent {
 
 	private async loadMatchHistory() {
 		try {
-			const matches = (await this.matchService.getUserMatches()) as GetMatchResponse[] || [];
+			const currentUserId = this.authService.getCurrentUser()?.id!;
+			const matches = (await this.matchService.getMatchesByUser(currentUserId)) as GetMatchResponse[] || [];
 
 			this.playerStats = this.extractStats(matches);
 			this.render();
