@@ -20,7 +20,7 @@ export default class extends AbstractView {
         }
 
         // TODO: erik: super hardcoded, I guess there should be something like this.router.getParam()
-        const userId = "9dadde86-469d-47e8-8fd3-7442aadb8eaf";
+        const userId = "36a67ec1-cd9b-4f9d-974a-807051e1dab8";
 
         this.navbar = new Navbar();
         document.body.appendChild(this.navbar.getContainer());

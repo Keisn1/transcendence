@@ -30,12 +30,12 @@ export class UserService {
 
         const data = await resp.json();
 
-        const user: PublicUser | undefined = data.user;
+        const publicUser: PublicUser | undefined = data.publicUser;
 
-        if (!user) {
+        if (!publicUser) {
             throw new Error(`Unexpected response shape when fetching user ${id}`);
         }
 
-        return user;
+        return publicUser;
     }
 }
