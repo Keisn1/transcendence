@@ -9,6 +9,11 @@ import GdprSettingsView from "./views/GdprSettingsView";
 import SettingsView from "./views/SettingsView";
 import UserView from "./views/UserView.ts";
 
+interface Route {
+    path: string;
+    view: new (router: Router, params: any) => AbstractView;
+}
+
 export default class Router {
     private currentView: AbstractView | null = null;
 
@@ -23,7 +28,7 @@ export default class Router {
     };
 
     private routing() {
-        let routes = [
+        let routes: Route[] = [
             {
                 path: "/",
                 view: DashboardView,
@@ -90,7 +95,8 @@ export default class Router {
         this.currentView.render();
     }
 
-    private getParams(match: any) {
+    private getParams(match: { route: Route; result: RegExpMatchArray | null }): any {
+        if (!match.result) return {};
         const values = match.result.slice(1);
         const keys = Array.from(match.route.path.matchAll(/:(\w+)/g)).map((result: any) => result[1]);
         return Object.fromEntries(

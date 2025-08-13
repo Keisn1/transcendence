@@ -10,7 +10,7 @@ export default class extends AbstractView {
     private adLightBox: AdLightBox | null = null;
     private dashboardContent: DashboardContent | null = null;
 
-    constructor(router?: Router, params?: any[]) {
+    constructor(router?: Router, params?: any) {
         super(router, params);
         this.setTitle("Dashboard");
     }

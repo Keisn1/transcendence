@@ -18,7 +18,7 @@ export default class extends AbstractView {
         e.preventDefault();
     };
 
-    constructor(router?: Router, params?: any[]) {
+    constructor(router?: Router, params?: any) {
         super(router, params);
         this.setTitle("Tournament");
         this.tournamentController = TournamentController.getInstance(router);

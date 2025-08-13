@@ -7,7 +7,7 @@ export default class extends AbstractView {
     private navbar: Navbar | null = null;
     private signup: SignUp | null = null;
 
-    constructor(router?: Router, params?: any[]) {
+    constructor(router?: Router, params?: any) {
         super(router, params);
         this.setTitle("Sign Up");
     }

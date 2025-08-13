@@ -8,7 +8,7 @@ export default class extends AbstractView {
     private navbar: Navbar | null = null;
     private gdprButtons: GdprButtons | null = null;
 
-    constructor(router?: Router, params?: any[]) {
+    constructor(router?: Router, params?: any) {
         super(router, params);
         this.setTitle("GDPR Settings");
     }

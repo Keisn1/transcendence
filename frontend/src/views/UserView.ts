@@ -8,7 +8,7 @@ export default class extends AbstractView {
     private navbar: Navbar | null = null;
     private userContent: UserContent | null = null;
 
-    constructor(router?: Router, params?: any[]) {
+    constructor(router?: Router, params?: any) {
         super(router, params);
         console.log(params);
         this.setTitle("User");
@@ -22,6 +22,14 @@ export default class extends AbstractView {
 
         this.navbar = new Navbar();
         document.body.appendChild(this.navbar.getContainer());
+
+        if (!this.params) {
+            console.log("no parameters give");
+            return;
+        }
+        if (!("id" in this.params)) {
+            console.log("no id in params");
+        }
 
         this.userContent = new UserContent(this.params.id);
         document.body.appendChild(this.userContent.getContainer());

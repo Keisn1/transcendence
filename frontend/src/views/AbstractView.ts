@@ -2,9 +2,9 @@ import type Router from "../router";
 
 export default class {
     protected router?: Router;
-    protected params?: any[];
+    protected params?: any;
 
-    constructor(router?: Router, params?: any[]) {
+    constructor(router?: Router, params?: any) {
         this.router = router;
         this.params = params;
     }
