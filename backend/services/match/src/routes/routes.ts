@@ -10,6 +10,7 @@ import {
 import { PostMatchBody } from "../types/match.types";
 import { PostTournamentBody } from "../types/tournament.types";
 import { postTournament, postTournamentSchema } from "../controllers/tournament.controller";
+import { deleteUserData, anonymizeUserData } from "../controllers/gdpr.controller";
 
 export async function routes(fastify: FastifyInstance) {
     fastify.register(
@@ -39,4 +40,9 @@ export async function routes(fastify: FastifyInstance) {
         },
         { prefix: "tournament" },
     );
+}
+
+export async function gdprRoutes(fastify: FastifyInstance) {
+    fastify.delete("/delete/:userId", deleteUserData);
+    fastify.put("/anonymize/:userId", anonymizeUserData);
 }

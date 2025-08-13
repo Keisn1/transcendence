@@ -25,20 +25,20 @@ user has the rights to know what data is stored, and for how long // read up on 
 
 new 11.8
 gdpr endpoints need to update/delete matchstats, played matches whatever
+// matches done, fileservice needs the same now
 
 
 
 done:
-new encrypt/decrypt key for 2fa secrets in vault abrufbar //done. llm abused. contact me if errors arise
-new service needs certificates and jwtsecret anbindung done
 
 getting checked by kay:
-2fa check for gdpr deletion/anonymization done
 
 actually done:
+new encrypt/decrypt key for 2fa secrets in vault abrufbar //done. llm abused. contact me if errors arise
+new service needs certificates and jwtsecret anbindung done
+2fa check for gdpr deletion/anonymization done
 
 devbuild:
-backend :
 frontend -> npm install, npm run dev:proxy
 new terminal
 backend -> docker compose build
