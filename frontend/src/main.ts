@@ -4,10 +4,12 @@ import "./components/adLightbox/adLightbox.ts"; // Add this line
 import Router from "./router.ts";
 import { AuthController } from "./controllers/auth.controller.ts";
 import { TournamentController } from "./controllers/tournament.controller.ts";
+import { UserController } from "./controllers/user.controller.ts";
 
 const router = new Router();
 AuthController.getInstance(router);
 TournamentController.getInstance(router);
+UserController.getInstance(router);
 
 document.addEventListener("DOMContentLoaded", () => {
     document.body.addEventListener("click", (e: MouseEvent) => {

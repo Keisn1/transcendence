@@ -4,6 +4,7 @@ import { MatchService } from "../../services/match/match.service.ts";
 import matchHistoryTemplate from "./matchHistory.component.html?raw";
 import type { GetMatchResponse } from "../../types/match.types.ts";
 import { UserService } from "../../services/user/user.service.ts";
+import { UserController } from "../../controllers/user.controller.ts";
 
 export class MatchHistoryComponent extends BaseComponent {
     private authService: AuthService;
@@ -16,7 +17,6 @@ export class MatchHistoryComponent extends BaseComponent {
 
     constructor(userId?: string) {
         super("div", "match-history");
-        this.userId = userId;
 
         this.authService = AuthService.getInstance();
         this.matchService = MatchService.getInstance();
@@ -26,16 +26,19 @@ export class MatchHistoryComponent extends BaseComponent {
 
         this.matchHistoryContent = this.container.querySelector("#match-history-content")!;
 
-        this.opponentNameCache = new Map<string, string>;
+        this.opponentNameCache = new Map<string, string>();
+
+        if (userId) this.userId = userId;
+        else this.userId = this.authService.getCurrentUser()?.id;
+
+        this.addEventListenerWithCleanup(this.matchHistoryContent, "click", this.onUserClick.bind(this));
 
         this.loadMatchHistory();
     }
 
     private async loadMatchHistory() {
         try {
-            const matches = this.userId
-                ? await this.matchService.getMatchesByUser(this.userId)
-                : await this.matchService.getUserMatches();
+            const matches = await this.matchService.getMatchesByUser(this.userId!);
 
             await this.prefetchOpponentNames(matches);
 
@@ -68,8 +71,7 @@ export class MatchHistoryComponent extends BaseComponent {
     }
 
     private renderMatch(match: GetMatchResponse): string {
-        const user = this.authService.getCurrentUser()!;
-        const isPlayer1 = match.player1Id === user.id;
+        const isPlayer1 = match.player1Id === this.userId;
         const userScore = isPlayer1 ? match.player1Score : match.player2Score;
         const opponentScore = isPlayer1 ? match.player2Score : match.player1Score;
         const opponentId = isPlayer1 ? match.player2Id : match.player1Id;
@@ -81,6 +83,11 @@ export class MatchHistoryComponent extends BaseComponent {
         const gameMode = this.getGameModeDisplay(match.gameMode);
         const date = new Date(match.created_at).toLocaleDateString();
 
+        const opponentName = this.getOpponentName(opponentId);
+        const opponentHtml = this.isLinkable(opponentId)
+            ? `<a href="/user/${opponentId}" data-user-id="${opponentId}" class="text-indigo-600 hover:underline">${opponentName}</a>`
+            : opponentName;
+
         return `
             <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                 <div class="flex items-center space-x-4">
@@ -91,7 +98,7 @@ export class MatchHistoryComponent extends BaseComponent {
                     </div>
                     <div>
                         <div class="font-medium text-gray-900">
-                            ${userScore} - ${opponentScore} vs ${this.getOpponentName(opponentId)}
+                            ${userScore} - ${opponentScore} vs ${opponentHtml}
                         </div>
                         <div class="text-sm text-gray-500">
                             ${gameMode} • ${date}
@@ -123,9 +130,35 @@ export class MatchHistoryComponent extends BaseComponent {
         if (opponentId === "00000000-0000-0000-0000-000000000001") return "AI Easy";
         if (opponentId === "00000000-0000-0000-0000-000000000002") return "AI Hard";
 
-        const opponentName = this.opponentNameCache.get(opponentId)!;
+        const opponentName = this.opponentNameCache.get(opponentId) ?? "Unknown";
         return opponentName;
     }
+
+    private isLinkable(opponentId: string | undefined): boolean {
+        if (!opponentId) return false;
+        if (
+            opponentId === "00000000-0000-0000-0000-000000000000" ||
+            opponentId === "00000000-0000-0000-0000-000000000001" ||
+            opponentId === "00000000-0000-0000-0000-000000000002"
+        ) {
+            return false;
+        }
+        return true;
+    }
+
+    private onUserClick(e: Event) {
+        e.preventDefault();
+
+        const target = e.target as HTMLElement;
+        const link = target.closest('[data-user-id]') as HTMLElement | null;
+
+        if (!link) return;
+
+        const userId = link.dataset.userId;
+        if (!userId) return;
+
+        UserController.getInstance().navigateToUser(`/user/${encodeURIComponent(userId)}`);
+    };
 
     private showError(message: string) {
         this.matchHistoryContent.innerHTML = `
@@ -136,15 +169,16 @@ export class MatchHistoryComponent extends BaseComponent {
     }
 
     private async prefetchOpponentNames(matches: GetMatchResponse[]) {
-        const ownerId = this.userId ?? this.authService.getCurrentUser()?.id;
+        const opponentIds = new Array<string>();
 
-        const opponentIds = new Array<string>;
+        // making array of all opponent ids
+        opponentIds.push(this.userId!);
         for (const m of matches) {
-            const isPlayer1 = (m.player1Id == ownerId) ? true : false;
+            const isPlayer1 = (m.player1Id == this.userId) ? true : false;
             const opponentId = isPlayer1 ? m.player2Id : m.player1Id;
 
             if (!opponentId) continue;
-            
+
             if (!this.opponentNameCache.has(opponentId)) {
                 opponentIds.push(opponentId);
             }
@@ -152,13 +186,14 @@ export class MatchHistoryComponent extends BaseComponent {
 
         if (opponentIds.length === 0) return;
 
+        // filling opponentNameCache with ids and names
         for (const id of opponentIds) {
             try {
                 const publicUser = await this.userService.getUserById(id);
                 this.opponentNameCache.set(id, publicUser.username);
             } catch (e) {
                 console.warn("Failed to fetch user", id, e);
-                this.opponentNameCache.set(id, `Player ${id}`);
+                this.opponentNameCache.set(id, "Unknown");
             }
         }
     }
