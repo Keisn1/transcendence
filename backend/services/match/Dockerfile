@@ -9,7 +9,7 @@ WORKDIR /app
 
 # Copy source code
 COPY src/ ./src/
-RUN mkdir db
+COPY db/ ./db/
 
 # Copy package files
 COPY tsconfig.json .

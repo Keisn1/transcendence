@@ -1,6 +1,9 @@
 #!/bin/sh
 set -e
 
+# Remove completion marker if it exists (force removal, no error if missing)
+rm -f /vault/init/.vault-ready
+
 INIT_FILE="/vault/init/vault-init.json"
 
 echo "Checking Vault initialization status..."
@@ -317,4 +320,7 @@ VAULT_TOKEN=$(vault write -field=token auth/approle/login role_id="$ROLE_ID" sec
 echo "Logged in with AppRole token."
 echo "VAULT_TOKEN after is: $VAULT_TOKEN" #DISABLE IN PROD
 echo "Vault KV and policies setup complete."
+
+# Create completion marker file for services to check
+touch /vault/init/.vault-ready
 

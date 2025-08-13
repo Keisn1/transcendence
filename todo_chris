@@ -23,22 +23,23 @@ user has the rights to know what data is stored, and for how long // read up on 
 
 
 
-new 11.8
-gdpr endpoints need to update/delete matchstats, played matches whatever
-// matches done, fileservice needs the same now
-
-
+new 13.8
+check stats of anonymized/deleted users 
+check general stats/compare with actual same stats
+nginx service is failing to boot on first launch on new pc. //should be fixed
 
 done:
-
-getting checked by kay:
-
-actually done:
+gdpr endpoints need to update/delete matchstats, played matches whatever
 new encrypt/decrypt key for 2fa secrets in vault abrufbar //done. llm abused. contact me if errors arise
 new service needs certificates and jwtsecret anbindung done
+
+getting checked by kay:
 2fa check for gdpr deletion/anonymization done
 
+actually done:
+
 devbuild:
+backend :
 frontend -> npm install, npm run dev:proxy
 new terminal
 backend -> docker compose build

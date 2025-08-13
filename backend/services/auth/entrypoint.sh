@@ -9,14 +9,24 @@ KEY_DST="/etc/ssl/private/auth-service.key"
 echo "⏳ Waiting for Vault to respond and /vault/init/.env to exist..."
 
 while true; do
-  # Check Vault health endpoint
+  # Check if Vault is unsealed and ready
   if curl -sf http://vault:8200/v1/sys/health > /dev/null; then
-    # Check if .env file exists
+    # Check if .env file exists with all required variables
     if [ -f /vault/init/.env ]; then
-      break
+      # Check if Vault setup is actually complete by looking for the completion message
+      if [ -f /vault/init/.vault-ready ]; then
+        echo "✅ Vault initialization fully complete with service credentials."
+        break
+      else
+        echo "⏳ Vault .env exists but setup still in progress..."
+      fi
+    else
+      echo "⏳ Waiting for Vault .env file..."
     fi
+  else
+    echo "⏳ Waiting for Vault to become ready..."
   fi
-  sleep 2
+  sleep 3
 done
 
 echo "✅ Vault is responding and /vault/init/.env exists."

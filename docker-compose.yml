@@ -2,13 +2,15 @@ services:
   auth-service:
     build:
       context: ./backend/services/auth
-    container_name: auth
+    container_name: auth-service
     ports:
       - "3000:3000"
     environment:
       - ENV=production
     volumes:
       - ./vault/init:/vault/init # Required for .env access
+    depends_on:
+      - vault
 
   file-service:
     build:
@@ -21,6 +23,8 @@ services:
     volumes:
       - ./backend/services/file/uploads:/app/uploads
       - ./vault/init:/vault/init
+    depends_on:
+      - vault
 
   match-service:
     build:
@@ -32,6 +36,8 @@ services:
       - ENV=production
     volumes:
       - ./vault/init:/vault/init
+    depends_on:
+      - vault
 
   nginx:
     build: ./nginx
@@ -45,6 +51,10 @@ services:
       - ./vault/init:/etc/nginx/certs
       - ./vault/init:/vault/init
       - ./frontend/dist:/usr/share/nginx/html
+    depends_on:
+    - auth-service
+    - file-service  
+    - match-service
 
   vault:
     container_name: vault

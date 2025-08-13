@@ -20,12 +20,25 @@ if (process.env.ENV === "production") {
         endpoint: process.env.VAULT_ADDR || "http://vault:8200",
     });
 
-    const loginWithAppRole = async () => {
-        const result = await vault.write("auth/approle/login", {
-            role_id: process.env.VAULT_ROLE_ID,
-            secret_id: process.env.VAULT_SECRET_ID,
-        });
-        vault.token = result.auth.client_token;
+    const loginWithAppRole = async (maxRetries = 30, delayMs = 2000) => {
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                const result = await vault.write("auth/approle/login", {
+                    role_id: process.env.VAULT_ROLE_ID,
+                    secret_id: process.env.VAULT_SECRET_ID,
+                });
+                vault.token = result.auth.client_token;
+                console.log(`✅ Successfully logged in with AppRole (attempt ${attempt})`);
+                return;
+            } catch (err) {
+                const errorMessage = err instanceof Error ? err.message : String(err);
+                console.log(`⏳ Waiting for Vault AppRole login (attempt ${attempt}/${maxRetries})...`, errorMessage);
+                if (attempt === maxRetries) {
+                    throw new Error(`Failed to login with AppRole after ${maxRetries} attempts: ${errorMessage}`);
+                }
+                await new Promise((resolve) => setTimeout(resolve, delayMs));
+            }
+        }
     };
 
     const start = async () => {
