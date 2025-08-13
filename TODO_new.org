@@ -40,16 +40,21 @@
   - solution with default-pfp -> look into notes
 
 - [X] bug: in TournamentCreationPanel: clicking on register multiple times will open verification multiple times
-- [ ] add statistics in profile
-- [ ] grey line on tournamentCreationPanel
+- [X] add statistics in profile
+- [X] grey line on tournamentCreationPanel
 
-- [ ] add match history view
-  - [ ] change PublicUser to something more strict (without twoFaEnabled)
-  - [ ] have a real PublicUser (only id, username, avatar)
+- [-] add match history view
+  - [X] change PublicUser to something more strict (without twoFaEnabled)
+  - [X] have a real PublicUser (only id, username, avatar)
+
   - [ ] make the matchHistory link visible in profile
   - [ ] when clicking on a user in matchView or tournamentView or in the matchHistoryView, it should lead to the match history of that user
 
 - [ ] disable sign-in button when 2fa is reached
+- [ ] do user not by id but by username
+
+- [ ] have tournamentsystem without registration
+
 - [ ] treating the security hole that a logged in user can actually post a tournament with any valid uuids
   - [ ] need to check if the users exist
   - [ ] need to have some token verification
