@@ -3,13 +3,16 @@ import { AuthService } from "../../services/auth/auth.service.ts";
 import { MatchService } from "../../services/match/match.service.ts";
 import matchHistoryTemplate from "./matchHistory.component.html?raw";
 import type { GetMatchResponse } from "../../types/match.types.ts";
+import { UserService } from "../../services/user/user.service.ts";
 
 export class MatchHistoryComponent extends BaseComponent {
     private authService: AuthService;
     private matchService: MatchService;
+    private userService: UserService;
     private userId?: string;
 
     private matchHistoryContent: HTMLElement;
+    private opponentNameCache: Map<string, string>;
 
     constructor(userId?: string) {
         super("div", "match-history");
@@ -17,10 +20,13 @@ export class MatchHistoryComponent extends BaseComponent {
 
         this.authService = AuthService.getInstance();
         this.matchService = MatchService.getInstance();
+        this.userService = UserService.getInstance();
 
         this.container.innerHTML = matchHistoryTemplate;
 
         this.matchHistoryContent = this.container.querySelector("#match-history-content")!;
+
+        this.opponentNameCache = new Map<string, string>;
 
         this.loadMatchHistory();
     }
@@ -30,6 +36,8 @@ export class MatchHistoryComponent extends BaseComponent {
             const matches = this.userId
                 ? await this.matchService.getMatchesByUser(this.userId)
                 : await this.matchService.getUserMatches();
+
+            await this.prefetchOpponentNames(matches);
 
             this.renderMatches(matches);
         } catch (error) {
@@ -111,9 +119,12 @@ export class MatchHistoryComponent extends BaseComponent {
     }
 
     private getOpponentName(opponentId: string): string {
-        if (opponentId === "aiEasy") return "AI Easy";
-        if (opponentId === "aiHard") return "AI Hard";
-        return `Player ${opponentId.substring(0, 8)}...`;
+        if (opponentId === "00000000-0000-0000-0000-000000000000") return "Unknown";
+        if (opponentId === "00000000-0000-0000-0000-000000000001") return "AI Easy";
+        if (opponentId === "00000000-0000-0000-0000-000000000002") return "AI Hard";
+
+        const opponentName = this.opponentNameCache.get(opponentId)!;
+        return opponentName;
     }
 
     private showError(message: string) {
@@ -122,5 +133,33 @@ export class MatchHistoryComponent extends BaseComponent {
                 <p class="text-red-500">${message}</p>
             </div>
         `;
+    }
+
+    private async prefetchOpponentNames(matches: GetMatchResponse[]) {
+        const ownerId = this.userId ?? this.authService.getCurrentUser()?.id;
+
+        const opponentIds = new Array<string>;
+        for (const m of matches) {
+            const isPlayer1 = (m.player1Id == ownerId) ? true : false;
+            const opponentId = isPlayer1 ? m.player2Id : m.player1Id;
+
+            if (!opponentId) continue;
+            
+            if (!this.opponentNameCache.has(opponentId)) {
+                opponentIds.push(opponentId);
+            }
+        }
+
+        if (opponentIds.length === 0) return;
+
+        for (const id of opponentIds) {
+            try {
+                const publicUser = await this.userService.getUserById(id);
+                this.opponentNameCache.set(id, publicUser.username);
+            } catch (e) {
+                console.warn("Failed to fetch user", id, e);
+                this.opponentNameCache.set(id, `Player ${id}`);
+            }
+        }
     }
 }
