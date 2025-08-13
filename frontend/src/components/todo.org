@@ -1,8 +1,0 @@
-#+title: Todo
-
-[[file:~/workspace/transcendence/frontend/src/controllers/utils.ts::// TODO: find a better way, maybe tournament class]]
-
-1. [X] put tournament components into tournament
-2. [ ] put methods of authservice that change state in the application into the authController
-3. [ ] put exit button on every tournament view (except creation)
-4. [ ] put warning when reload (banner)

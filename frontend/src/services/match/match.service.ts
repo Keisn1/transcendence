@@ -47,4 +47,21 @@ export class MatchService {
 
         return response.json();
     }
+
+    // TODO: erik: make getUserMatches and getMatchesByUser one function with optional userId
+    async getMatchesByUser(userId: string): Promise<GetMatchResponse[]> {
+        if (!userId) throw new Error("User not authenticated");
+
+        const response = await fetch(`/api/match/user/${userId}`, {
+            headers: {
+                Authorization: `Bearer ${AuthStorage.getToken()}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch matches");
+        }
+
+        return response.json();
+    }
 }

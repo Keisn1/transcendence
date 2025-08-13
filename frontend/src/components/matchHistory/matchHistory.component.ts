@@ -1,42 +1,36 @@
 import { BaseComponent } from "../BaseComponent.ts";
 import { AuthService } from "../../services/auth/auth.service.ts";
 import { MatchService } from "../../services/match/match.service.ts";
-import dashboardContentTemplate from "./dashboardContent.html?raw";
+import matchHistoryTemplate from "./matchHistory.component.html?raw";
 import type { GetMatchResponse } from "../../types/match.types.ts";
 
-export class DashboardContent extends BaseComponent {
+export class MatchHistoryComponent extends BaseComponent {
     private authService: AuthService;
     private matchService: MatchService;
-    private userAvatar: HTMLImageElement;
-    private userName: HTMLElement;
+    private userId?: string;
+
     private matchHistoryContent: HTMLElement;
 
-    constructor() {
-        super("div", "dashboard-content");
+    constructor(userId?: string) {
+        super("div", "match-history");
+        this.userId = userId;
+
         this.authService = AuthService.getInstance();
         this.matchService = MatchService.getInstance();
 
-        this.container.innerHTML = dashboardContentTemplate;
+        this.container.innerHTML = matchHistoryTemplate;
 
-        this.userAvatar = this.container.querySelector("#user-avatar")!;
-        this.userName = this.container.querySelector("#user-name")!;
         this.matchHistoryContent = this.container.querySelector("#match-history-content")!;
 
-        this.loadUserInfo();
         this.loadMatchHistory();
-    }
-
-    private loadUserInfo() {
-        const user = this.authService.getCurrentUser();
-        if (user) {
-            this.userAvatar.src = user.avatar;
-            this.userName.textContent = user.username;
-        }
     }
 
     private async loadMatchHistory() {
         try {
-            const matches = await this.matchService.getUserMatches();
+            const matches = this.userId
+                ? await this.matchService.getMatchesByUser(this.userId)
+                : await this.matchService.getUserMatches();
+
             this.renderMatches(matches);
         } catch (error) {
             console.error("Failed to load match history:", error);
@@ -67,7 +61,6 @@ export class DashboardContent extends BaseComponent {
 
     private renderMatch(match: GetMatchResponse): string {
         const user = this.authService.getCurrentUser()!;
-        // make call to /api/user/:id
         const isPlayer1 = match.player1Id === user.id;
         const userScore = isPlayer1 ? match.player1Score : match.player2Score;
         const opponentScore = isPlayer1 ? match.player2Score : match.player1Score;
@@ -118,12 +111,8 @@ export class DashboardContent extends BaseComponent {
     }
 
     private getOpponentName(opponentId: string): string {
-        // For AI opponents
         if (opponentId === "aiEasy") return "AI Easy";
         if (opponentId === "aiHard") return "AI Hard";
-
-        // For real players, you might want to fetch their names
-        // For now, just show the ID
         return `Player ${opponentId.substring(0, 8)}...`;
     }
 
@@ -133,9 +122,5 @@ export class DashboardContent extends BaseComponent {
                 <p class="text-red-500">${message}</p>
             </div>
         `;
-    }
-
-    destroy(): void {
-        super.destroy();
     }
 }

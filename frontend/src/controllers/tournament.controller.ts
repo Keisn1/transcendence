@@ -92,10 +92,6 @@ export class TournamentController {
         return this.tournamentMachine;
     }
 
-    public getTournamentId() {
-        return this.tournament.id;
-    }
-
     // Controller handles state transitions
     startMatch(): void {
         this.tournamentMachine?.update(TournamentEvent.START, this.tournament!);

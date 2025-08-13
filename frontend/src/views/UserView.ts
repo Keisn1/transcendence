@@ -1,16 +1,17 @@
 import AbstractView from "./AbstractView.ts";
 import { Navbar } from "../components/navbar/navbar.ts";
 import type Router from "../router.ts";
-import { ProfileComponent } from "../components/profile/profile.ts";
 import { AuthService } from "../services/auth/auth.service.ts";
+import { UserContent } from "../components/userContent/userContent.component.ts";
 
 export default class extends AbstractView {
     private navbar: Navbar | null = null;
-    private profileComponent: ProfileComponent | null = null;
+    private userContent: UserContent | null = null;
 
     constructor(router?: Router, params?: any) {
         super(router, params);
-        this.setTitle("Profile");
+        console.log(params);
+        this.setTitle("User");
     }
 
     render() {
@@ -22,15 +23,23 @@ export default class extends AbstractView {
         this.navbar = new Navbar();
         document.body.appendChild(this.navbar.getContainer());
 
-        this.profileComponent = new ProfileComponent();
-        document.body.appendChild(this.profileComponent.getContainer());
+        if (!this.params) {
+            console.log("no parameters give");
+            return;
+        }
+        if (!("id" in this.params)) {
+            console.log("no id in params");
+        }
+
+        this.userContent = new UserContent(this.params.id);
+        document.body.appendChild(this.userContent.getContainer());
     }
 
     destroy() {
-        console.log("Destroying ProfileView");
+        console.log("Destroying UserView");
         this.navbar?.destroy();
-        this.profileComponent?.destroy();
+        this.userContent?.destroy();
         document.getElementById("navbar-container")?.remove();
-        document.getElementById("profile-content")?.remove();
+        document.getElementById("dashboard-content")?.remove();
     }
 }

@@ -1,8 +1,29 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { genSaltSync, hashSync } from "bcrypt";
-import { UpdateUserBody, UpdateUserResponse } from "../types/auth.types";
+import { PublicUser, UpdateUserBody, UpdateUserResponse } from "../types/auth.types";
 
-export default async function updateProfile(request: FastifyRequest, reply: FastifyReply): Promise<UpdateUserResponse> {
+export async function getUserById(
+    request: FastifyRequest<{ Params: { userId: string } }>,
+    reply: FastifyReply,
+): Promise<PublicUser> {
+    const { userId } = request.params;
+    console.log(userId);
+
+    try {
+        const result = await request.server.db.query(`SELECT id, username, avatar FROM users WHERE id = ? `, [userId]);
+
+        console.log(result);
+        const publicUser = result[0];
+        console.log(publicUser);
+
+        return reply.status(200).send({ publicUser: publicUser });
+    } catch (error) {
+        console.error("Failed to fetch user matches:", error);
+        return reply.status(500).send({ error: "Failed to fetch matches" });
+    }
+}
+
+export default async function updateUser(request: FastifyRequest, reply: FastifyReply): Promise<UpdateUserResponse> {
     const id = request.user.id;
     const { username, email, password, avatar } = request.body as UpdateUserBody;
 
@@ -58,7 +79,7 @@ export default async function updateProfile(request: FastifyRequest, reply: Fast
     }
 }
 
-export const updateProfileSchema = {
+export const updateUserSchema = {
     body: {
         type: "object",
         properties: {
@@ -89,3 +110,28 @@ export const updateProfileSchema = {
         },
     },
 } as const;
+
+export const getUserByIdSchema = {
+    params: {
+        type: "object",
+        properties: { userId: { type: "string", format: "uuid" } },
+        required: ["userId"],
+    },
+    response: {
+        200: {
+            type: "object",
+            properties: {
+                publicUser: {
+                    type: "object",
+                    properties: {
+                        id: { type: "string" },
+                        username: { type: "string" },
+                        avatar: { type: "string", format: "uri-reference" },
+                    },
+                    required: ["id", "username", "avatar"],
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+};

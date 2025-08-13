@@ -7,6 +7,13 @@ import SignUpView from "./views/SignUpView.ts";
 import TournamentView from "./views/TournamentView.ts";
 import GdprSettingsView from "./views/GdprSettingsView";
 import SettingsView from "./views/SettingsView";
+import UserView from "./views/UserView.ts";
+
+interface Route {
+    path: string;
+    view: new (router: Router, params: any) => AbstractView;
+}
+
 export default class Router {
     private currentView: AbstractView | null = null;
 
@@ -21,7 +28,7 @@ export default class Router {
     };
 
     private routing() {
-        let routes = [
+        let routes: Route[] = [
             {
                 path: "/",
                 view: DashboardView,
@@ -53,7 +60,11 @@ export default class Router {
             {
                 path: "/settings/gdpr",
                 view: GdprSettingsView,
-            }
+            },
+            {
+                path: "/user/:id",
+                view: UserView,
+            },
         ];
 
         let potentialMatches = routes.map((route) => {
@@ -79,8 +90,20 @@ export default class Router {
         }
 
         console.log("creating new view");
-        this.currentView = new match.route.view(this);
+        console.log("params Match:", this.getParams(match));
+        this.currentView = new match.route.view(this, this.getParams(match));
         this.currentView.render();
+    }
+
+    private getParams(match: { route: Route; result: RegExpMatchArray | null }): any {
+        if (!match.result) return {};
+        const values = match.result.slice(1);
+        const keys = Array.from(match.route.path.matchAll(/:(\w+)/g)).map((result: any) => result[1]);
+        return Object.fromEntries(
+            keys.map((key, i) => {
+                return [key, values[i]];
+            }),
+        );
     }
 
     private pathToRegex = (path: string) =>
