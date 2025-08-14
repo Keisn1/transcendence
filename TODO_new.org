@@ -44,17 +44,19 @@
 - [X] grey line on tournamentCreationPanel
 
 - [-] add match history view
+  - [ ] when clicking on a user in matchView or tournamentView or in the matchHistoryView, it should lead to the match history of that user
   - [X] change PublicUser to something more strict (without twoFaEnabled)
   - [X] have a real PublicUser (only id, username, avatar)
-
-  - [ ] make the matchHistory link visible in profile
-  - [ ] when clicking on a user in matchView or tournamentView or in the matchHistoryView, it should lead to the match history of that user
+- [X] do user not by id but by username
+- [X] have tournamentsystem without registration
+- [X] change to /user/id//:id to /user//:username
 
 - [ ] disable sign-in button when 2fa is reached
-- [ ] do user not by id but by username
-
-- [ ] have tournamentsystem without registration
-- [ ] change to /user/id to /user/username
+- [ ] not used notifications button in navbar
+  - [ ] maybe we can use it for friendship requests
+- [ ] username validation: set the char length limit on username, email, and password
+- [ ] browser tab name "Vite + TS" in frontend/index.html
+- [ ] don't be able to type any more into slot after pressing register and success (disable test field)
 
 - [ ] treating the security hole that a logged in user can actually post a tournament with any valid uuids
   - [ ] need to check if the users exist
@@ -63,20 +65,17 @@
       #+begin_src typescript
         const token = request.server.jwt.sign({userId: asdf, verified: true}, { expiresIn: "5min" });
       #+end_src
-
-- [ ] not used leaderboard in navbar
-- [ ] not used notifications button in navbar
 - [ ] not working "forgot password" in login
-- [ ] browser tab name "Vite + TS" in frontend/index.html
-- [ ] set the char length limit on username, email, and password
-- [ ] don't be able to type any more into slot after pressing register and success
-* notes eriki_tournament_matches
+  - don't see it in the subject (but interesting for sure)
+- [X] not used leaderboard in navbar
+
+* DONE notes eriki_tournament_matches
 - instead of giving tournamendId as string in constructor of the GameComponent, use the GameComponentOptions
 - delete getTournamentId (we already have getTournament)
 - tournamentId? inside the type
 - outfactor default-pfp.png (it is present in some places of the code, we should factor this out to somewhere, where it can be defined application wide)
 
-* notes on new user type
+* DONE notes on new user type
 - auth routes that need to send back twoFaEnabled or not (those where the frontend will set the current user)
   - /signup (always false)
   - /login
@@ -93,22 +92,23 @@
     -
 
 * notes (subject go-through)
-- check for unhandled errors
-- check for warnings
-  - must exclude all the comments
-- implement default version of the tournament system
-- XSS attacks?
-  - let's try to hack it with the help of an llm
-- ◦ Ensure that the AI adapts to different gameplay scenarios and user interactions.
+- [X] implement default version of the tournament system
+- [ ] Ensure that the AI adapts to different gameplay scenarios and user interactions.
   - make difficulty a little bit adaptive to the game score?
   - maybe add some radomness to the moves
-- ask Chris about the firewall
-  - I have turned it off in one service so that i can reach it
-- go over cybersecurity modules with Chris
-- maybe need to implement the other 2fa options
 - [ ] double check input validation!
   - "Ensure that the website is secured. Check the database to verify that passwords are hashed. Check the server for server-side validation/sanitization on forms and any user input. If this isn't done, the evaluation ends now."
-
 - [ ] add friends button
   - "Users can see the profile of other users. A profile contains basic informations such as their nickname, their avatar, or a button to add them as friends."
   - "The user has access to a (friends interface), where they can see their friends and their status (offline/online/in a game/and so forth). They also have access to basics informations about them (name/nickname, avatar and so forth)."
+- [ ] ask Chris about the firewall
+  - I have turned it off in one service so that i can reach it
+- [ ] go over cybersecurity modules with Chris
+- [ ] XSS attacks?
+  - let's try to hack it with the help of an llm
+- [ ] check for unhandled errors
+- [ ] check for warnings
+  - must exclude all the comments
+
+- [ ] maybe need to implement the other 2fa options
+  - [ ] ask Alex
