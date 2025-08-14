@@ -1,6 +1,7 @@
 import { BaseComponent } from "../BaseComponent";
 import playersDisplayTemplate from "./playersDisplay.html?raw";
 import { AuthService } from "../../services/auth/auth.service";
+import { UserController } from "../../controllers/user.controller";
 import type { PublicUser } from "../../types/auth.types";
 import type { GameMode } from "../../types/game.types";
 
@@ -18,30 +19,39 @@ export class PlayersDisplay extends BaseComponent {
         } else {
             this.render("pvp");
         }
+
+        this.addEventListenerWithCleanup(this.container, "click", this.onUserClick.bind(this));
     }
 
     private render(gameMode: GameMode) {
         const user = this.authService.getCurrentUser();
         const player2Content = this.getPlayer2Content(gameMode);
 
+        const player1Span = user?.username
+            ? `<span class="cursor-pointer text-black underline-none hover:text-indigo-600" data-username="${user.username}">${user.username}</span>`
+            : "Player 1";
+
         this.container.innerHTML = playersDisplayTemplate
             .replace("{{canvasWidth}}", this.canvasWidth.toString())
-            .replace("{{player1Name}}", user?.username || "Player 1")
+            .replace("{{player1Name}}", player1Span)
             .replace("{{player1Avatar}}", user?.avatar || "/uploads/default-pfp.png")
             .replace("{{player2Content}}", player2Content);
     }
 
     private renderTournament(players: { player1: PublicUser; player2: PublicUser }) {
+        const player1Span = `<span class="cursor-pointer text-black underline-none hover:text-indigo-600" data-username="${players.player1.username}">${players.player1.username}</span>`;
+        const player2Span = `<span class="cursor-pointer text-black underline-none hover:text-indigo-600" data-username="${players.player2.username}">${players.player2.username}</span>`;
+
         const player2Content = `
             <img src="${players.player2.avatar}"
                  alt="${players.player2.username}"
                  class="w-12 h-12 rounded-full border-2 border-white">
-            <span class="font-semibold text-lg">${players.player2.username}</span>
+            <span class="font-semibold text-lg">${player2Span}</span>
         `;
 
         this.container.innerHTML = playersDisplayTemplate
             .replace("{{canvasWidth}}", this.canvasWidth.toString())
-            .replace("{{player1Name}}", players.player1.username)
+            .replace("{{player1Name}}", player1Span)
             .replace("{{player1Avatar}}", players.player1.avatar)
             .replace("{{player2Content}}", player2Content);
     }
@@ -67,6 +77,14 @@ export class PlayersDisplay extends BaseComponent {
 
     public updateGameMode(gameMode: GameMode) {
         this.render(gameMode);
+    }
+
+    private onUserClick(e: Event) {
+        e.preventDefault();
+        const target = e.target as HTMLElement;
+        const username = target.dataset.username;
+        if (!username) return;
+        UserController.getInstance().navigateToUser(`/user/${encodeURIComponent(username)}`);
     }
 
     destroy(): void {
