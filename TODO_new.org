@@ -63,6 +63,12 @@
       #+begin_src typescript
         const token = request.server.jwt.sign({userId: asdf, verified: true}, { expiresIn: "5min" });
       #+end_src
+
+- [ ] not used leaderboard in navbar
+- [ ] not used notifications button in navbar
+- [ ] not working "forgot password" in login
+- [ ] browser tab name "Vite + TS" in frontend/index.html
+- [ ] set the char length limit on username, email, and password
 * notes eriki_tournament_matches
 - instead of giving tournamendId as string in constructor of the GameComponent, use the GameComponentOptions
 - delete getTournamentId (we already have getTournament)
