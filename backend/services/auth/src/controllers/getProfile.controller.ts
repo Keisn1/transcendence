@@ -1,7 +1,7 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { Profile } from "../types/auth.types";
 
-export default async function getProfile(request: FastifyRequest, reply: FastifyReply) {
+export async function getProfile(request: FastifyRequest, reply: FastifyReply) {
     const userId = request.user.id;
 
     try {
