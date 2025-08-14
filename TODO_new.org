@@ -83,3 +83,19 @@
   - POST /auth/verify
     - in frontend/auth/auth.service ts verifyUser returns a PublicUser object which is not necessary, should only return id/username/avatar
     - actually verify can stay like this, but the user object returned by authService.verifyUser should be a real PublicUser
+    -
+
+* notes (subject go-through)
+- check for unhandled errors
+- check for warnings
+  - must exclude all the comments
+- implement default version of the tournament system
+- XSS attacks?
+  - let's try to hack it with the help of an llm
+- ◦ Ensure that the AI adapts to different gameplay scenarios and user interactions.
+  - make difficulty a little bit adaptive to the game score?
+  - maybe add some radomness to the moves
+- ask Chris about the firewall
+  - I have turned it off in one service so that i can reach it
+- go over cybersecurity modules with Chris
+- maybe need to implement the other 2fa options
