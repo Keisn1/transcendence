@@ -34,23 +34,12 @@ export class MatchHistoryComponent extends BaseComponent {
 
         this.addEventListenerWithCleanup(this.matchHistoryContent, "click", this.onUserClick.bind(this));
 
-        // this.loadMatchHistory();
-    }
-
-    static async create(username?: string): Promise<MatchHistoryComponent> {
-        const component = new MatchHistoryComponent(username);
-        await component.loadMatchHistory();
-        return component;
+        this.loadMatchHistory();
     }
 
     private async loadMatchHistory() {
         try {
             this.userId = (await this.userService.getUserByUsername(this.username!)).id;
-            // Only proceed if we have userId
-            if (!this.userId) {
-                throw new Error("Could not find user");
-            }
-
             const matches = await this.matchService.getMatchesByUser(this.userId!);
 
             await this.prefetchOpponentNames(matches);
@@ -98,7 +87,7 @@ export class MatchHistoryComponent extends BaseComponent {
 
         const opponentName = this.getOpponentName(opponentId);
         const opponentHtml = this.isLinkable(opponentId)
-            ? `<a href="" data-user-name="${opponentName}" class="text-indigo-600 hover:underline">${opponentName}</a>`
+            ? `<a data-user-name="${opponentName}" class="text-indigo-600 hover:underline">${opponentName}</a>`
             : opponentName;
 
         return `

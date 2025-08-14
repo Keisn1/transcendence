@@ -6,7 +6,7 @@ import { UserController } from "../../../controllers/user.controller.ts";
 
 export class NextMatch extends BaseComponent {
     private tournamentController: TournamentController;
-    // private userController: UserController;
+    private userController: UserController;
     private nextMatchDetails: HTMLElement;
     private startBtn: HTMLButtonElement;
 
@@ -15,7 +15,7 @@ export class NextMatch extends BaseComponent {
         console.log("constructing bracket component");
         this.container.innerHTML = nextMatchTemplate;
         this.tournamentController = TournamentController.getInstance();
-        // this.userController = UserController.getInstance();
+        this.userController = UserController.getInstance();
 
         this.nextMatchDetails = this.container.querySelector("#next-match-details")!;
         this.startBtn = this.container.querySelector("#start-match-btn")!;
@@ -66,7 +66,7 @@ export class NextMatch extends BaseComponent {
         if (!username) return;
 
         UserController.getInstance().navigateToUser(`/user/${encodeURIComponent(username)}`);
-    }
+    };
 
     destroy(): void {
         super.destroy();
