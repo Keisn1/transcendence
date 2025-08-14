@@ -34,24 +34,27 @@ export default class extends AbstractView {
 
     private renderByState() {
         // Clean up previous component
-        console.log("render tournamentView by state");
+        console.log("render tournamentViewDefault by state");
         this.currentComponent?.destroy();
 
-        console.log("Tournament being rendered with tournament: ", this.tournamentController.getTournament());
-        console.log("matches results", this.tournamentController.getTournament()?.matches[0]?.result);
-        const state = this.tournamentController.getTournamentMachine().getState();
+        console.log(
+            "Tournament being rendered with tournamentDefault: ",
+            this.tournamentController.getTournamentDefault(),
+        );
+        console.log("matches results", this.tournamentController.getTournamentDefault()?.matches[0]?.result);
+        const state = this.tournamentController.getTournamentMachineDefault().getState();
         switch (state) {
             case TournamentState.UNINITIALIZED:
-                this.currentComponent = new TournamentCreation(false);
+                this.currentComponent = new TournamentCreation(true);
                 break;
             case TournamentState.READY:
-                this.currentComponent = new TournamentBracketComponent(false);
+                this.currentComponent = new TournamentBracketComponent(true);
                 break;
             case TournamentState.IN_PROGRESS:
-                this.currentComponent = new TournamentMatchComponent(false);
+                this.currentComponent = new TournamentMatchComponent(true);
                 break;
             case TournamentState.COMPLETED:
-                this.currentComponent = new TournamentFinalComponent(false);
+                this.currentComponent = new TournamentFinalComponent(true);
                 break;
         }
 

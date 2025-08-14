@@ -56,13 +56,17 @@ export class TournamentController {
     private static instance: TournamentController;
     private tournamentService: TournamentService;
     private tournament: Tournament;
+    private tournamentDefault: Tournament;
     private tournamentMachine: TournamentMachine; // Controller manages state
+    private tournamentMachineDefault: TournamentMachine;
     private router: Router;
 
     private constructor(router: Router) {
         this.tournamentService = TournamentService.getInstance();
         this.tournamentMachine = new TournamentMachine();
+        this.tournamentMachineDefault = new TournamentMachine();
         this.tournament = new Tournament();
+        this.tournamentDefault = new Tournament();
         this.router = router;
     }
 
@@ -79,15 +83,13 @@ export class TournamentController {
         tournament.id = await this.tournamentService.createTournament(tournament);
 
         this.tournament = tournament;
-        this.tournamentMachine.update(TournamentEvent.LOAD, tournament);
+        this.tournamentMachine.update(TournamentEvent.LOAD, this.tournament);
         this.router.navigateTo(`/tournament`);
     }
 
     public async createTournamentDefault(players: PublicUser[]): Promise<void> {
-        const tournament = new Tournament(players);
-
-        this.tournament = tournament;
-        this.tournamentMachine.update(TournamentEvent.LOAD, tournament);
+        this.tournamentDefault = new Tournament(players);
+        this.tournamentMachineDefault.update(TournamentEvent.LOAD, this.tournamentDefault);
         this.router.navigateTo(`/tournament-default`);
     }
 
@@ -95,9 +97,16 @@ export class TournamentController {
         return this.tournament;
     }
 
+    public getTournamentDefault() {
+        return this.tournamentDefault;
+    }
+
     getTournamentMachine(): TournamentMachine {
-        // should this be public?
         return this.tournamentMachine;
+    }
+
+    getTournamentMachineDefault(): TournamentMachine {
+        return this.tournamentMachineDefault;
     }
 
     // Controller handles state transitions
@@ -109,7 +118,7 @@ export class TournamentController {
 
     startMatchDefault(): void {
         console.log("starting default match");
-        this.tournamentMachine?.update(TournamentEvent.START, this.tournament!);
+        this.tournamentMachineDefault?.update(TournamentEvent.START, this.tournamentDefault!);
         this.router.navigateTo(`/tournament-default`);
     }
 
@@ -122,10 +131,10 @@ export class TournamentController {
     }
 
     finishMatchDefault(result: MatchResult): void {
-        this.tournament.matches[this.tournament.nextMatchIdx].result = result;
-        this.tournament.nextMatchIdx++;
-        if (!this.tournament.hasMoreMatches()) this.tournament.generateNextRound();
-        this.tournamentMachine?.update(TournamentEvent.FINISH, this.tournament);
+        this.tournamentDefault.matches[this.tournamentDefault.nextMatchIdx].result = result;
+        this.tournamentDefault.nextMatchIdx++;
+        if (!this.tournamentDefault.hasMoreMatches()) this.tournamentDefault.generateNextRound();
+        this.tournamentMachineDefault?.update(TournamentEvent.FINISH, this.tournamentDefault);
         this.router.navigateTo("/tournament-default");
     }
 
@@ -136,8 +145,8 @@ export class TournamentController {
     }
 
     exitTournamentDefault(): void {
-        this.tournament = new Tournament();
-        this.tournamentMachine = new TournamentMachine();
+        this.tournamentDefault = new Tournament();
+        this.tournamentMachineDefault = new TournamentMachine();
         this.router.navigateTo("/tournament-default");
     }
 }

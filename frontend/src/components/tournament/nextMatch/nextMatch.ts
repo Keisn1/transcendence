@@ -1,27 +1,36 @@
 import { BaseComponent } from "../../BaseComponent.ts";
 import nextMatchTemplate from "./nextMatch.html?raw";
-import { TournamentState } from "../../../controllers/tournament.machine.ts";
-import { TournamentController } from "../../../controllers/tournament.controller.ts";
+import { TournamentMachine, TournamentState } from "../../../controllers/tournament.machine.ts";
+import { Tournament, TournamentController } from "../../../controllers/tournament.controller.ts";
 import { UserController } from "../../../controllers/user.controller.ts";
 
 export class NextMatch extends BaseComponent {
     private tournamentController: TournamentController;
     private nextMatchDetails: HTMLElement;
     private startBtn: HTMLButtonElement;
+    private defaultComponents: boolean;
+    private tournament: Tournament;
+    private tournamentMachine: TournamentMachine;
 
-    constructor(withRegistration: boolean = true) {
+    constructor(defaultComponents: boolean = false) {
         super("div", "next-match-container");
+        this.defaultComponents = defaultComponents;
         this.container.innerHTML = nextMatchTemplate;
         this.tournamentController = TournamentController.getInstance();
+
+        if (this.defaultComponents) {
+            this.tournament = this.tournamentController.getTournamentDefault();
+            this.tournamentMachine = this.tournamentController.getTournamentMachineDefault();
+        } else {
+            this.tournament = this.tournamentController.getTournament();
+            this.tournamentMachine = this.tournamentController.getTournamentMachine();
+        }
 
         this.nextMatchDetails = this.container.querySelector("#next-match-details")!;
         this.startBtn = this.container.querySelector("#start-match-btn")!;
         this.startBtn.onclick = () => {
-            if (withRegistration) {
-                this.tournamentController.startMatch();
-            } else {
-                this.tournamentController.startMatchDefault();
-            }
+            if (defaultComponents) this.tournamentController.startMatchDefault();
+            else this.tournamentController.startMatch();
         };
 
         this.populateData();
@@ -31,14 +40,12 @@ export class NextMatch extends BaseComponent {
     }
 
     private fillNextMatchDetails() {
-        const tournament = this.tournamentController.getTournament();
-        const nextMatch = tournament.matches[tournament.nextMatchIdx];
-
+        const nextMatch = this.tournament.matches[this.tournament.nextMatchIdx];
         const player1Span = `<span class="cursor-pointer text-black underline-none hover:text-indigo-600" data-username="${nextMatch.player1.username}">${nextMatch.player1.username}</span>`;
         const player2Span = `<span class="cursor-pointer text-black underline-none hover:text-indigo-600" data-username="${nextMatch.player2.username}">${nextMatch.player2.username}</span>`;
 
         let text = "";
-        switch (this.tournamentController.getTournamentMachine()!.getState()) {
+        switch (this.tournamentMachine.getState()) {
             case TournamentState.READY: // TODO: erik: this case doesn't look right, possibly can be removed
                 text = `Playing: ${player1Span} vs ${player2Span}`;
                 break;

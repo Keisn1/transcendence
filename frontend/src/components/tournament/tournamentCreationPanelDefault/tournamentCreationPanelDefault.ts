@@ -14,7 +14,7 @@ export class TournamentCreationPanelDefault extends BaseComponent {
 
     constructor() {
         super("div", "tournament-container");
-        console.log("constructing tournament creation panel");
+        console.log("constructing tournament creation panel default");
         this.container.innerHTML = tournamentCreationPanelTemplate;
 
         this.tournamentForm = this.container.querySelector<HTMLFormElement>("#tournament-form")!;
@@ -29,6 +29,7 @@ export class TournamentCreationPanelDefault extends BaseComponent {
     }
 
     private handleAddPlayer(e: Event) {
+        console.log("hello");
         e.preventDefault();
         if (this.addedPlayersCount >= 4) return;
 

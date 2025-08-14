@@ -8,19 +8,19 @@ export class TournamentCreation extends BaseComponent {
     private tournamentCreationPanel: TournamentCreationPanel | null = null;
     private tournamentCreationPanelDefault: TournamentCreationPanelDefault | null = null;
 
-    constructor(withRegistration: boolean = true) {
+    constructor(defaultComponents: boolean = false) {
         super("div", "tournament-container", "flex min-h-screen flex-col justify-center px-6 py-12 lg:px-8");
         const title = "Pong Tournament Signup";
         const description = "Register up to 4 players below.";
         this.header = new TournamentHeader(title, description);
         this.container.appendChild(this.header.getContainer());
 
-        if (withRegistration) {
-            this.tournamentCreationPanel = new TournamentCreationPanel();
-            this.container.appendChild(this.tournamentCreationPanel.getContainer());
-        } else {
+        if (defaultComponents) {
             this.tournamentCreationPanelDefault = new TournamentCreationPanelDefault();
             this.container.appendChild(this.tournamentCreationPanelDefault.getContainer());
+        } else {
+            this.tournamentCreationPanel = new TournamentCreationPanel();
+            this.container.appendChild(this.tournamentCreationPanel.getContainer());
         }
     }
 
