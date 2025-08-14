@@ -9,16 +9,19 @@ export class NextMatch extends BaseComponent {
     private nextMatchDetails: HTMLElement;
     private startBtn: HTMLButtonElement;
 
-    constructor() {
+    constructor(withRegistration: boolean = true) {
         super("div", "next-match-container");
-        console.log("constructing bracket component");
         this.container.innerHTML = nextMatchTemplate;
         this.tournamentController = TournamentController.getInstance();
 
         this.nextMatchDetails = this.container.querySelector("#next-match-details")!;
         this.startBtn = this.container.querySelector("#start-match-btn")!;
         this.startBtn.onclick = () => {
-            this.tournamentController.startMatch();
+            if (withRegistration) {
+                this.tournamentController.startMatch();
+            } else {
+                this.tournamentController.startMatchDefault();
+            }
         };
 
         this.populateData();

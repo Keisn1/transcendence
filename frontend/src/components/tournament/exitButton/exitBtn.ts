@@ -6,7 +6,7 @@ export class ExitBtn extends BaseComponent {
     private tournamentController: TournamentController;
     private exitBtn: HTMLButtonElement;
 
-    constructor() {
+    constructor(withRegistration: boolean = true) {
         super("div", "exit-button-container");
         console.log("constructing exit button component");
         this.container.innerHTML = buttonTemplate;
@@ -14,7 +14,11 @@ export class ExitBtn extends BaseComponent {
         this.tournamentController = TournamentController.getInstance();
 
         this.exitBtn.onclick = () => {
-            this.tournamentController.exitTournament();
+            if (withRegistration) {
+                this.tournamentController.exitTournament();
+            } else {
+                this.tournamentController.exitTournamentDefault();
+            }
         };
     }
 

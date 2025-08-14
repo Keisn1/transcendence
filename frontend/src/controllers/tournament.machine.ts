@@ -41,7 +41,6 @@ export class TournamentMachine {
             return;
         }
 
-        console.log("here: ", tournament.hasMoreMatches());
         if (
             tx.from === TournamentState.IN_PROGRESS &&
             event === TournamentEvent.FINISH &&

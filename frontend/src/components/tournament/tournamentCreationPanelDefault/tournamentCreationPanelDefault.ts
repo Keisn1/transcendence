@@ -109,7 +109,7 @@ export class TournamentCreationPanelDefault extends BaseComponent {
         }
 
         try {
-            await TournamentController.getInstance().createTournament(this.registeredPlayers);
+            await TournamentController.getInstance().createTournamentDefault(this.registeredPlayers);
             this.showMessage("Tournament was successfully created");
         } catch (err: any) {
             this.showMessage(err.message || "Could not create tournament", "error");

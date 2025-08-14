@@ -69,6 +69,7 @@
 - [ ] not working "forgot password" in login
 - [ ] browser tab name "Vite + TS" in frontend/index.html
 - [ ] set the char length limit on username, email, and password
+- [ ] don't be able to type any more into slot after pressing register and success
 * notes eriki_tournament_matches
 - instead of giving tournamendId as string in constructor of the GameComponent, use the GameComponentOptions
 - delete getTournamentId (we already have getTournament)

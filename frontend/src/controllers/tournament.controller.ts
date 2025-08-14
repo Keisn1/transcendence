@@ -83,6 +83,14 @@ export class TournamentController {
         this.router.navigateTo(`/tournament`);
     }
 
+    public async createTournamentDefault(players: PublicUser[]): Promise<void> {
+        const tournament = new Tournament(players);
+
+        this.tournament = tournament;
+        this.tournamentMachine.update(TournamentEvent.LOAD, tournament);
+        this.router.navigateTo(`/tournament-default`);
+    }
+
     public getTournament() {
         return this.tournament;
     }
@@ -94,8 +102,15 @@ export class TournamentController {
 
     // Controller handles state transitions
     startMatch(): void {
+        console.log("start button clicked");
         this.tournamentMachine?.update(TournamentEvent.START, this.tournament!);
         this.router.navigateTo(`/tournament`);
+    }
+
+    startMatchDefault(): void {
+        console.log("starting default match");
+        this.tournamentMachine?.update(TournamentEvent.START, this.tournament!);
+        this.router.navigateTo(`/tournament-default`);
     }
 
     finishMatch(result: MatchResult): void {
@@ -110,5 +125,11 @@ export class TournamentController {
         this.tournament = new Tournament();
         this.tournamentMachine = new TournamentMachine();
         this.router.navigateTo("/tournament");
+    }
+
+    exitTournamentDefault(): void {
+        this.tournament = new Tournament();
+        this.tournamentMachine = new TournamentMachine();
+        this.router.navigateTo("/tournament-default");
     }
 }

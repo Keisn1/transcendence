@@ -10,15 +10,16 @@ export class TournamentBracketComponent extends BaseComponent {
     private matchList: MatchList;
     private exitButton: ExitBtn;
 
-    constructor() {
+    constructor(withRegistration: boolean = true) {
         super("div", "tournament-container", "mt-8 sm:mx-auto sm:w-full sm:max-w-2xl");
         console.log("constructing bracket component");
         const title = "Tournament Bracket";
         const description = "View upcoming matches and overall schedule.";
         this.header = new TournamentHeader(title, description);
-        this.nextMatch = new NextMatch();
+
+        this.nextMatch = new NextMatch(withRegistration);
         this.matchList = new MatchList();
-        this.exitButton = new ExitBtn();
+        this.exitButton = new ExitBtn(withRegistration);
 
         this.container.appendChild(this.header.getContainer());
         this.container.appendChild(this.nextMatch.getContainer());
