@@ -8,6 +8,21 @@ export async function getUserById(
 ): Promise<PublicUser> {
     const { userId } = request.params;
     console.log(userId);
+    if (userId == "00000000-0000-0000-0000-000000000000") {
+        return reply.status(200).send({
+            publicUser: { id: "00000000-0000-0000-0000-000000000000", username: "unknown", avatar: "default-pfp.png" },
+        });
+    }
+    if (userId == "00000000-0000-0000-0000-000000000001") {
+        return reply.status(200).send({
+            publicUser: { id: "00000000-0000-0000-0000-000000000001", username: "AI Easy", avatar: "default-pfp.png" },
+        });
+    }
+    if (userId == "00000000-0000-0000-0000-000000000002") {
+        return reply.status(200).send({
+            publicUser: { id: "00000000-0000-0000-0000-000000000002", username: "AI Hard", avatar: "default-pfp.png" },
+        });
+    }
 
     try {
         const result = await request.server.db.query(`SELECT id, username, avatar FROM users WHERE id = ? `, [userId]);
@@ -23,7 +38,30 @@ export async function getUserById(
     }
 }
 
-export default async function updateUser(request: FastifyRequest, reply: FastifyReply): Promise<UpdateUserResponse> {
+export async function getUserByUsername(
+    request: FastifyRequest<{ Params: { username: string } }>,
+    reply: FastifyReply,
+): Promise<PublicUser> {
+    const { username } = request.params;
+    console.log(username);
+
+    try {
+        const result = await request.server.db.query(`SELECT id, username, avatar FROM users WHERE username = ? `, [
+            username,
+        ]);
+
+        console.log(result);
+        const publicUser = result[0];
+        console.log(publicUser);
+
+        return reply.status(200).send({ publicUser: publicUser });
+    } catch (error) {
+        console.error("Failed to fetch user matches:", error);
+        return reply.status(500).send({ error: "Failed to fetch matches" });
+    }
+}
+
+export async function updateUser(request: FastifyRequest, reply: FastifyReply): Promise<UpdateUserResponse> {
     const id = request.user.id;
     const { username, email, password, avatar } = request.body as UpdateUserBody;
 
@@ -111,10 +149,35 @@ export const updateUserSchema = {
     },
 } as const;
 
+export const getUserByUsernameSchema = {
+    params: {
+        type: "object",
+        properties: { username: { type: "string" } },
+        required: ["username"],
+    },
+    response: {
+        200: {
+            type: "object",
+            properties: {
+                publicUser: {
+                    type: "object",
+                    properties: {
+                        id: { type: "string" },
+                        username: { type: "string" },
+                        avatar: { type: "string", format: "uri-reference" },
+                    },
+                    required: ["id", "username", "avatar"],
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+};
+
 export const getUserByIdSchema = {
     params: {
         type: "object",
-        properties: { userId: { type: "string", format: "uuid" } },
+        properties: { userId: { type: "string" } },
         required: ["userId"],
     },
     response: {

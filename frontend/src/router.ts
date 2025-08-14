@@ -62,7 +62,7 @@ export default class Router {
                 view: GdprSettingsView,
             },
             {
-                path: "/user/:id",
+                path: "/user/:username",
                 view: UserView,
             },
         ];

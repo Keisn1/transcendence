@@ -11,11 +11,12 @@ export class MatchHistoryComponent extends BaseComponent {
     private matchService: MatchService;
     private userService: UserService;
     private userId?: string;
+    private username?: string;
 
     private matchHistoryContent: HTMLElement;
     private opponentNameCache: Map<string, string>;
 
-    constructor(userId?: string) {
+    constructor(username?: string) {
         super("div", "match-history");
 
         this.authService = AuthService.getInstance();
@@ -28,8 +29,8 @@ export class MatchHistoryComponent extends BaseComponent {
 
         this.opponentNameCache = new Map<string, string>();
 
-        if (userId) this.userId = userId;
-        else this.userId = this.authService.getCurrentUser()?.id;
+        if (username) this.username = username;
+        else this.username = this.authService.getCurrentUser()?.username;
 
         this.addEventListenerWithCleanup(this.matchHistoryContent, "click", this.onUserClick.bind(this));
 
@@ -38,6 +39,7 @@ export class MatchHistoryComponent extends BaseComponent {
 
     private async loadMatchHistory() {
         try {
+            this.userId = (await this.userService.getUserByUsername(this.username!)).id;
             const matches = await this.matchService.getMatchesByUser(this.userId!);
 
             await this.prefetchOpponentNames(matches);
@@ -85,7 +87,7 @@ export class MatchHistoryComponent extends BaseComponent {
 
         const opponentName = this.getOpponentName(opponentId);
         const opponentHtml = this.isLinkable(opponentId)
-            ? `<a href="/user/${opponentId}" data-user-id="${opponentId}" class="text-indigo-600 hover:underline">${opponentName}</a>`
+            ? `<a data-user-name="${opponentName}" class="text-indigo-600 hover:underline">${opponentName}</a>`
             : opponentName;
 
         return `
@@ -151,11 +153,12 @@ export class MatchHistoryComponent extends BaseComponent {
 
         const target = e.target as HTMLElement;
 
-        const userId = target.dataset.userId;
-        if (!userId) return;
+        const username = target.dataset.userName;
+        console.log(target.dataset);
+        if (!username) return;
 
-        UserController.getInstance().navigateToUser(`/user/${encodeURIComponent(userId)}`);
-    };
+        UserController.getInstance().navigateToUser(`/user/${encodeURIComponent(username)}`);
+    }
 
     private showError(message: string) {
         this.matchHistoryContent.innerHTML = `
@@ -171,7 +174,7 @@ export class MatchHistoryComponent extends BaseComponent {
         // making array of all opponent ids
         opponentIds.push(this.userId!);
         for (const m of matches) {
-            const isPlayer1 = (m.player1Id == this.userId) ? true : false;
+            const isPlayer1 = m.player1Id == this.userId ? true : false;
             const opponentId = isPlayer1 ? m.player2Id : m.player1Id;
 
             if (!opponentId) continue;

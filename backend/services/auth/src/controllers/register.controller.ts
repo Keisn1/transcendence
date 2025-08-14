@@ -3,11 +3,13 @@ import { genSaltSync, hashSync } from "bcrypt";
 import { RegisterBody, RegisterResponse, User } from "../types/auth.types";
 import { v4 as uuidv4 } from "uuid";
 
-export default async function register(
+export async function register(
     request: FastifyRequest<{ Body: RegisterBody }>,
     reply: FastifyReply,
 ): Promise<RegisterResponse> {
-    const { username, email, password } = request.body;
+    let { username, email, password } = request.body;
+
+    username = username.toLowerCase();
 
     try {
         // Hash password (stays in auth service)

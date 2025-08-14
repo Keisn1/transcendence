@@ -6,13 +6,13 @@ export class UserContent extends BaseComponent {
     private userDisplay: UserDisplayComponent;
     private matchHistory: MatchHistoryComponent;
 
-    constructor(userId: string) {
+    constructor(username: string) {
         super("div", "dashboard-content");
 
         this.container.className = "max-w-6xl mx-auto mt-8 px-4";
 
-        this.userDisplay = new UserDisplayComponent(userId);
-        this.matchHistory = new MatchHistoryComponent(userId);
+        this.userDisplay = new UserDisplayComponent(username);
+        this.matchHistory = new MatchHistoryComponent(username);
 
         this.container.appendChild(this.userDisplay.getContainer());
         this.container.appendChild(this.matchHistory.getContainer());

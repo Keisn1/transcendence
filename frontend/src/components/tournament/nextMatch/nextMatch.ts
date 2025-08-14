@@ -2,6 +2,7 @@ import { BaseComponent } from "../../BaseComponent.ts";
 import nextMatchTemplate from "./nextMatch.html?raw";
 import { TournamentState } from "../../../controllers/tournament.machine.ts";
 import { TournamentController } from "../../../controllers/tournament.controller.ts";
+import { UserController } from "../../../controllers/user.controller.ts";
 
 export class NextMatch extends BaseComponent {
     private tournamentController: TournamentController;
@@ -27,30 +28,42 @@ export class NextMatch extends BaseComponent {
     }
 
     private fillNextMatchDetails() {
+        const tournament = this.tournamentController.getTournament();
+        const nextMatch = tournament.matches[tournament.nextMatchIdx];
+
+        const player1Span = `<span class="cursor-pointer text-black underline-none hover:text-indigo-600" data-username="${nextMatch.player1.username}">${nextMatch.player1.username}</span>`;
+        const player2Span = `<span class="cursor-pointer text-black underline-none hover:text-indigo-600" data-username="${nextMatch.player2.username}">${nextMatch.player2.username}</span>`;
+
+        let text = "";
         switch (this.tournamentController.getTournamentMachine()!.getState()) {
-            case TournamentState.READY:
-                this.nextMatchDetails.textContent = `Playing: ${this.nextMatchLabel()}`;
+            case TournamentState.READY: // TODO: erik: this case doesn't look right, possibly can be removed
+                text = `Playing: ${player1Span} vs ${player2Span}`;
                 break;
             case TournamentState.IN_PROGRESS:
-                this.nextMatchDetails.textContent = `Playing: ${this.nextMatchLabel()}`;
+                text = `Playing: ${player1Span} vs ${player2Span}`;
                 break;
             case TournamentState.MATCH_DONE:
-                this.nextMatchDetails.textContent = "Last result recorded";
+                text = "Last result recorded";
                 break;
             case TournamentState.COMPLETED:
-                this.nextMatchDetails.textContent = "Tournament Complete!";
+                text = "Tournament Complete!";
                 break;
         }
+
+        this.nextMatchDetails.innerHTML = text;
+
+        this.addEventListenerWithCleanup(this.nextMatchDetails, "click", this.onUserClick.bind(this));
     }
 
-    private nextMatchLabel() {
-        // TODO: bit strange, maybe a method on the tournament itself
-        // const next = this.tournamentController.getTournament()!.matches.find((m) => !m.result)!;
-        // return `${next.player1.username} vs ${next.player2.username ?? "BYE"}`;
+    private onUserClick(e: Event) {
+        e.preventDefault();
 
-        const tournament = this.tournamentController.getTournament();
-		const nextMatch = tournament.matches[tournament.nextMatchIdx];
-        return `${nextMatch.player1.username} vs ${nextMatch.player2.username}`;
+        const target = e.target as HTMLElement;
+
+        const username = target.dataset.userId;
+        if (!username) return;
+
+        UserController.getInstance().navigateToUser(`/user/${encodeURIComponent(username)}`);
     }
 
     destroy(): void {

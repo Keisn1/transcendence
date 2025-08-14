@@ -1,6 +1,5 @@
 import { AuthStorage } from "../auth/auth.storage";
 import { type GetMatchResponse, type PostMatchBody } from "../../types/match.types";
-//declared but never read? import { AuthService } from "../auth/auth.service";
 
 export class MatchService {
     private static instance: MatchService;
