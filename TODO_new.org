@@ -105,3 +105,9 @@
   - I have turned it off in one service so that i can reach it
 - go over cybersecurity modules with Chris
 - maybe need to implement the other 2fa options
+- [ ] double check input validation!
+  - "Ensure that the website is secured. Check the database to verify that passwords are hashed. Check the server for server-side validation/sanitization on forms and any user input. If this isn't done, the evaluation ends now."
+
+- [ ] add friends button
+  - "Users can see the profile of other users. A profile contains basic informations such as their nickname, their avatar, or a button to add them as friends."
+  - "The user has access to a (friends interface), where they can see their friends and their status (offline/online/in a game/and so forth). They also have access to basics informations about them (name/nickname, avatar and so forth)."
