@@ -10,6 +10,7 @@ export class Navbar extends BaseComponent {
     private dashboardLink: HTMLAnchorElement;
     private gameLink: HTMLAnchorElement;
     private tournamentLink: HTMLAnchorElement;
+    private tournamentDefaultLink: HTMLAnchorElement;
     private profileLink: HTMLAnchorElement;
     private profileDropdown: HTMLElement;
     private menu: HTMLElement;
@@ -31,6 +32,7 @@ export class Navbar extends BaseComponent {
         this.dashboardLink = this.container.querySelector<HTMLAnchorElement>("#dashboard-link")!;
         this.gameLink = this.container.querySelector<HTMLAnchorElement>("#game-link")!;
         this.tournamentLink = this.container.querySelector<HTMLAnchorElement>("#tournament-link")!;
+        this.tournamentDefaultLink = this.container.querySelector<HTMLAnchorElement>("#tournament-default-link")!;
         this.profileLink = this.container.querySelector<HTMLAnchorElement>("#profile-link")!;
         this.loginLink = this.container.querySelector<HTMLAnchorElement>("#login-link")!;
         this.signupLink = this.container.querySelector<HTMLAnchorElement>("#signup-link")!;
@@ -87,6 +89,7 @@ export class Navbar extends BaseComponent {
         this.dashboardLink.href = "/";
         this.gameLink.href = "/game";
         this.tournamentLink.href = "/tournament";
+        this.tournamentDefaultLink.href = "/tournament-default";
         this.profileLink.href = "/profile";
         this.settingsLink.href = "/settings";
         this.loginLink.href = "/login";

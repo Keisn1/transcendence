@@ -1,0 +1,28 @@
+<div id="player-{{slotId}}" class="pb-4">
+	<div class="member-fields space-y-2">
+		<!-- Alias -->
+		<div>
+			<label class="block text-sm font-medium text-gray-700">Alias</label>
+			<div class="mt-1">
+				<input
+					type="text"
+					id="alias-{{slotId}}"
+					name="alias-{{slotId}}"
+					class="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+					placeholder="Enter alias" />
+			</div>
+		</div>
+
+        <!-- Buttons -->
+        <div class="flex justify-between space-x-2">
+            <button
+                type="button"
+                class="remove-btn rounded-md bg-red-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+				>Remove</button>
+            <button
+                type="button"
+                class="register-player-btn rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+				>Register</button>
+        </div>
+    </div>
+</div>

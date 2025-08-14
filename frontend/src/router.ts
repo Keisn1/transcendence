@@ -8,6 +8,7 @@ import TournamentView from "./views/TournamentView.ts";
 import GdprSettingsView from "./views/GdprSettingsView";
 import SettingsView from "./views/SettingsView";
 import UserView from "./views/UserView.ts";
+import TournamentViewDefault from "./views/TournamentViewDefault.ts";
 
 interface Route {
     path: string;
@@ -52,6 +53,10 @@ export default class Router {
             {
                 path: "/tournament",
                 view: TournamentView,
+            },
+            {
+                path: "/tournament-default",
+                view: TournamentViewDefault,
             },
             {
                 path: "/settings",
