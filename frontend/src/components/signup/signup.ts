@@ -4,6 +4,9 @@ import signupTemplate from "./signup.html?raw";
 import { type SignupForm } from "../../types/auth.types.ts";
 
 const MIN_LEN_PASSWORD = 8;
+const MAX_LEN_PASSWORD = 128;   // practical
+const MAX_LEN_USERNAME = 20;    // practical
+const MAX_LEN_EMAIL = 254;      // RFC 5321
 
 export class SignUp extends BaseComponent {
     private signupForm: HTMLFormElement;
@@ -44,12 +47,24 @@ export class SignUp extends BaseComponent {
     }
 
     private validateForm(data: any): boolean {
-        if (data.password !== data.confirmPassword) {
-            this.showError("Passwords do not match");
+        if (data.username.length > MAX_LEN_USERNAME) {
+            this.showError(`Username is too long. Maximum ${MAX_LEN_USERNAME} characters`);
+            return false;
+        }
+        if (data.email.length > MAX_LEN_EMAIL) {
+            this.showError(`Email is too long. Maximum ${MAX_LEN_EMAIL} characters`);
             return false;
         }
         if (data.password.length < MIN_LEN_PASSWORD) {
             this.showError(`Password must be at least ${MIN_LEN_PASSWORD} characters`);
+            return false;
+        }
+        if (data.password.length > MAX_LEN_PASSWORD) {
+            this.showError(`Password must be less or equal to ${MIN_LEN_PASSWORD} characters`);
+            return false;
+        }
+        if (data.password !== data.confirmPassword) {
+            this.showError("Passwords do not match");
             return false;
         }
         return true;
