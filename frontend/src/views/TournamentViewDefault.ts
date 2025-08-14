@@ -48,10 +48,10 @@ export default class extends AbstractView {
                 this.currentComponent = new TournamentBracketComponent(false);
                 break;
             case TournamentState.IN_PROGRESS:
-                this.currentComponent = new TournamentMatchComponent();
+                this.currentComponent = new TournamentMatchComponent(false);
                 break;
             case TournamentState.COMPLETED:
-                this.currentComponent = new TournamentFinalComponent();
+                this.currentComponent = new TournamentFinalComponent(false);
                 break;
         }
 

@@ -1,4 +1,4 @@
-import playerSlotTemplate from "./playerSlot.html?raw";
+import playerSlotTemplate from "./playerSlotDefault.html?raw";
 import tournamentCreationPanelTemplate from "./tournamentCreationPanelDefault.html?raw";
 import { BaseComponent } from "../../BaseComponent.ts";
 import { TournamentController } from "../../../controllers/tournament.controller.ts";
@@ -86,7 +86,7 @@ export class TournamentCreationPanelDefault extends BaseComponent {
             const publicUser: PublicUser = {
                 id: "00000000-0000-0000-0000-000000000000",
                 username: alias,
-                avatar: "default-pfp.png",
+                avatar: "/uploads/default-pfp.png",
             };
 
             this.registeredPlayers.push(publicUser);

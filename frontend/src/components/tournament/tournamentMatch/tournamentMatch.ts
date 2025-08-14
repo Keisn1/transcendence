@@ -9,7 +9,7 @@ export class TournamentMatchComponent extends BaseComponent {
     private tournamentController: TournamentController;
     private exitBtn: ExitBtn;
 
-    constructor() {
+    constructor(withRegistration: boolean = true) {
         super("div", "tournament-container");
         this.tournamentController = TournamentController.getInstance();
 
@@ -25,13 +25,17 @@ export class TournamentMatchComponent extends BaseComponent {
             tournamentId: tournament.id,
         });
 
-        this.exitBtn = new ExitBtn();
+        this.exitBtn = new ExitBtn(withRegistration);
 
         this.container.appendChild(this.gameComponent.getContainer());
         this.container.appendChild(this.exitBtn.getContainer());
 
         this.gameComponent.gameControls.addToFinishCallbacks(() => {
-            this.tournamentController.finishMatch(this.gameComponent!.getResult());
+            if (withRegistration) {
+                this.tournamentController.finishMatch(this.gameComponent!.getResult());
+            } else {
+                this.tournamentController.finishMatchDefault(this.gameComponent!.getResult());
+            }
         });
     }
     destroy(): void {

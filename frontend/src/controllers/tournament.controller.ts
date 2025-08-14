@@ -121,6 +121,14 @@ export class TournamentController {
         this.router.navigateTo("/tournament");
     }
 
+    finishMatchDefault(result: MatchResult): void {
+        this.tournament.matches[this.tournament.nextMatchIdx].result = result;
+        this.tournament.nextMatchIdx++;
+        if (!this.tournament.hasMoreMatches()) this.tournament.generateNextRound();
+        this.tournamentMachine?.update(TournamentEvent.FINISH, this.tournament);
+        this.router.navigateTo("/tournament-default");
+    }
+
     exitTournament(): void {
         this.tournament = new Tournament();
         this.tournamentMachine = new TournamentMachine();

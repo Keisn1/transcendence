@@ -14,6 +14,7 @@ export class ExitBtn extends BaseComponent {
         this.tournamentController = TournamentController.getInstance();
 
         this.exitBtn.onclick = () => {
+            console.log("clicked exit button");
             if (withRegistration) {
                 this.tournamentController.exitTournament();
             } else {

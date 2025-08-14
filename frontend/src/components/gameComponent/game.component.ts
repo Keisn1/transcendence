@@ -102,7 +102,6 @@ export class GameComponent extends BaseComponent {
     private async saveMatch() {
         try {
             if (!this.authService.isAuthenticated()) return;
-
             const result = this.getResult();
             const user = this.authService.getCurrentUser();
             const duration = Date.now() - this.gameStartTime;
