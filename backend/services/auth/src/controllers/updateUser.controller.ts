@@ -2,17 +2,15 @@ import { FastifyRequest, FastifyReply } from "fastify";
 import { genSaltSync, hashSync } from "bcrypt";
 import { PublicUser, UpdateUserBody, UpdateUserResponse } from "../types/auth.types";
 
-export async function getUserByUsername(
-    request: FastifyRequest<{ Params: { username: string } }>,
+export async function getUserById(
+    request: FastifyRequest<{ Params: { userId: string } }>,
     reply: FastifyReply,
 ): Promise<PublicUser> {
-    const { username } = request.params;
-    console.log(username);
+    const { userId } = request.params;
+    console.log(userId);
 
     try {
-        const result = await request.server.db.query(`SELECT id, username, avatar FROM users WHERE username = ? `, [
-            username,
-        ]);
+        const result = await request.server.db.query(`SELECT id, username, avatar FROM users WHERE id = ? `, [userId]);
 
         console.log(result);
         const publicUser = result[0];
@@ -25,7 +23,7 @@ export async function getUserByUsername(
     }
 }
 
-export async function updateUser(request: FastifyRequest, reply: FastifyReply): Promise<UpdateUserResponse> {
+export default async function updateUser(request: FastifyRequest, reply: FastifyReply): Promise<UpdateUserResponse> {
     const id = request.user.id;
     const { username, email, password, avatar } = request.body as UpdateUserBody;
 
@@ -113,11 +111,11 @@ export const updateUserSchema = {
     },
 } as const;
 
-export const getUserByUsernameSchema = {
+export const getUserByIdSchema = {
     params: {
         type: "object",
-        properties: { username: { type: "string" } },
-        required: ["username"],
+        properties: { userId: { type: "string", format: "uuid" } },
+        required: ["userId"],
     },
     response: {
         200: {

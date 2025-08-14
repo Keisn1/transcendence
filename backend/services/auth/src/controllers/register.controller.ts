@@ -3,7 +3,7 @@ import { genSaltSync, hashSync } from "bcrypt";
 import { RegisterBody, RegisterResponse, User } from "../types/auth.types";
 import { v4 as uuidv4 } from "uuid";
 
-export async function register(
+export default async function register(
     request: FastifyRequest<{ Body: RegisterBody }>,
     reply: FastifyReply,
 ): Promise<RegisterResponse> {
