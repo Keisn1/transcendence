@@ -60,7 +60,7 @@ export class NextMatch extends BaseComponent {
 
         const target = e.target as HTMLElement;
 
-        const username = target.dataset.userId;
+        const username = target.dataset.username;
         if (!username) return;
 
         UserController.getInstance().navigateToUser(`/user/${encodeURIComponent(username)}`);

@@ -87,7 +87,7 @@ export class MatchHistoryComponent extends BaseComponent {
 
         const opponentName = this.getOpponentName(opponentId);
         const opponentHtml = this.isLinkable(opponentId)
-            ? `<a data-user-name="${opponentName}" class="text-indigo-600 hover:underline">${opponentName}</a>`
+            ? `<a href="" data-username="${opponentName}" class="text-indigo-600 hover:underline">${opponentName}</a>`
             : opponentName;
 
         return `
@@ -153,7 +153,7 @@ export class MatchHistoryComponent extends BaseComponent {
 
         const target = e.target as HTMLElement;
 
-        const username = target.dataset.userName;
+        const username = target.dataset.username;
         console.log(target.dataset);
         if (!username) return;
 
