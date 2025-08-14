@@ -12,18 +12,18 @@ export class TournamentFinalComponent extends BaseComponent {
     private matchList: MatchList;
     private exitBtn: ExitBtn;
 
-    constructor(withRegistration: boolean = false) {
+    constructor(defaultComponents: boolean = false) {
         super("div", "tournament-container", "mt-8 sm:mx-auto sm:w-full sm:max-w-2xl");
         console.log("constructing bracket component");
         const title = "Tournament Results";
         const description = "View the current tournament leaderboard and review every match outcome.";
         this.header = new TournamentHeader(title, description);
 
-        if (withRegistration) this.leaderboard = new Leaderboard();
-        else this.leaderboardDefault = new LeaderboardDefault();
+        if (defaultComponents) this.leaderboardDefault = new LeaderboardDefault();
+        else this.leaderboard = new Leaderboard();
 
-        this.matchList = new MatchList();
-        this.exitBtn = new ExitBtn();
+        this.matchList = new MatchList(defaultComponents);
+        this.exitBtn = new ExitBtn(defaultComponents);
 
         this.container.appendChild(this.header.getContainer());
         if (this.leaderboard) this.container.appendChild(this.leaderboard.getContainer());

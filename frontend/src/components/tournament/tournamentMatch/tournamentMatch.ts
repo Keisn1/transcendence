@@ -9,12 +9,14 @@ export class TournamentMatchComponent extends BaseComponent {
     private tournamentController: TournamentController;
     private exitBtn: ExitBtn;
 
-    constructor(withRegistration: boolean = true) {
+    constructor(defaultComponents: boolean = false) {
         super("div", "tournament-container");
         this.tournamentController = TournamentController.getInstance();
 
         // Get current match players
-        const tournament = this.tournamentController.getTournament();
+        let tournament = this.tournamentController.getTournament();
+        if (defaultComponents) tournament = this.tournamentController.getTournamentDefault();
+
         const currentMatch = tournament.matches[tournament.nextMatchIdx];
 
         this.gameComponent = new GameComponent(GameControlsTournamentComponent, {
@@ -25,17 +27,14 @@ export class TournamentMatchComponent extends BaseComponent {
             tournamentId: tournament.id,
         });
 
-        this.exitBtn = new ExitBtn(withRegistration);
+        this.exitBtn = new ExitBtn(defaultComponents);
 
         this.container.appendChild(this.gameComponent.getContainer());
         this.container.appendChild(this.exitBtn.getContainer());
 
         this.gameComponent.gameControls.addToFinishCallbacks(() => {
-            if (withRegistration) {
-                this.tournamentController.finishMatch(this.gameComponent!.getResult());
-            } else {
-                this.tournamentController.finishMatchDefault(this.gameComponent!.getResult());
-            }
+            if (defaultComponents) this.tournamentController.finishMatchDefault(this.gameComponent!.getResult());
+            else this.tournamentController.finishMatch(this.gameComponent!.getResult());
         });
     }
     destroy(): void {

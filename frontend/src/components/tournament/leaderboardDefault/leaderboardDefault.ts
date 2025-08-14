@@ -19,7 +19,7 @@ export class LeaderboardDefault extends BaseComponent {
     }
 
     private getPlayerScores(): { player: PublicUser; count: number }[] {
-        const tournament = this.tournamentController.getTournament()!;
+        const tournament = this.tournamentController.getTournamentDefault()!;
 
         const playerScores = new Map<string, { player: PublicUser; count: number }>();
 

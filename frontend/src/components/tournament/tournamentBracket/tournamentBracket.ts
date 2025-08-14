@@ -18,7 +18,7 @@ export class TournamentBracketComponent extends BaseComponent {
         this.header = new TournamentHeader(title, description);
 
         this.nextMatch = new NextMatch(defaultComponents);
-        this.matchList = new MatchList();
+        this.matchList = new MatchList(defaultComponents);
         this.exitButton = new ExitBtn(defaultComponents);
 
         this.container.appendChild(this.header.getContainer());

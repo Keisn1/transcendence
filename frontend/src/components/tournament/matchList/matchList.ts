@@ -19,7 +19,7 @@ export class MatchList extends BaseComponent {
         this.populateData();
     }
     private populateData() {
-        if (this.defaultComponents) this.fillMatchListDefault;
+        if (this.defaultComponents) this.fillMatchListDefault();
         else this.fillMatchList();
     }
 
@@ -35,6 +35,7 @@ export class MatchList extends BaseComponent {
     }
 
     private fillMatchListDefault() {
+        console.log("fill Macht list default");
         this.tournamentController.getTournamentDefault()!.matches.forEach((m) => {
             const status: string = `${m.result?.player1Score} : ${m.result?.player2Score}`;
             const html = matchTemplate
