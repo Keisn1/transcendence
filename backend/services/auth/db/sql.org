@@ -18,16 +18,9 @@ SELECT * FROM users;
 #+end_src
 
 #+RESULTS:
-| id                                   | username           | email                          | password_hash                                                | avatar                            | twofa_secret                                         | created_at          | updated_at          | twofa_enabled |
-| 36a67ec1-cd9b-4f9d-974a-807051e1dab8 | kay2               | kay@example.de                 | $2b$10$UN.ihBplhGH.NjXGT39mYea43Sbzm3onCAksNrRe3/c6iOUalqgCy | /uploads/avatar-1754835808234.jpg | INMCYXSUHA3HSYTTEMYD6VTSKZNVG6ZQOVUD6JSFLJQUES3UJZEA | 2025-08-09 09:12:40 | 2025-08-10 14:23:29 |             1 |
-| f13e547b-9c63-4e97-b8dc-366550d49717 | user               | user@example.com               | $2b$10$a5AcwgjTowgGT66SUorNHOVYEH6hZl1g8BCLHMZ8noStUEI91zLdS | /uploads/default-pfp.png          |                                                      | 2025-08-09 09:13:47 | 2025-08-09 09:13:47 |             0 |
-| 7b3f5d14-0c84-4528-af15-7cd94aa8d5ab | anon_1754976667967 | anon_1754976667967@example.com |                                                              | /uploads/default-pfp.png          |                                                      | 2025-08-11 18:06:03 | 2025-08-12 05:31:07 |             0 |
-| 3b01eb9f-e7db-4d21-ab8d-9c49dc9f9d12 | anon_1754988782905 | anon_1754988782905@example.com |                                                              | /uploads/default-pfp.png          |                                                      | 2025-08-12 07:43:24 | 2025-08-12 08:53:02 |             0 |
-| d7f90010-346b-4509-aaf2-9fdf63081275 | a                  | a@a.com                        | $2b$10$KkYTvjXkWWZb3gORW1/E6.ViAMwBmXJG4to1IlVybFzbvUgO8b7oO | /uploads/default-pfp.png          |                                                      | 2025-08-12 08:27:39 | 2025-08-12 08:27:39 |             0 |
-| bf161351-cddf-4fc0-9156-5e08d4ab6ca5 | b                  | b@b.com                        | $2b$10$LXFOH.4pY8AEqkhpwoDmOOhVwQttlY77fkHjxhgu/fN2gDerv6zju | /uploads/default-pfp.png          |                                                      | 2025-08-12 08:27:53 | 2025-08-12 08:27:53 |             0 |
-| bb8d2c28-7bce-4504-acb8-630704f40ec9 | c                  | c@c.com                        | $2b$10$iATlWQgu/R0DmwGJuO.7fuGwhvPf3kJU6ro/bOBNs7S1PBkTfuGkO | /uploads/default-pfp.png          |                                                      | 2025-08-12 08:28:14 | 2025-08-12 08:28:14 |             0 |
-| 79ee729e-56b6-497b-8ade-46da0230805d | anon_1754988475852 | anon_1754988475852@example.com |                                                              | /uploads/avatar-1754988397567.svg | ORCFIRJMKAXUQW3LLMYTQZ3GOJFXQYR7J4YC4LCELIYGE2BEEM3A | 2025-08-12 08:46:27 | 2025-08-12 08:47:55 |             1 |
-| 2afb6eb0-175e-47bf-a464-fa5270885e09 | f                  | f@f.com                        | $2b$10$m4iunyGwBI7eK0m4bcYbj.GEwN6wwb28uKzhp7Pnd2LhPPbVzAHSS | /uploads/default-pfp.png          |                                                      | 2025-08-12 19:53:32 | 2025-08-12 19:53:32 |             0 |
+| id                                   | username | email   | password_hash                                                | avatar                   | twofa_secret | created_at          | updated_at          | twofa_enabled |
+| f3a7f773-59b7-42f1-aa53-475ad90a4f5e | k        | k@k.com | $2b$10$3Q7GDBDkisFFrrYjD8BqfubxKELfnbE.S/thIVfuXCodZsg7AWtLK | /uploads/default-pfp.png |              | 2025-08-14 05:27:26 | 2025-08-14 05:27:26 |             0 |
+| 4822a6be-b04e-4c45-b88a-a7a07d47f9aa | f        | f@f.com | $2b$10$e3lc/9Xn5mOUL3z.tMACOut8368G9JZB.M3WXLKj2UmuHJBusd3mq | /uploads/default-pfp.png |              | 2025-08-14 05:38:23 | 2025-08-14 05:38:23 |             0 |
 ** get user by id
 #+begin_src sqlite
 SELECT id, username, avatar FROM users WHERE id =

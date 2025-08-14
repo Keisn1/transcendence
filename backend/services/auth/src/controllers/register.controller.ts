@@ -7,7 +7,9 @@ export async function register(
     request: FastifyRequest<{ Body: RegisterBody }>,
     reply: FastifyReply,
 ): Promise<RegisterResponse> {
-    const { username, email, password } = request.body;
+    let { username, email, password } = request.body;
+
+    username = username.toLowerCase();
 
     try {
         // Hash password (stays in auth service)

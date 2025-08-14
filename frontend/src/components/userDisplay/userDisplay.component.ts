@@ -6,14 +6,14 @@ import userDisplayTemplate from "./userDisplay.component.html?raw";
 export class UserDisplayComponent extends BaseComponent {
     private authService: AuthService;
     private userService: UserService;
-    private userId?: string;
+    private username?: string;
 
     private userAvatar: HTMLImageElement;
     private userName: HTMLElement;
 
-    constructor(userId?: string) {
+    constructor(username?: string) {
         super("div", "user-display");
-        this.userId = userId;
+        this.username = username;
 
         this.authService = AuthService.getInstance();
         this.userService = UserService.getInstance();
@@ -28,14 +28,14 @@ export class UserDisplayComponent extends BaseComponent {
 
     private async loadUserInfo() {
         try {
-            if (!this.userId) {
+            if (!this.username) {
                 const user = this.authService.getCurrentUser();
                 if (user) {
                     this.userAvatar.src = user.avatar;
                     this.userName.textContent = user.username;
                 }
             } else {
-                const publicUser = await this.userService.getUserById(this.userId);
+                const publicUser = await this.userService.getUserByUsername(this.username);
                 this.userAvatar.src = publicUser.avatar;
                 this.userName.textContent = publicUser.username;
             }

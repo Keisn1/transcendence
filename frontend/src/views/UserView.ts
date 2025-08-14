@@ -27,11 +27,11 @@ export default class extends AbstractView {
             console.log("no parameters give");
             return;
         }
-        if (!("id" in this.params)) {
+        if (!("username" in this.params)) {
             console.log("no id in params");
         }
 
-        this.userContent = new UserContent(this.params.id);
+        this.userContent = new UserContent(this.params.username);
         document.body.appendChild(this.userContent.getContainer());
     }
 

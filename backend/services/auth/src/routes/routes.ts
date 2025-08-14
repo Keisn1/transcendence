@@ -9,6 +9,8 @@ import { complete2FASchema, disable2FA, verify2FA, verify2FASchema } from "../co
 import { init2FA, complete2FA } from "../controllers/twofa.controller";
 import {
     updateUser,
+    getUserById,
+    getUserByIdSchema,
     getUserByUsername,
     getUserByUsernameSchema,
     updateUserSchema,
@@ -36,8 +38,15 @@ export async function routes(fastify: FastifyInstance) {
     fastify.register(
         (fastify: FastifyInstance) => {
             fastify.put("", { preHandler: fastify.jwtAuth, schema: updateUserSchema }, updateUser);
+
+            fastify.get<{ Params: { userId: string } }>(
+                "/id/:userId",
+                { preHandler: fastify.jwtAuth, schema: getUserByIdSchema },
+                getUserById,
+            );
+
             fastify.get<{ Params: { username: string } }>(
-                "/:userId",
+                "/:username",
                 { preHandler: fastify.jwtAuth, schema: getUserByUsernameSchema },
                 getUserByUsername,
             );
