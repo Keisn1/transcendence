@@ -28,11 +28,9 @@ export class PlayersDisplay extends BaseComponent {
         const user = this.authService.getCurrentUser();
         const player2Content = this.getPlayer2Content(gameMode);
 
-        const player1Span = user?.username
-            ? (user.id && user.id !== ZERO_UUID
-                ? `<span class="cursor-pointer text-black underline-none hover:text-indigo-600" data-username="${user.username}">${user.username}</span>`
-                : user.username)
-            : "Player 1";
+        const player1Span = user?.id
+            ? `<span class="cursor-pointer text-black underline-none hover:text-indigo-600" data-username="${user.username}">${user.username}</span>`
+            : `<span>Player 1</span>`;
 
         this.container.innerHTML = playersDisplayTemplate
             .replace("{{canvasWidth}}", this.canvasWidth.toString())
@@ -44,11 +42,12 @@ export class PlayersDisplay extends BaseComponent {
     private renderTournament(players: { player1: PublicUser; player2: PublicUser }) {
         const player1Span = (players.player1.id && players.player1.id !== ZERO_UUID)
             ? `<span class="cursor-pointer text-black underline-none hover:text-indigo-600" data-username="${players.player1.username}">${players.player1.username}</span>`
-            : players.player1.username;
+            : `<span>${players.player1.username}</span>`
 
         const player2Span = (players.player2.id && players.player2.id !== ZERO_UUID)
             ? `<span class="cursor-pointer text-black underline-none hover:text-indigo-600" data-username="${players.player2.username}">${players.player2.username}</span>`
-            : players.player2.username;
+            : `<span>${players.player2.username}</span>`
+
 
         const player2Content = `
             <img src="${players.player2.avatar}"
