@@ -1,7 +1,6 @@
 import { BaseComponent } from "../BaseComponent";
 import playersDisplayTemplate from "./playersDisplay.html?raw";
 import { AuthService } from "../../services/auth/auth.service";
-import { UserController } from "../../controllers/user.controller";
 import type { PublicUser } from "../../types/auth.types";
 import type { GameMode } from "../../types/game.types";
 
@@ -84,7 +83,10 @@ export class PlayersDisplay extends BaseComponent {
         const target = e.target as HTMLElement;
         const username = target.dataset.username;
         if (!username) return;
-        UserController.getInstance().navigateToUser(`/user/${encodeURIComponent(username)}`);
+
+        // window.open(`/user/${encodeURIComponent(username)}`, '_self');
+        window.open(`/user/${encodeURIComponent(username)}`, '_blank');
+        return;
     }
 
     destroy(): void {
