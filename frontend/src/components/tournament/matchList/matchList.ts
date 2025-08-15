@@ -46,8 +46,8 @@ export class MatchList extends BaseComponent {
         this.tournamentController.getTournamentDefault()!.matches.forEach((m) => {
             const status: string = `${m.result?.player1Score} : ${m.result?.player2Score}`;
 
-            const player1Span = `<span class="cursor-pointer text-black underline-none hover:text-indigo-600" data-username="${m.player1.username}">${m.player1.username}</span>`;
-            const player2Span = `<span class="cursor-pointer text-black underline-none hover:text-indigo-600" data-username="${m.player2.username}">${m.player2.username}</span>`;
+            const player1Span = `<span class="font-medium text-black underline-none">${m.player1.username}</span>`
+            const player2Span = `<span class="font-medium text-black underline-none">${m.player2.username}</span>`
 
             const html = matchTemplate
                 .replace(/{{player1}}/g, player1Span)
