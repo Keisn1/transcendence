@@ -23,31 +23,29 @@ user has the rights to know what data is stored, and for how long // read up on 
 
 
 new 15.8
-find cleaner solution for the ignoring of the warning of 
-    https self signed cert which gdpr struggle with without the env call
-double check all the webbased attacks, ask llm
 modsecurity  extra rule for the auth service because its currently disabled
-tls cert call auth service gdpr
-download button if time
-gdpr compliance reread
-
-
-
-
-new 13.8
 check stats of anonymized/deleted users 
-check general stats/compare with actual same stats
-nginx service is failing to boot on first launch on new pc. //should be fixed
+
+
+later:
+double check all the webbased attacks, ask llm
+gdpr compliance reread
+download button if time
+
 
 done:
+check general stats/compare with actual same stats
+nginx service is failing to boot on first launch on new pc. //should be fixed
+find cleaner solution for the ignoring of the warning of 
+    https self signed cert which gdpr struggle with without the env call //done
 gdpr endpoints need to update/delete matchstats, played matches whatever
 new encrypt/decrypt key for 2fa secrets in vault abrufbar //done. llm abused. contact me if errors arise
 new service needs certificates and jwtsecret anbindung done
 
 getting checked by kay:
-2fa check for gdpr deletion/anonymization done
 
 actually done:
+2fa check for gdpr deletion/anonymization done
 
 devbuild:
 backend :
