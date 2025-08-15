@@ -4,6 +4,8 @@ import { AuthService } from "../../services/auth/auth.service";
 import type { PublicUser } from "../../types/auth.types";
 import type { GameMode } from "../../types/game.types";
 
+const ZERO_UUID = "00000000-0000-0000-0000-000000000000";
+
 export class PlayersDisplay extends BaseComponent {
     private authService: AuthService;
     private canvasWidth: number;
@@ -27,7 +29,9 @@ export class PlayersDisplay extends BaseComponent {
         const player2Content = this.getPlayer2Content(gameMode);
 
         const player1Span = user?.username
-            ? `<span class="cursor-pointer text-black underline-none hover:text-indigo-600" data-username="${user.username}">${user.username}</span>`
+            ? (user.id && user.id !== ZERO_UUID
+                ? `<span class="cursor-pointer text-black underline-none hover:text-indigo-600" data-username="${user.username}">${user.username}</span>`
+                : user.username)
             : "Player 1";
 
         this.container.innerHTML = playersDisplayTemplate
@@ -38,8 +42,13 @@ export class PlayersDisplay extends BaseComponent {
     }
 
     private renderTournament(players: { player1: PublicUser; player2: PublicUser }) {
-        const player1Span = `<span class="cursor-pointer text-black underline-none hover:text-indigo-600" data-username="${players.player1.username}">${players.player1.username}</span>`;
-        const player2Span = `<span class="cursor-pointer text-black underline-none hover:text-indigo-600" data-username="${players.player2.username}">${players.player2.username}</span>`;
+        const player1Span = (players.player1.id && players.player1.id !== ZERO_UUID)
+            ? `<span class="cursor-pointer text-black underline-none hover:text-indigo-600" data-username="${players.player1.username}">${players.player1.username}</span>`
+            : players.player1.username;
+
+        const player2Span = (players.player2.id && players.player2.id !== ZERO_UUID)
+            ? `<span class="cursor-pointer text-black underline-none hover:text-indigo-600" data-username="${players.player2.username}">${players.player2.username}</span>`
+            : players.player2.username;
 
         const player2Content = `
             <img src="${players.player2.avatar}"
