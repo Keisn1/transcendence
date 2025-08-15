@@ -43,8 +43,8 @@
 - [X] add statistics in profile
 - [X] grey line on tournamentCreationPanel
 
-- [-] add match history view
-  - [ ] when clicking on a user in matchView or tournamentView or in the matchHistoryView, it should lead to the match history of that user
+- [X] add match history view
+  - [X] when clicking on a user in matchView or tournamentView or in the matchHistoryView, it should lead to the match history of that user
   - [X] change PublicUser to something more strict (without twoFaEnabled)
   - [X] have a real PublicUser (only id, username, avatar)
 - [X] do user not by id but by username
@@ -54,8 +54,8 @@
 - [ ] disable sign-in button when 2fa is reached
 - [ ] not used notifications button in navbar
   - [ ] maybe we can use it for friendship requests
-- [ ] username validation: set the char length limit on username, email, and password
-- [ ] browser tab name "Vite + TS" in frontend/index.html
+- [X] username validation: set the char length limit on username, email, and password
+- [X] browser tab name "Vite + TS" in frontend/index.html
 - [ ] don't be able to type any more into slot after pressing register and success (disable test field)
 
 - [ ] treating the security hole that a logged in user can actually post a tournament with any valid uuids
