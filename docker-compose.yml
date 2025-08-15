@@ -7,6 +7,7 @@ services:
       - "3000:3000"
     environment:
       - ENV=production
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
     volumes:
       - ./vault/init:/vault/init # Required for .env access
     depends_on:
