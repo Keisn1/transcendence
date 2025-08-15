@@ -52,6 +52,8 @@
 - [X] change to /user/id//:id to /user//:username
 
 - [ ] disable sign-in button when 2fa is reached
+  - [ ] at profile change
+
 - [ ] not used notifications button in navbar
   - [ ] maybe we can use it for friendship requests
 - [X] username validation: set the char length limit on username, email, and password
@@ -93,6 +95,7 @@
 
 * notes (subject go-through)
 - [X] implement default version of the tournament system
+- [ ] delete old avatars when they are updated
 - [ ] Ensure that the AI adapts to different gameplay scenarios and user interactions.
   - make difficulty a little bit adaptive to the game score?
   - maybe add some radomness to the moves
@@ -101,14 +104,38 @@
 - [ ] add friends button
   - "Users can see the profile of other users. A profile contains basic informations such as their nickname, their avatar, or a button to add them as friends."
   - "The user has access to a (friends interface), where they can see their friends and their status (offline/online/in a game/and so forth). They also have access to basics informations about them (name/nickname, avatar and so forth)."
-- [ ] ask Chris about the firewall
-  - I have turned it off in one service so that i can reach it
-- [ ] go over cybersecurity modules with Chris
-- [ ] XSS attacks?
-  - let's try to hack it with the help of an llm
 - [ ] check for unhandled errors
 - [ ] check for warnings
   - must exclude all the comments
+- [ ] more precise warnings in registration process
+- [ ] make sure every jwt gets a proper timeout
 
 - [ ] maybe need to implement the other 2fa options
   - [ ] ask Alex
+
+- [ ] ask Chris about the firewall
+  - I have turned it off in one service so that i can reach it
+  - lot of filtering going on
+
+- [ ] go over cybersecurity modules with Chris
+
+- [ ] XSS attacks?
+  - let's try to hack it with the help of an llm
+
+- files are accepted to much
+  - restrict gif/jpeg/png
+
+- download button
+  - wenn Zeit ist, dann machen
+
+- deletion of avatars when user requests deletion of data
+  - depends on deletion of avatars in general
+
+- test hacks
+  - rerun
+  - include XSS and SQL-Injection
+
+- [ ] delete all logs in all services and in frontend
+
+- [ ] when a match is played and the user goes back in time, the match is registered multiple times in the database
+  - [ ] needs to be figured out somehow
