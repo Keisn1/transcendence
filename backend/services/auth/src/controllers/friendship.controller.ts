@@ -102,6 +102,7 @@ export async function getPendingRequests(
     reply: FastifyReply,
 ): Promise<GetPendingRequestsResponse> {
     const userId = request.user.id;
+    console.log("userId: ", userId);
 
     const requests = await request.server.db.query(
         `
@@ -113,6 +114,7 @@ export async function getPendingRequests(
     `,
         [userId],
     );
+    console.log(requests);
 
     return reply.status(200).send({ requests });
 }

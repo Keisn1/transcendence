@@ -58,11 +58,7 @@ export async function getUserById(
 
     try {
         const result = await request.server.db.query(`SELECT id, username, avatar FROM users WHERE id = ? `, [userId]);
-
-        console.log(result);
         const publicUser = result[0];
-        console.log(publicUser);
-
         return reply.status(200).send({ publicUser: publicUser });
     } catch (error) {
         console.error("Failed to fetch user matches:", error);
@@ -82,9 +78,7 @@ export async function getUserByUsername(
             username,
         ]);
 
-        console.log(result);
         const publicUser = result[0];
-        console.log(publicUser);
 
         return reply.status(200).send({ publicUser: publicUser });
     } catch (error) {

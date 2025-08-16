@@ -3,6 +3,8 @@ import { Navbar } from "../components/navbar/navbar.ts";
 import type Router from "../router.ts";
 import { AuthService } from "../services/auth/auth.service.ts";
 import { UserContent } from "../components/userContent/userContent.component.ts";
+import { FriendRequestButton } from "../components/friendRequest/friendRequest.ts";
+import { OnlineStatus } from "../components/onlineStatus/onlineStatus.ts";
 
 export default class extends AbstractView {
     private navbar: Navbar | null = null;
@@ -33,6 +35,12 @@ export default class extends AbstractView {
 
         this.userContent = new UserContent(this.params.username);
         document.body.appendChild(this.userContent.getContainer());
+
+        const friendRequestButton = new FriendRequestButton(this.params.username);
+        this.userContent.getContainer().appendChild(friendRequestButton.getContainer());
+
+        const onlineStatus = new OnlineStatus(this.params.username);
+        this.userContent.getContainer().appendChild(onlineStatus.getContainer());
     }
 
     destroy() {
