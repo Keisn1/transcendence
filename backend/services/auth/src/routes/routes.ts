@@ -14,6 +14,8 @@ import {
     getUserByUsername,
     getUserByUsernameSchema,
     updateUserSchema,
+    getOnlineStatus,
+    getOnlineStatusSchema,
 } from "../controllers/updateUser.controller";
 import {
     getFriendshipStatus,
@@ -26,6 +28,7 @@ import {
     sendFriendRequestSchema,
 } from "../controllers/friendship.controller";
 import { RespondToRequestBody } from "../types/auth.types";
+import { updateOnlineStatus } from "../controllers/online.controller";
 
 export async function routes(fastify: FastifyInstance) {
     fastify.register(
@@ -69,6 +72,19 @@ export async function routes(fastify: FastifyInstance) {
                 "/:username",
                 { preHandler: fastify.jwtAuth, schema: getUserByUsernameSchema },
                 getUserByUsername,
+            );
+            fastify.get<{ Params: { userId: string } }>(
+                "/online-status/:userId",
+                {
+                    preHandler: fastify.jwtAuth,
+                    schema: getOnlineStatusSchema,
+                },
+                getOnlineStatus,
+            );
+            fastify.put<{ Body: { isOnline: boolean } }>(
+                "/online-status",
+                { preHandler: fastify.jwtAuth },
+                updateOnlineStatus,
             );
             fastify.get("/health", healthRoute);
         },

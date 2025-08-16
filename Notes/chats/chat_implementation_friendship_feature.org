@@ -2,7 +2,7 @@
 :GPTEL_MODEL: claude-sonnet-4-20250514
 :GPTEL_BACKEND: Claude
 :GPTEL_SYSTEM: You are a large language model living in Emacs and a helpful assistant. Avoid long answers.
-:GPTEL_BOUNDS: ((response (388 981) (1435 2273) (2284 16794) (16850 19023) (19066 20110) (20114 20836) (20837 21728) (21768 21826) (21832 24101) (24143 24965) (24966 25416)))
+:GPTEL_BOUNDS: ((response (767 1360) (1814 2652) (2663 17165) (17221 19394) (19437 20481) (20485 21207) (21208 22099) (22139 22197) (22203 24472) (24514 25336) (25337 25787) (25987 26289) (26455 26635) (26723 28356) (28422 31012) (31102 32430) (32432 32480) (32488 32536) (32539 32543) (32548 32583) (32589 32597) (32599 32614) (32618 32626) (32630 32641) (32642 32654) (32661 32697) (32701 32713) (32717 32769) (32776 32784) (32785 32788) (32793 32801) (32804 32847) (32849 32857) (32863 32929) (32934 32938) (32941 32993) (33001 33822) (33901 35522)))
 :END:
 
 *** Look at the rules
@@ -359,7 +359,6 @@ this.container.insertBefore(friendshipRequests.getContainer(), this.matchHistory
 
 This creates a complete friendship system with request/accept functionality and online status for friends only.
 
-*******
 *** I want to go over the backend controller methods one by one and add schema as well as body and response types to them. Let's start with sendFriendRequest
 
 **** sendFriendRequest Method
@@ -767,6 +766,320 @@ const showButton = status === 'none'; // Only show for no existing friendship
 
 The =canRequest= field is somewhat redundant - we could determine this from =status= alone. Would you like to simplify this?
 
-*** 
+*** I've remove it from the backend. I have not yet implemented the frontend components. I will do this one by one and I will get back to that issue once i encounter it. Nothing to be done for now
 
+Understood! You've removed =canRequest= from the backend and will handle the frontend logic based on the =status= field alone when you implement the components.
 
+The backend friendship API is now complete with proper types and schemas. Ready to help when you start implementing the frontend components.
+
+*** I still haven't implemented the frontend components but I saw that you use an endpoint /api/user/online-status//:userId:
+#+begin_src typescript :results output
+            const statusResponse = await fetch(`/api/user/online-status/${userId}`, {
+                headers: { Authorization: `Bearer ${AuthStorage.getToken()}` }
+            });
+#+end_src
+I haven't seen this endpoint among the backend endpoints that you proposed.
+
+You're absolutely right! I referenced =/api/user/online-status/${userId}= in the OnlineStatus component but never defined that backend endpoint.
+
+**** Missing Backend Endpoint
+
+We need to add this to the user controller:
+
+#+begin_src typescript
+// In updateUser.controller.ts (or create separate online.controller.ts)
+export async function getOnlineStatus(
+    request: FastifyRequest<{ Params: { userId: string } }>,
+    reply: FastifyReply
+) {
+    const { userId } = request.params;
+    const currentUserId = request.user.id;
+
+    // First check if they're friends
+    const friendship = await request.server.db.query(=
+        SELECT status FROM friendships
+        WHERE ((requester_id = ? AND addressee_id = ?) OR (requester_id = ? AND addressee_id = ?))
+        AND status = 'accepted'
+    =, [currentUserId, userId, userId, currentUserId]);
+
+    if (friendship.length === 0) {
+        return reply.status(403).send({ error: "Can only see online status of friends" });
+    }
+
+    // Get user's online status
+    const user = await request.server.db.query(
+        "SELECT is_online, last_seen FROM users WHERE id = ?",
+        [userId]
+    );
+
+    if (user.length === 0) {
+        return reply.status(404).send({ error: "User not found" });
+    }
+
+    return reply.send({
+        isOnline: Boolean(user[0].is_online),
+        lastSeen: user[0].last_seen
+    });
+}
+#+end_src
+
+**** Add to routes.ts
+#+begin_src typescript
+// In the user routes section
+fastify.get("/online-status/:userId", { preHandler: fastify.jwtAuth }, getOnlineStatus);
+#+end_src
+
+Good catch! This endpoint is essential for the online status feature to work.
+
+*** Again, I would like to have types and schemas for this one
+
+**** Types
+#+begin_src typescript
+// Add to auth.types.ts
+export interface GetOnlineStatusResponse {
+    isOnline: boolean;
+    lastSeen: string | null;
+}
+#+end_src
+
+**** Updated Controller Method
+#+begin_src typescript
+export async function getOnlineStatus(
+    request: FastifyRequest<{ Params: { userId: string } }>,
+    reply: FastifyReply
+): Promise<GetOnlineStatusResponse> {
+    const { userId } = request.params;
+    const currentUserId = request.user.id;
+
+    // First check if they're friends
+    const friendship = await request.server.db.query(`
+        SELECT status FROM friendships
+        WHERE ((requester_id = ? AND addressee_id = ?) OR (requester_id = ? AND addressee_id = ?))
+        AND status = 'accepted'
+    `, [currentUserId, userId, userId, currentUserId]);
+
+    if (friendship.length === 0) {
+        return reply.status(403).send({ error: "Can only see online status of friends" });
+    }
+
+    // Get user's online status
+    const user = await request.server.db.query(
+        "SELECT is_online, last_seen FROM users WHERE id = ?",
+        [userId]
+    );
+
+    if (user.length === 0) {
+        return reply.status(404).send({ error: "User not found" });
+    }
+
+    return reply.status(200).send({
+        isOnline: Boolean(user[0].is_online),
+        lastSeen: user[0].last_seen
+    });
+}
+#+end_src
+
+**** Schema Definition
+#+begin_src typescript
+export const getOnlineStatusSchema = {
+    params: {
+        type: "object",
+        properties: {
+            userId: { type: "string" }
+        },
+        required: ["userId"],
+        additionalProperties: false
+    },
+    response: {
+        200: {
+            type: "object",
+            properties: {
+                isOnline: { type: "boolean" },
+                lastSeen: {
+                    type: ["string", "null"]
+                }
+            },
+            required: ["isOnline", "lastSeen"],
+            additionalProperties: false
+        },
+        403: {
+            type: "object",
+            properties: {
+                error: { type: "string" }
+            },
+            required: ["error"],
+            additionalProperties: false
+        },
+        404: {
+            type: "object",
+            properties: {
+                error: { type: "string" }
+            },
+            required: ["error"],
+            additionalProperties: false
+        }
+    }
+} as const;
+#+end_src
+
+**** Updated Route Registration
+#+begin_src typescript
+// In routes.ts
+fastify.get("/online-status/:userId", {
+    preHandler: fastify.jwtAuth,
+    schema: getOnlineStatusSchema
+}, getOnlineStatus);
+#+end_src
+
+*** Good. I don't actually see where we update the last_seen and the is_online column.
+
+You're absolutely right! I defined the columns but never implemented the logic to update them.
+
+**** Update on Login
+#+begin_src typescript
+// In login.controller.ts - add after successful login
+await request.server.db.run(
+    "UPDATE users SET is_online = 1, last_seen = CURRENT_TIMESTAMP WHERE id = ?",
+    [user.id]
+);
+#+end_src
+
+**** Update on Logout/Activity
+#+begin_src typescript
+// Create new controller: online.controller.ts
+export async function updateOnlineStatus(
+    request: FastifyRequest<{ Body: { isOnline: boolean } }>,
+    reply: FastifyReply
+) {
+    const { isOnline } = request.body;
+    const userId = request.user.id;
+
+    await request.server.db.run(
+        "UPDATE users SET is_online = ?, last_seen = CURRENT_TIMESTAMP WHERE id = ?",
+        [isOnline ? 1 : 0, userId]
+    );
+
+    return reply.send({ success: true });
+}
+
+// Add route
+fastify.put("/online-status", { preHandler: fastify.jwtAuth }, updateOnlineStatus);
+#+end_src
+
+**** Frontend Activity Tracking
+#+begin_src typescript
+// In AuthService or create OnlineStatusService
+class OnlineStatusService {
+    private heartbeatInterval: number | null = null;
+
+    startTracking() {
+        // Update online status every 30 seconds
+        this.heartbeatInterval = window.setInterval(() => {
+            this.updateOnlineStatus(true);
+        }, 30000);
+
+        // Set offline when page unloads
+        window.addEventListener('beforeunload', () => {
+            fetch('/api/user/online-status', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': =Bearer ${AuthStorage.getToken()}=
+                },
+                body: JSON.stringify({ isOnline: false }),
+                keepalive: true  // Ensures request completes even if page closes
+            }).catch(() => {}); // Ignore errors on page unload
+        });
+    }
+
+    private async updateOnlineStatus(isOnline: boolean) {
+        try {
+            await fetch('/api/user/online-status', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${AuthStorage.getToken()}`
+                },
+                body: JSON.stringify({ isOnline })
+            });
+        } catch (error) {
+            console.error('Failed to update online status:', error);
+        }
+    }
+
+    stopTracking() {
+        if (this.heartbeatInterval) {
+            clearInterval(this.heartbeatInterval);
+            this.heartbeatInterval = null;
+        }
+        this.updateOnlineStatus(false);
+    }
+}
+#+end_src
+
+This handles login updates, periodic heartbeats, and logout/page close updates.
+*** I've implemented OnlineStatusService. How do i use it in the AuthService?
+**** Initialize in AuthService Constructor
+#+begin_src typescript
+// In AuthService
+import { OnlineStatusService } from './onlineStatus.service';
+
+export class AuthService {
+    private onlineStatusService: OnlineStatusService;
+
+    constructor() {
+        // ... existing constructor code
+        this.onlineStatusService = new OnlineStatusService();
+    }
+#+end_src
+
+***** Start Tracking on Successful Login
+#+begin_src typescript
+// In AuthService login method - after successful login
+async login(credentials: LoginBody): Promise<LoginResponse> {
+    // ... existing login logic
+
+    // After successful login and token storage
+    this.currentUser = response.user;
+    this.notifyAuthChange();
+
+    // Start online status tracking
+    this.onlineStatusService.startTracking();
+
+    return response;
+}
+#+end_src
+
+***** Stop Tracking on Logout
+#+begin_src typescript
+// In AuthService logout method
+logout(): void {
+    // Stop online status tracking first
+    this.onlineStatusService.stopTracking();
+
+    // ... existing logout logic
+    this.clearAuthState();
+    this.notifyAuthChange();
+}
+#+end_src
+
+***** Initialize on Startup (if already logged in)
+#+begin_src typescript
+// In AuthService constructor or initialization method
+private initializeAuth() {
+    const token = AuthStorage.getToken();
+    const user = AuthStorage.getUser();
+
+    if (token && user) {
+        this.currentUser = user;
+        // Start tracking if already authenticated
+        this.onlineStatusService.startTracking();
+    }
+}
+#+end_src
+
+This ensures online status tracking starts with login and stops with logout.
+
+******
+*** when doiong
+<

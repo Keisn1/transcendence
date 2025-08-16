@@ -95,3 +95,8 @@ export interface RespondToRequestResponse {
 export interface GetFriendshipStatusResponse {
     status: "none" | "pending" | "accepted" | "declined";
 }
+
+export interface GetOnlineStatusResponse {
+    isOnline: boolean;
+    lastSeen: string | null;
+}

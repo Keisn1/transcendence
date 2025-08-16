@@ -1,6 +1,38 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { genSaltSync, hashSync } from "bcrypt";
-import { PublicUser, UpdateUserBody, UpdateUserResponse } from "../types/auth.types";
+import { GetOnlineStatusResponse, PublicUser, UpdateUserBody, UpdateUserResponse } from "../types/auth.types";
+
+export async function getOnlineStatus(
+    request: FastifyRequest<{ Params: { userId: string } }>,
+    reply: FastifyReply,
+): Promise<GetOnlineStatusResponse> {
+    const { userId } = request.params;
+    const currentUserId = request.user.id;
+
+    // First check if they're friends
+    const friendship = await request.server.db.query(
+        `SELECT status FROM friendships
+        WHERE ((requester_id = ? AND addressee_id = ?) OR (requester_id = ? AND addressee_id = ?))
+        AND status = 'accepted' `,
+        [currentUserId, userId, userId, currentUserId],
+    );
+
+    if (friendship.length === 0) {
+        return reply.status(403).send({ error: "Can only see online status of friends" });
+    }
+
+    // Get user's online status
+    const user = await request.server.db.query("SELECT is_online, last_seen FROM users WHERE id = ?", [userId]);
+
+    if (user.length === 0) {
+        return reply.status(404).send({ error: "User not found" });
+    }
+
+    return reply.status(200).send({
+        isOnline: Boolean(user[0].is_online),
+        lastSeen: user[0].last_seen,
+    });
+}
 
 export async function getUserById(
     request: FastifyRequest<{ Params: { userId: string } }>,
@@ -198,3 +230,43 @@ export const getUserByIdSchema = {
         },
     },
 };
+
+export const getOnlineStatusSchema = {
+    params: {
+        type: "object",
+        properties: {
+            userId: { type: "string" },
+        },
+        required: ["userId"],
+        additionalProperties: false,
+    },
+    response: {
+        200: {
+            type: "object",
+            properties: {
+                isOnline: { type: "boolean" },
+                lastSeen: {
+                    type: ["string", "null"],
+                },
+            },
+            required: ["isOnline", "lastSeen"],
+            additionalProperties: false,
+        },
+        403: {
+            type: "object",
+            properties: {
+                error: { type: "string" },
+            },
+            required: ["error"],
+            additionalProperties: false,
+        },
+        404: {
+            type: "object",
+            properties: {
+                error: { type: "string" },
+            },
+            required: ["error"],
+            additionalProperties: false,
+        },
+    },
+} as const;

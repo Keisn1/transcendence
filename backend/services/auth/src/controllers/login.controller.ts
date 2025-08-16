@@ -31,7 +31,6 @@ export async function login(request: FastifyRequest<{ Body: LoginBody }>, reply:
         }
         const response: LoginResponse = { token, user };
 
-        // send response
         return reply.status(201).send(response);
     } catch (error) {
         console.error("Login error:", error);

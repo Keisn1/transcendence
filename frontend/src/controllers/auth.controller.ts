@@ -1,15 +1,24 @@
 import { AuthService } from "../services/auth/auth.service.ts";
 import Router from "../router";
 import { type LoginBody, type SignupForm, type User } from "../types/auth.types.ts";
+import { OnlineStatusService } from "../services/user/onlineStatus.service.ts";
+import { AuthStorage } from "../services/auth/auth.storage.ts";
 
 export class AuthController {
+    private onlineStatusService: OnlineStatusService;
+
     private static instance: AuthController;
     private authService: AuthService;
     private router: Router;
 
     private constructor(router: Router) {
         this.authService = AuthService.getInstance();
+        this.onlineStatusService = new OnlineStatusService();
         this.router = router;
+
+        if (AuthStorage.getToken() && AuthStorage.loadUser()) {
+            this.onlineStatusService.startTracking();
+        }
     }
 
     public static getInstance(router?: Router): AuthController {
@@ -21,6 +30,7 @@ export class AuthController {
 
     public logout(): void {
         const currentPath = window.location.pathname;
+        this.onlineStatusService.stopTracking();
         this.authService.logout();
 
         console.log("inside logout");
@@ -51,6 +61,7 @@ export class AuthController {
     public async login(credentials: { email: string; password: string }): Promise<{ requires2FA: boolean }> {
         const result = await this.authService.login(credentials);
         if (!result.requires2FA) {
+            this.onlineStatusService.startTracking();
             this.router.navigateTo("/");
         }
 
@@ -59,6 +70,7 @@ export class AuthController {
 
     public async complete2FALogin(token: string): Promise<void> {
         await this.authService.complete2FALogin(token);
+        this.onlineStatusService.startTracking();
         this.router.navigateTo("/");
     }
 
@@ -72,6 +84,7 @@ export class AuthController {
 
     public async signUp(formData: SignupForm): Promise<void> {
         await this.authService.signUp(formData);
+        this.onlineStatusService.startTracking();
         this.router.navigateTo("/profile");
     }
 

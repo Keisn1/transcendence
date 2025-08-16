@@ -30,7 +30,11 @@ export class MatchHistoryComponent extends BaseComponent {
         this.opponentNameCache = new Map<string, string>();
 
         if (username) this.username = username;
-        else this.username = this.authService.getCurrentUser()?.username;
+        else {
+            const user = this.authService.getCurrentUser()!;
+            this.username = user.username;
+            this.userId = user.id;
+        }
 
         this.addEventListenerWithCleanup(this.matchHistoryContent, "click", this.onUserClick.bind(this));
 
@@ -39,7 +43,7 @@ export class MatchHistoryComponent extends BaseComponent {
 
     private async loadMatchHistory() {
         try {
-            this.userId = (await this.userService.getUserByUsername(this.username!)).id;
+            if (!this.userId) this.userId = (await this.userService.getUserByUsername(this.username!)).id;
             const matches = await this.matchService.getMatchesByUser(this.userId!);
 
             await this.prefetchOpponentNames(matches);
