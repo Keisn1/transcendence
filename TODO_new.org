@@ -95,15 +95,18 @@
 
 * notes (subject go-through)
 - [X] implement default version of the tournament system
+- [ ] add friends button
+  - [ ] "Users can see the profile of other users. A profile contains basic informations such as their nickname, their avatar, or a button to add them as friends."
+  - [ ] "The user has access to a (friends interface), where they can see their friends and their status (offline/online/in a game/and so forth). They also have access to basics informations about them (name/nickname, avatar and so forth)."
+  - [ ] make sure that gdpr is deleting/anonymizing/information is still working
+
+
 - [ ] delete old avatars when they are updated
 - [ ] Ensure that the AI adapts to different gameplay scenarios and user interactions.
   - make difficulty a little bit adaptive to the game score?
   - maybe add some radomness to the moves
 - [ ] double check input validation!
   - "Ensure that the website is secured. Check the database to verify that passwords are hashed. Check the server for server-side validation/sanitization on forms and any user input. If this isn't done, the evaluation ends now."
-- [ ] add friends button
-  - "Users can see the profile of other users. A profile contains basic informations such as their nickname, their avatar, or a button to add them as friends."
-  - "The user has access to a (friends interface), where they can see their friends and their status (offline/online/in a game/and so forth). They also have access to basics informations about them (name/nickname, avatar and so forth)."
 - [ ] check for unhandled errors
 - [ ] check for warnings
   - must exclude all the comments
@@ -139,3 +142,4 @@
 
 - [ ] when a match is played and the user goes back in time, the match is registered multiple times in the database
   - [ ] needs to be figured out somehow
+- [ ] gpdr.controllers are still missing schemas and body and response types

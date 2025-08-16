@@ -15,6 +15,17 @@ import {
     getUserByUsernameSchema,
     updateUserSchema,
 } from "../controllers/updateUser.controller";
+import {
+    getFriendshipStatus,
+    getFriendshipStatusSchema,
+    getPendingRequests,
+    getPendingRequestsSchema,
+    respondToRequest,
+    respondToRequestSchema,
+    sendFriendRequest,
+    sendFriendRequestSchema,
+} from "../controllers/friendship.controller";
+import { RespondToRequestBody } from "../types/auth.types";
 
 export async function routes(fastify: FastifyInstance) {
     fastify.register(
@@ -35,6 +46,15 @@ export async function routes(fastify: FastifyInstance) {
         },
         { prefix: "auth" },
     );
+
+    fastify.register(
+        (fastify: FastifyInstance) => {
+            fastify.get("/delete", { preHandler: fastify.jwtAuth }, deleteUser);
+            fastify.get("/anonymize", { preHandler: fastify.jwtAuth }, anonymizeUser);
+        },
+        { prefix: "gdpr" },
+    );
+
     fastify.register(
         (fastify: FastifyInstance) => {
             fastify.put("", { preHandler: fastify.jwtAuth, schema: updateUserSchema }, updateUser);
@@ -65,9 +85,36 @@ export async function routes(fastify: FastifyInstance) {
 
     fastify.register(
         (fastify: FastifyInstance) => {
-            fastify.get("/delete", { preHandler: fastify.jwtAuth }, deleteUser);
-            fastify.get("/anonymize", { preHandler: fastify.jwtAuth }, anonymizeUser);
+            fastify.post<{ Params: { userId: string } }>(
+                "/request/:userId",
+                { preHandler: fastify.jwtAuth, schema: sendFriendRequestSchema },
+                sendFriendRequest,
+            );
+            fastify.get(
+                "/requests",
+                {
+                    preHandler: fastify.jwtAuth,
+                    schema: getPendingRequestsSchema,
+                },
+                getPendingRequests,
+            );
+            fastify.put<{ Params: { friendshipId: string }; Body: RespondToRequestBody }>(
+                "/respond/:friendshipId",
+                {
+                    preHandler: fastify.jwtAuth,
+                    schema: respondToRequestSchema,
+                },
+                respondToRequest,
+            );
+            fastify.get<{ Params: { userId: string } }>(
+                "/status/:userId",
+                {
+                    preHandler: fastify.jwtAuth,
+                    schema: getFriendshipStatusSchema,
+                },
+                getFriendshipStatus,
+            );
         },
-        { prefix: "gdpr" },
+        { prefix: "friendship" },
     );
 }

@@ -67,3 +67,31 @@ export interface Complete2FaResponse {
     token: string;
     user: User;
 }
+
+export interface SendFriendRequestResponse {
+    success: boolean;
+}
+
+export interface PendingFriendRequest {
+    id: string;
+    requester_id: string;
+    username: string;
+    avatar: string;
+    created_at: string;
+}
+
+export interface GetPendingRequestsResponse {
+    requests: PendingFriendRequest[];
+}
+
+export interface RespondToRequestBody {
+    action: "accept" | "decline";
+}
+
+export interface RespondToRequestResponse {
+    success: boolean;
+}
+
+export interface GetFriendshipStatusResponse {
+    status: "none" | "pending" | "accepted" | "declined";
+}

@@ -35,9 +35,3 @@ When asked for an explanation:
 2. **Use metaphors** - Relate technical concepts to real-world analogies to make them more intuitive
 3. **Add a "For Dummies" section** - Include a simplified explanation using plain language, avoiding jargon
 4. Structure as: Explanation → Code examples → Metaphors → For Dummies section
-* UserStory prompt`
-I've developed this frontend for a ponggame and I now want to implement this user story
-#+begin_example
-As a registered user of the website, I want to be able to navigate to my profile, where I can see my Username, my email and my avatar, so I can individualize my appearance on the website.
-#+end_example
-I want to continue my established structure. Please guide me through that.

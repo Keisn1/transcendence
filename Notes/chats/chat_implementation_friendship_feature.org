@@ -1,0 +1,772 @@
+:PROPERTIES:
+:GPTEL_MODEL: claude-sonnet-4-20250514
+:GPTEL_BACKEND: Claude
+:GPTEL_SYSTEM: You are a large language model living in Emacs and a helpful assistant. Avoid long answers.
+:GPTEL_BOUNDS: ((response (388 981) (1435 2273) (2284 16794) (16850 19023) (19066 20110) (20114 20836) (20837 21728) (21768 21826) (21832 24101) (24143 24965) (24966 25416)))
+:END:
+
+*** Look at the rules
+
+Looking at your LLM Rules in =LLM_RULES.org=:
+
+- Key Points Understood
+- Use org-mode formatting (no markdown)
+- Keep responses brief and focused
+- For code changes: show only what needs modification
+- For new approaches: present complete fresh solutions
+- For explanations: include code examples, metaphors, and simplified sections
+
+- Ready to Apply
+I'll follow these rules throughout our conversation. The distinction between "changes" (modifications) vs "approaches" (new solutions) is particularly clear and helpful.
+
+Need clarification on anything or ready to proceed with your questions?
+
+*** We want to create a feature which goes as follows:
+- "As a logged in user, when i look at the Userview of another user I want to be able to request a friendship with that user."
+- "As a logged in user, looking at my dashboard, I want to see pending friendship requests and to be able to accept or decline them"
+- "When the friendship is accepted, I want to be able to see the online status of my friends when I look at their =profile= (UserView)"
+
+Looking at this friendship feature, I'll design a complete solution:
+
+- Database Schema (New Migration)
+
+#+begin_src sql
+-- Add to migrations: 009_create_friendships.sql
+CREATE TABLE friendships (
+    id TEXT PRIMARY KEY,
+    requester_id TEXT NOT NULL,
+    addressee_id TEXT NOT NULL,
+    status TEXT CHECK(status IN ('pending', 'accepted', 'declined')) DEFAULT 'pending',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (requester_id) REFERENCES users (id) ON DELETE CASCADE,
+    FOREIGN KEY (addressee_id) REFERENCES users (id) ON DELETE CASCADE,
+    UNIQUE(requester_id, addressee_id)
+);
+
+-- Add online status tracking
+ALTER TABLE users ADD COLUMN last_seen DATETIME;
+ALTER TABLE users ADD COLUMN is_online INTEGER DEFAULT 0;
+#+end_src
+
+- Backend API Endpoints
+
+**** Backend
+***** Friendship Controller
+#+begin_src typescript
+// controllers/friendship.controller.ts
+import { FastifyRequest, FastifyReply } from "fastify";
+import { v4 as uuidv4 } from "uuid";
+
+export async function sendFriendRequest(request: FastifyRequest, reply: FastifyReply) {
+    const { userId } = request.params as { userId: string };
+    const requesterId = request.user.id;
+
+    if (requesterId === userId) {
+        return reply.status(400).send({ error: "Cannot send friend request to yourself" });
+    }
+
+    const friendshipId = uuidv4();
+    await request.server.db.run(
+        "INSERT INTO friendships (id, requester_id, addressee_id, status) VALUES (?, ?, ?, 'pending')",
+        [friendshipId, requesterId, userId]
+    );
+
+    reply.send({ success: true });
+}
+
+export async function getPendingRequests(request: FastifyRequest, reply: FastifyReply) {
+    const userId = request.user.id;
+
+    const requests = await request.server.db.query(`
+        SELECT f.id, f.requester_id, u.username, u.avatar, f.created_at
+        FROM friendships f
+        JOIN users u ON f.requester_id = u.id
+        WHERE f.addressee_id = ? AND f.status = 'pending'
+        ORDER BY f.created_at DESC
+    `, [userId]);
+
+    reply.send({ requests });
+}
+
+export async function respondToRequest(request: FastifyRequest, reply: FastifyReply) {
+    const { friendshipId } = request.params as { friendshipId: string };
+    const { action } = request.body as { action: 'accept' | 'decline' };
+
+    await request.server.db.run(
+        "UPDATE friendships SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND addressee_id = ?",
+        [action === 'accept' ? 'accepted' : 'declined', friendshipId, request.user.id]
+    );
+
+    reply.send({ success: true });
+}
+
+export async function getFriendshipStatus(request: FastifyRequest, reply: FastifyReply) {
+    const { userId } = request.params as { userId: string };
+    const currentUserId = request.user.id;
+
+    const friendship = await request.server.db.query(`
+        SELECT status FROM friendships
+        WHERE (requester_id = ? AND addressee_id = ?) OR (requester_id = ? AND addressee_id = ?)
+    `, [currentUserId, userId, userId, currentUserId]);
+
+    reply.send({
+        status: friendship[0]?.status || 'none',
+        canRequest: friendship.length === 0 && currentUserId !== userId
+    });
+}
+#+end_src
+
+***** Update Routes
+#+begin_src typescript
+// Add to routes.ts in the authenticated section
+fastify.register((fastify: FastifyInstance) => {
+    fastify.post("/request/:userId", { preHandler: fastify.jwtAuth }, sendFriendRequest);
+    fastify.get("/requests", { preHandler: fastify.jwtAuth }, getPendingRequests);
+    fastify.put("/respond/:friendshipId", { preHandler: fastify.jwtAuth }, respondToRequest);
+    fastify.get("/status/:userId", { preHandler: fastify.jwtAuth }, getFriendshipStatus);
+}, { prefix: "friendship" });
+#+end_src
+**** Frontend Components
+***** Friend Request Button Component
+#+begin_src typescript
+// components/friendRequest/friendRequest.ts
+import { BaseComponent } from "../BaseComponent";
+import { AuthStorage } from "../../services/auth/auth.storage";
+
+export class FriendRequestButton extends BaseComponent {
+    private button: HTMLButtonElement;
+    private userId: string;
+
+    constructor(userId: string) {
+        super("div", "friend-request-container");
+        this.userId = userId;
+
+        this.container.innerHTML = `
+            <button id="friend-request-btn" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                Add Friend
+            </button>
+        `;
+
+        this.button = this.container.querySelector("#friend-request-btn")!;
+        this.addEventListenerWithCleanup(this.button, "click", this.sendRequest.bind(this));
+
+        this.checkFriendshipStatus();
+    }
+
+    private async checkFriendshipStatus() {
+        try {
+            const response = await fetch(`/api/friendship/status/${this.userId}`, {
+                headers: { Authorization: `Bearer ${AuthStorage.getToken()}` }
+            });
+            const { status, canRequest } = await response.json();
+
+            if (status === 'accepted') {
+                this.button.textContent = "Friends";
+                this.button.disabled = true;
+                this.button.className = "px-4 py-2 bg-green-600 text-white rounded";
+            } else if (status === 'pending') {
+                this.button.textContent = "Request Sent";
+                this.button.disabled = true;
+                this.button.className = "px-4 py-2 bg-gray-600 text-white rounded";
+            } else if (!canRequest) {
+                this.container.style.display = 'none';
+            }
+        } catch (error) {
+            console.error("Failed to check friendship status:", error);
+        }
+    }
+
+    private async sendRequest() {
+        try {
+            const response = await fetch(`/api/friendship/request/${this.userId}`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${AuthStorage.getToken()}` }
+            });
+
+            if (response.ok) {
+                this.button.textContent = "Request Sent";
+                this.button.disabled = true;
+                this.button.className = "px-4 py-2 bg-gray-600 text-white rounded";
+            }
+        } catch (error) {
+            console.error("Failed to send friend request:", error);
+        }
+    }
+}
+#+end_src
+
+***** Friendship Requests Component
+#+begin_src typescript
+// components/friendshipRequests/friendshipRequests.ts
+import { BaseComponent } from "../BaseComponent";
+import { AuthStorage } from "../../services/auth/auth.storage";
+
+export class FriendshipRequests extends BaseComponent {
+    constructor() {
+        super("div", "friendship-requests", "bg-white rounded-xl shadow p-6 mb-8");
+
+        this.container.innerHTML = `
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Friend Requests</h2>
+            <div id="requests-container">
+                <div class="text-center py-4">
+                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600 mx-auto"></div>
+                    <p class="mt-2 text-gray-500">Loading requests...</p>
+                </div>
+            </div>
+        `;
+
+        this.loadRequests();
+    }
+
+    private async loadRequests() {
+        try {
+            const response = await fetch("/api/friendship/requests", {
+                headers: { Authorization: `Bearer ${AuthStorage.getToken()}` }
+            });
+            const { requests } = await response.json();
+
+            const container = this.container.querySelector("#requests-container")!;
+
+            if (requests.length === 0) {
+                container.innerHTML = `<p class="text-gray-500">No pending friend requests</p>`;
+                return;
+            }
+
+            container.innerHTML = requests.map((req: any) => `
+                <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg mb-2">
+                    <div class="flex items-center space-x-3">
+                        <img src="${req.avatar}" alt="${req.username}" class="w-10 h-10 rounded-full">
+                        <span class="font-medium">${req.username}</span>
+                    </div>
+                    <div class="space-x-2">
+                        <button class="accept-btn px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700" data-id="${req.id}">
+                            Accept
+                        </button>
+                        <button class="decline-btn px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700" data-id="${req.id}">
+                            Decline
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            this.setupButtonListeners();
+        } catch (error) {
+            console.error("Failed to load friend requests:", error);
+        }
+    }
+
+    private setupButtonListeners() {
+        this.addEventListenerWithCleanup(this.container, "click", async (e: Event) => {
+            const target = e.target as HTMLElement;
+            const friendshipId = target.dataset.id;
+
+            if (!friendshipId) return;
+
+            const action = target.classList.contains('accept-btn') ? 'accept' :
+                          target.classList.contains('decline-btn') ? 'decline' : null;
+
+            if (!action) return;
+
+            try {
+                await fetch(`/api/friendship/respond/${friendshipId}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${AuthStorage.getToken()}`
+                    },
+                    body: JSON.stringify({ action })
+                });
+
+                this.loadRequests(); // Reload the list
+            } catch (error) {
+                console.error("Failed to respond to friend request:", error);
+            }
+        });
+    }
+}
+#+end_src
+
+***** Online Status Indicator
+#+begin_src typescript
+// components/onlineStatus/onlineStatus.ts
+export class OnlineStatus extends BaseComponent {
+    constructor(userId: string) {
+        super("div", "online-status", "inline-flex items-center space-x-2");
+        this.checkOnlineStatus(userId);
+    }
+
+    private async checkOnlineStatus(userId: string) {
+        try {
+            // Check if they're friends first
+            const friendshipResponse = await fetch(`/api/friendship/status/${userId}`, {
+                headers: { Authorization: `Bearer ${AuthStorage.getToken()}` }
+            });
+            const { status } = await friendshipResponse.json();
+
+            if (status !== 'accepted') return; // Only show for friends
+
+            // Get online status
+            const statusResponse = await fetch(`/api/user/online-status/${userId}`, {
+                headers: { Authorization: `Bearer ${AuthStorage.getToken()}` }
+            });
+            const { isOnline, lastSeen } = await statusResponse.json();
+
+            this.container.innerHTML = `
+                <div class="flex items-center space-x-2">
+                    <div class="w-3 h-3 rounded-full ${isOnline ? 'bg-green-500' : 'bg-gray-400'}"></div>
+                    <span class="text-sm text-gray-600">
+                        ${isOnline ? 'Online' : `Last seen ${this.formatLastSeen(lastSeen)}`}
+                    </span>
+                </div>
+            `;
+        } catch (error) {
+            console.error("Failed to check online status:", error);
+        }
+    }
+
+    private formatLastSeen(lastSeen: string): string {
+        const date = new Date(lastSeen);
+        const now = new Date();
+        const diff = now.getTime() - date.getTime();
+
+        if (diff < 60000) return "just now";
+        if (diff < 3600000) return `${Math.floor(diff / 60000)} minutes ago`;
+        if (diff < 86400000) return `${Math.floor(diff / 3600000)} hours ago`;
+        return `${Math.floor(diff / 86400000)} days ago`;
+    }
+}
+#+end_src
+
+- Integration Points
+
+***** Update UserView
+#+begin_src typescript
+// Add to UserView.ts render method
+const friendRequestButton = new FriendRequestButton(this.params.username);
+this.userContent.getContainer().appendChild(friendRequestButton.getContainer());
+
+const onlineStatus = new OnlineStatus(this.params.username);
+this.userContent.getContainer().appendChild(onlineStatus.getContainer());
+#+end_src
+
+***** Update DashboardView
+#+begin_src typescript
+// Add to DashboardContent component
+const friendshipRequests = new FriendshipRequests();
+this.container.insertBefore(friendshipRequests.getContainer(), this.matchHistory.getContainer());
+#+end_src
+
+This creates a complete friendship system with request/accept functionality and online status for friends only.
+
+*******
+*** I want to go over the backend controller methods one by one and add schema as well as body and response types to them. Let's start with sendFriendRequest
+
+**** sendFriendRequest Method
+
+#+begin_src typescript
+// Add to auth.types.ts
+export interface SendFriendRequestBody {
+    // No body needed - userId comes from params
+}
+
+export interface SendFriendRequestResponse {
+    success: boolean;
+}
+#+end_src
+
+**** Updated Controller Method
+#+begin_src typescript
+export async function sendFriendRequest(
+    request: FastifyRequest<{ Params: { userId: string } }>,
+    reply: FastifyReply
+): Promise<SendFriendRequestResponse> {
+    const { userId } = request.params;
+    const requesterId = request.user.id;
+
+    if (requesterId === userId) {
+        return reply.status(400).send({ error: "Cannot send friend request to yourself" });
+    }
+
+    // Check if friendship already exists
+    const existing = await request.server.db.query(
+        "SELECT id FROM friendships WHERE (requester_id = ? AND addressee_id = ?) OR (requester_id = ? AND addressee_id = ?)",
+        [requesterId, userId, userId, requesterId]
+    );
+
+    if (existing.length > 0) {
+        return reply.status(409).send({ error: "Friendship request already exists" });
+    }
+
+    const friendshipId = uuidv4();
+    await request.server.db.run(
+        "INSERT INTO friendships (id, requester_id, addressee_id, status) VALUES (?, ?, ?, 'pending')",
+        [friendshipId, requesterId, userId]
+    );
+
+    return reply.status(200).send({ success: true });
+}
+#+end_src
+
+**** Schema Definition
+#+begin_src typescript
+export const sendFriendRequestSchema = {
+    params: {
+        type: "object",
+        properties: {
+            userId: { type: "string" }
+        },
+        required: ["userId"],
+        additionalProperties: false
+    },
+    response: {
+        200: {
+            type: "object",
+            properties: {
+                success: { type: "boolean" }
+            },
+            required: ["success"],
+            additionalProperties: false
+        },
+        400: {
+            type: "object",
+            properties: {
+                error: { type: "string" }
+            },
+            required: ["error"],
+            additionalProperties: false
+        },
+        409: {
+            type: "object",
+            properties: {
+                error: { type: "string" }
+            },
+            required: ["error"],
+            additionalProperties: false
+        }
+    }
+} as const;
+#+end_src
+
+**** Updated Route Registration
+#+begin_src typescript
+// In routes.ts
+fastify.post("/request/:userId", {
+    preHandler: fastify.jwtAuth,
+    schema: sendFriendRequestSchema
+}, sendFriendRequest);
+#+end_src
+
+Ready for the next method?
+
+***
+*** Now let's do the same for getPendingRequests
+
+**** getPendingRequests Method
+***** Types
+#+begin_src typescript
+// Add to auth.types.ts
+export interface PendingFriendRequest {
+    id: string;
+    requester_id: string;
+    username: string;
+    avatar: string;
+    created_at: string;
+}
+
+export interface GetPendingRequestsResponse {
+    requests: PendingFriendRequest[];
+}
+#+end_src
+
+***** Updated Controller Method
+#+begin_src typescript
+export async function getPendingRequests(
+    request: FastifyRequest,
+    reply: FastifyReply
+): Promise<GetPendingRequestsResponse> {
+    const userId = request.user.id;
+
+    const requests = await request.server.db.query(`
+        SELECT f.id, f.requester_id, u.username, u.avatar, f.created_at
+        FROM friendships f
+        JOIN users u ON f.requester_id = u.id
+        WHERE f.addressee_id = ? AND f.status = 'pending'
+        ORDER BY f.created_at DESC
+    `, [userId]);
+
+    return reply.status(200).send({ requests });
+}
+#+end_src
+
+***** Schema Definition
+#+begin_src typescript
+export const getPendingRequestsSchema = {
+    response: {
+        200: {
+            type: "object",
+            properties: {
+                requests: {
+                    type: "array",
+                    items: {
+                        type: "object",
+                        properties: {
+                            id: { type: "string" },
+                            requester_id: { type: "string" },
+                            username: { type: "string" },
+                            avatar: { type: "string", format: "uri-reference" },
+                            created_at: { type: "string" }
+                        },
+                        required: ["id", "requester_id", "username", "avatar", "created_at"],
+                        additionalProperties: false
+                    }
+                }
+            },
+            required: ["requests"],
+            additionalProperties: false
+        }
+    }
+} as const;
+#+end_src
+
+***** Updated Route Registration
+#+begin_src typescript
+// In routes.ts
+fastify.get("/requests", {
+    preHandler: fastify.jwtAuth,
+    schema: getPendingRequestsSchema
+}, getPendingRequests);
+#+end_src
+
+Ready for respondToRequest next?
+
+******
+*** now let's do respondToRequest
+**** Types
+#+begin_src typescript
+// Add to auth.types.ts
+export interface RespondToRequestBody {
+    action: 'accept' | 'decline';
+}
+
+export interface RespondToRequestResponse {
+    success: boolean;
+}
+#+end_src
+
+**** Updated Controller Method
+#+begin_src typescript
+export async function respondToRequest(
+    request: FastifyRequest<{ Params: { friendshipId: string }, Body: RespondToRequestBody }>,
+    reply: FastifyReply
+): Promise<RespondToRequestResponse> {
+    const { friendshipId } = request.params;
+    const { action } = request.body;
+    const userId = request.user.id;
+
+    // Verify the friendship exists and belongs to current user
+    const friendship = await request.server.db.query(
+        "SELECT id FROM friendships WHERE id = ? AND addressee_id = ? AND status = 'pending'",
+        [friendshipId, userId]
+    );
+
+    if (friendship.length === 0) {
+        return reply.status(404).send({ error: "Friend request not found or already processed" });
+    }
+
+    const status = action === 'accept' ? 'accepted' : 'declined';
+    
+    const result = await request.server.db.run(
+        "UPDATE friendships SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+        [status, friendshipId]
+    );
+
+    if (result.changes === 0) {
+        return reply.status(404).send({ error: "Friend request not found" });
+    }
+
+    return reply.status(200).send({ success: true });
+}
+#+end_src
+
+**** Schema Definition
+#+begin_src typescript
+export const respondToRequestSchema = {
+    params: {
+        type: "object",
+        properties: {
+            friendshipId: { type: "string" }
+        },
+        required: ["friendshipId"],
+        additionalProperties: false
+    },
+    body: {
+        type: "object",
+        properties: {
+            action: { 
+                type: "string",
+                enum: ["accept", "decline"]
+            }
+        },
+        required: ["action"],
+        additionalProperties: false
+    },
+    response: {
+        200: {
+            type: "object",
+            properties: {
+                success: { type: "boolean" }
+            },
+            required: ["success"],
+            additionalProperties: false
+        },
+        404: {
+            type: "object",
+            properties: {
+                error: { type: "string" }
+            },
+            required: ["error"],
+            additionalProperties: false
+        }
+    }
+} as const;
+#+end_src
+
+**** Updated Route Registration
+#+begin_src typescript
+// In routes.ts
+fastify.put("/respond/:friendshipId", {
+    preHandler: fastify.jwtAuth,
+    schema: respondToRequestSchema
+}, respondToRequest);
+#+end_src
+
+Ready for getFriendshipStatus next?
+
+*** now let's do getFriendshipStatus
+
+**** Types
+#+begin_src typescript
+// Add to auth.types.ts
+export interface GetFriendshipStatusResponse {
+    status: 'none' | 'pending' | 'accepted' | 'declined';
+    canRequest: boolean;
+}
+#+end_src
+
+**** Updated Controller Method
+#+begin_src typescript
+export async function getFriendshipStatus(
+    request: FastifyRequest<{ Params: { userId: string } }>,
+    reply: FastifyReply
+): Promise<GetFriendshipStatusResponse> {
+    const { userId } = request.params;
+    const currentUserId = request.user.id;
+
+    if (currentUserId === userId) {
+        return reply.status(400).send({ error: "Cannot check friendship status with yourself" });
+    }
+
+    const friendship = await request.server.db.query(`
+        SELECT status FROM friendships
+        WHERE (requester_id = ? AND addressee_id = ?) OR (requester_id = ? AND addressee_id = ?)
+    `, [currentUserId, userId, userId, currentUserId]);
+
+    const status = friendship[0]?.status || 'none';
+    const canRequest = friendship.length === 0;
+
+    return reply.status(200).send({
+        status: status as 'none' | 'pending' | 'accepted' | 'declined',
+        canRequest
+    });
+}
+#+end_src
+
+**** Schema Definition
+#+begin_src typescript
+export const getFriendshipStatusSchema = {
+    params: {
+        type: "object",
+        properties: {
+            userId: { type: "string" }
+        },
+        required: ["userId"],
+        additionalProperties: false
+    },
+    response: {
+        200: {
+            type: "object",
+            properties: {
+                status: {
+                    type: "string",
+                    enum: ["none", "pending", "accepted", "declined"]
+                },
+                canRequest: { type: "boolean" }
+            },
+            required: ["status", "canRequest"],
+            additionalProperties: false
+        },
+        400: {
+            type: "object",
+            properties: {
+                error: { type: "string" }
+            },
+            required: ["error"],
+            additionalProperties: false
+        }
+    }
+} as const;
+#+end_src
+
+**** Updated Route Registration
+#+begin_src typescript
+// In routes.ts
+fastify.get("/status/:userId", {
+    preHandler: fastify.jwtAuth,
+    schema: getFriendshipStatusSchema
+}, getFriendshipStatus);
+#+end_src
+
+All friendship controller methods now have proper types and schemas!
+
+*** what is canRequest being used for?
+
+Looking at the =canRequest= field, it's used to determine whether the current user should see the "Add Friend" button on another user's profile.
+
+*Current Logic:*
+- =canRequest = true= when no friendship record exists between the users
+- This means the "Add Friend" button will show
+
+*In the Frontend Component:*
+#+begin_src typescript
+// In FriendRequestButton component
+if (!canRequest) {
+    this.container.style.display = 'none'; // Hide the button entirely
+}
+#+end_src
+
+*The Issue:*
+The current logic is incomplete. We should hide the button in more cases:
+
+- When friendship is =declined= (user was rejected, shouldn't spam requests)
+- When user is looking at their own profile
+- When friendship is already =accepted= or =pending=
+
+*Better Logic:*
+#+begin_src typescript
+const canRequest = friendship.length === 0 || 
+                  (friendship[0]?.status === 'declined' && /* maybe after cooldown period */);
+#+end_src
+
+*Simpler Approach:*
+Since we already return the =status=, the frontend could just check:
+#+begin_src typescript
+// Frontend logic
+const showButton = status === 'none'; // Only show for no existing friendship
+#+end_src
+
+The =canRequest= field is somewhat redundant - we could determine this from =status= alone. Would you like to simplify this?
+
+*** 
+
+
