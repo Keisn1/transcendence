@@ -1,0 +1,90 @@
+#+title: Todo
+
+* Erik
+- [ ] Ensure that the AI adapts to different gameplay scenarios and user interactions.
+  - maybe add some radomness to the moves?
+  - make difficulty a little bit adaptive to the game score? (an extra)
+
+- [ ] more precise warnings in registration process
+  - improved already
+  - sanitization and validation of user input
+  - check every user input and sanitize and validate
+
+- [-] add friends button
+  - [X] "Users can see the profile of other users. A profile contains basic informations such as their nickname, their avatar, or a button to add them as friends."
+  - [X] "The user has access to a (friends interface), where they can see their friends and their status. They also have access to basics informations about them (name/nickname, avatar and so forth)."
+  - [ ] improve placement of the button and onlineStatus
+
+- [ ] not used notifications button in navbar
+  - maybe we can use it for friendship requests
+
+* Bugs
+- [ ] profile-change -> 2fa enabled in frontend again
+- [ ] don't be able to type any more into slot after pressing register and success (disable test field)
+
+- [ ] treating the security hole that a logged in user can actually post a tournament with any valid uuids
+  - [ ] need to check if the users exist
+  - [ ] need to have some token verification
+    - maybe something like
+      #+begin_src typescript
+        const token = request.server.jwt.sign({userId: asdf, verified: true}, { expiresIn: "5min" });
+      #+end_src
+
+- [ ] when a match is played and the user goes back in time, the match is registered multiple times in the database (Kay)
+  - [ ] needs to be figured out somehow
+
+* incomplete implementation
+
+- [ ] make sure that gdpr is deleting/anonymizing/information is still working (Kay)
+- [ ] delete old avatars when they are updated (Kay/Chris)
+  - [ ] deletion of avatars when user requests deletion of data
+    - depends on deletion of avatars in general
+  - [ ] outfactor default-pfp.png (it is present in some places of the code, we should factor this out to somewhere, where it can be defined application wide) (Kay)
+
+- [ ] check for unhandled errors (no 500s if there is a good reason for failure)
+  - [ ] go through backend endpoints and check
+  - [ ] check with LLM
+
+- [ ] check for warnings
+  - [ ] any warning that happens shall not include any comments
+  - [ ] check with LLM
+
+- [ ] make sure every jwt gets a proper timeout (Kay)
+
+- [ ] files are accepted to much (Kay)
+  - [ ] restrict gif/jpeg/png
+  - [ ] sanitization/validation on the files
+
+- [ ] double check input validation! (1. "Ensure that the website is secured. Check the database to verify that passwords are hashed. Check the server for server-side validation/sanitization on forms and any user input. If this isn't done, the evaluation ends now.")
+  - https://www.esecurityplanet.com/endpoint/prevent-web-attacks-using-input-sanitization/
+  1. [ ] make a list of every user input anywhere inside the app
+  2. [ ] check every user input and sanitize and validate
+
+* code quality
+- [ ] delete all console.logs in all services and in frontend
+- [ ] gpdr.controllers are still missing schemas and body and response types (Chris)
+- [ ] refactor new frontend component introduced with friendship-feature
+
+* Feature
+- [ ] download button for users data (Kay)
+  - [ ] now imperative with new information of friendship between users
+  - [ ] need to talk to Chris about this
+
+- [ ] not used notifications button in navbar
+  - maybe we can use it for friendship requests
+
+- [ ] not working "forgot password" in login
+  - don't see it in the subject (but interesting for sure)
+
+* need more information
+- [-] maybe need to implement the other 2fa options
+  - [ ] ask Alex
+  - [X] chris is of the same opinion (only one)
+
+- [ ] ask Chris about the firewall
+  - [ ] Chris is working on this
+
+- [ ] XSS attacks? (kept more as an reminder)
+  - [ ] let's try to hack it with the help of an llm
+
+- [ ] setup CORS with fastify and environment variables (kay)
