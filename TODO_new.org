@@ -95,9 +95,10 @@
 
 * notes (subject go-through)
 - [X] implement default version of the tournament system
-- [ ] add friends button
-  - [ ] "Users can see the profile of other users. A profile contains basic informations such as their nickname, their avatar, or a button to add them as friends."
+- [-] add friends button
+  - [X] "Users can see the profile of other users. A profile contains basic informations such as their nickname, their avatar, or a button to add them as friends."
   - [ ] "The user has access to a (friends interface), where they can see their friends and their status (offline/online/in a game/and so forth). They also have access to basics informations about them (name/nickname, avatar and so forth)."
+  - [ ] improve placement of the button and onlineStatus
   - [ ] make sure that gdpr is deleting/anonymizing/information is still working
 
 

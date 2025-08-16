@@ -1,6 +1,7 @@
 import { BaseComponent } from "../BaseComponent.ts";
 import { UserDisplayComponent } from "../userDisplay/userDisplay.component.ts";
 import { MatchHistoryComponent } from "../matchHistory/matchHistory.component.ts";
+import { FriendshipRequests } from "../friendshipRequests/friendshipRequests.ts";
 
 export class DashboardContent extends BaseComponent {
     private userDisplay: UserDisplayComponent;
@@ -16,6 +17,9 @@ export class DashboardContent extends BaseComponent {
 
         this.container.appendChild(this.userDisplay.getContainer());
         this.container.appendChild(this.matchHistory.getContainer());
+
+        const friendshipRequests = new FriendshipRequests();
+        this.container.insertBefore(friendshipRequests.getContainer(), this.matchHistory.getContainer());
     }
 
     destroy(): void {

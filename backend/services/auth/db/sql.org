@@ -18,9 +18,10 @@ SELECT * FROM users;
 #+end_src
 
 #+RESULTS:
-| id                                   | username | email   | password_hash                                                | avatar                   | twofa_secret | created_at          | updated_at          | twofa_enabled | last_seen           | is_online |
-| f3a7f773-59b7-42f1-aa53-475ad90a4f5e | k        | k@k.com | $2b$10$3Q7GDBDkisFFrrYjD8BqfubxKELfnbE.S/thIVfuXCodZsg7AWtLK | /uploads/default-pfp.png |              | 2025-08-14 05:27:26 | 2025-08-14 05:27:26 |             0 | 2025-08-16 10:22:47 |         0 |
-| 4822a6be-b04e-4c45-b88a-a7a07d47f9aa | f        | f@f.com | $2b$10$e3lc/9Xn5mOUL3z.tMACOut8368G9JZB.M3WXLKj2UmuHJBusd3mq | /uploads/default-pfp.png |              | 2025-08-14 05:38:23 | 2025-08-14 05:38:23 |             0 |                     |         0 |
+| id                                   | username | email     | password_hash                                                | avatar                   | twofa_secret                                         | created_at          | updated_at          | twofa_enabled | last_seen           | is_online |
+| f3a7f773-59b7-42f1-aa53-475ad90a4f5e | k        | k@k.com   | $2b$10$3Q7GDBDkisFFrrYjD8BqfubxKELfnbE.S/thIVfuXCodZsg7AWtLK | /uploads/default-pfp.png |                                                      | 2025-08-14 05:27:26 | 2025-08-14 05:27:26 |             0 | 2025-08-16 11:47:13 |         0 |
+| 4822a6be-b04e-4c45-b88a-a7a07d47f9aa | f        | f@f.com   | $2b$10$e3lc/9Xn5mOUL3z.tMACOut8368G9JZB.M3WXLKj2UmuHJBusd3mq | /uploads/default-pfp.png |                                                      | 2025-08-14 05:38:23 | 2025-08-14 05:38:23 |             0 | 2025-08-16 11:53:59 |         1 |
+| 5d595a6f-6ec8-4243-be0c-6ca91d861d80 | fa       | fa@fa.com | $2b$10$z6A4lsG.b.zPWENLZj6SMe2fszsgjlq21DtNBmguQf3IcCxusIR5W | /uploads/default-pfp.png | N5YEYV2GHREXGWTIOR5CKTB4MNZWGQKBGFHFMOKKLVGUGM2NFF5A | 2025-08-16 10:41:21 | 2025-08-16 10:49:49 |             1 | 2025-08-16 11:03:21 |         0 |
 ** get user by id
 #+begin_src sqlite
 SELECT id, username, avatar FROM users WHERE id =
@@ -36,3 +37,21 @@ SELECT id, last_seen, is_online FROM users;
 | f3a7f773-59b7-42f1-aa53-475ad90a4f5e | 2025-08-16 10:57:32 |         0 |
 | 4822a6be-b04e-4c45-b88a-a7a07d47f9aa |                     |         0 |
 | 5d595a6f-6ec8-4243-be0c-6ca91d861d80 | 2025-08-16 10:58:59 |         0 |
+
+* friendships
+#+begin_src sqlite
+SELECT * from friendships;
+#+end_src
+
+#+RESULTS:
+| id                                   | requester_id                         | addressee_id | status  | created_at          | updated_at          |
+| bf10058e-78f5-4362-8a09-6c22f80f8b51 | f3a7f773-59b7-42f1-aa53-475ad90a4f5e | f            | pending | 2025-08-16 11:46:19 | 2025-08-16 11:46:19 |
+
+** get pending requests
+#+begin_src sqlite
+SELECT f.id, f.requester_id, u.username, u.avatar, f.created_at
+FROM friendships f
+JOIN users u ON f.requester_id = u.id
+WHERE f.addressee_id = ? AND f.status = 'pending'
+ORDER BY f.created_at DESC
+#+end_src
