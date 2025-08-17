@@ -94,13 +94,14 @@ export class PongGame {
         }
 
         if (difficulty) {
-            if (difficulty === "easy") this.feedFrequency = 1300;
-            this.setupAi();
+            if (difficulty === "easy") {
+                this.feedFrequency = 1300;
+                this.aiController = new AiController(this.paddles.right, this.canvas, difficulty);
+            } else {
+                // feedFrequency default of 1000 ms
+                this.aiController = new AiController(this.paddles.right, this.canvas, difficulty);
+            }
         }
-    }
-
-    private setupAi() {
-        this.aiController = new AiController(this.paddles.right, this.canvas);
     }
 
     async start() {

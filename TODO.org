@@ -1,22 +1,24 @@
 #+title: Todo
 
 * Erik
-- [ ] Ensure that the AI adapts to different gameplay scenarios and user interactions.
+- [X] Ensure that the AI adapts to different gameplay scenarios and user interactions.
   - maybe add some radomness to the moves?
   - make difficulty a little bit adaptive to the game score? (an extra)
 
-- [ ] more precise warnings in registration process
+- [X] more precise warnings in registration process
   - improved already
   - sanitization and validation of user input
   - check every user input and sanitize and validate
 
-- [-] add friends button
+- [X] add friends button
   - [X] "Users can see the profile of other users. A profile contains basic informations such as their nickname, their avatar, or a button to add them as friends."
   - [X] "The user has access to a (friends interface), where they can see their friends and their status. They also have access to basics informations about them (name/nickname, avatar and so forth)."
-  - [ ] improve placement of the button and onlineStatus
+  - [X] improve placement of the button and onlineStatus
 
 - [ ] not used notifications button in navbar
   - maybe we can use it for friendship requests
+
+- [ ] Lags are present in the game, especially in the collision of the ball to the corner of the paddle
 
 * Bugs
 - [ ] profile-change -> 2fa enabled in frontend again

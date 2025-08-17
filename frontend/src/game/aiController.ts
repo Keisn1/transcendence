@@ -1,5 +1,8 @@
 import { Ball, type BallDirection, type BallPosition } from "./ball";
 import { Paddle } from "./paddle";
+import { type AiDifficulty } from "../types/game.types";
+
+const EPSILON = 1e-9;
 
 interface Intersection {
     x: number;
@@ -41,10 +44,13 @@ export class AiController {
     private ballData: BallData | null = null;
     private isRunning: boolean = false;
     private actionLoop: number | null = null;
+    private noiseFraction: number = 0;
 
-    constructor(paddle: Paddle, canvas: HTMLCanvasElement) {
+    constructor(paddle: Paddle, canvas: HTMLCanvasElement, difficulty: AiDifficulty) {
         this.paddle = paddle;
         this.canvas = canvas;
+        if (difficulty === "easy") this.noiseFraction = 0.5;
+        else this.noiseFraction = 0.2;
         this.startAiLoop();
     }
 
@@ -95,11 +101,17 @@ export class AiController {
             (paddle.side === "right" && ballData.dir.dx > 0);
 
         if (movingTowards) {
-            this.intersection.x = paddle.side === "left" ? 
-                paddle.posX + paddle.width : paddle.posX;
-            this.intersection.y = this.predictYIntersection(
-                ballData.pos, ballData.dir, canvas.height, this.intersection.x
-            );
+            this.intersection.x = paddle.side === "left"
+                ? paddle.posX + paddle.width
+                : paddle.posX;
+
+            const predictedY = this.predictYIntersection(ballData.pos, ballData.dir, canvas.height, this.intersection.x);
+
+            // -(paddle.height * this.noiseFraction) < noise < (paddle.height * this.noiseFraction)
+            const noise = (Math.random() * 2 - 1) * (paddle.height * this.noiseFraction); 
+
+            // 0 < predictedY + noise < canvas.height
+            this.intersection.y = Math.max(0, Math.min(canvas.height, predictedY + noise)); 
         } else {
             this.intersection.y = canvas.height / 2;
         }
@@ -111,6 +123,8 @@ export class AiController {
         canvasHeight: number,
         intersectionX: number,
     ): number {
+        if (Math.abs(dir.dy) < EPSILON) return pos.y;
+        if (Math.abs(dir.dx) < EPSILON) return pos.y;
         const initialBounceY = dir.dy > 0 ? 0 : canvasHeight;
         const stepsInDy = (pos.y - initialBounceY) / dir.dy;
         const initialBounceX = pos.x - dir.dx * stepsInDy;
@@ -123,6 +137,7 @@ export class AiController {
         const f = m / spanX;
         let yHit = initialBounceY + (nextBounceY - initialBounceY) * f;
         if (k % 2 === 1) yHit = canvasHeight - yHit;
+        yHit = Math.max(0, Math.min(canvasHeight, yHit)); // 0 < yHIt < canvasHeight
 
         return yHit;
     }
