@@ -52,11 +52,21 @@ export class Ball {
 
     updateCollision(paddle: Paddle) {
         const paddleCenterY = paddle.posY + paddle.height / 2;
-        const relativeIntersectY = (this.pos.y - paddleCenterY) / (paddle.height / 2); // in range pf -1 to 1
+        const relativeIntersectY = (this.pos.y - paddleCenterY) / (paddle.height / 2);
         const maxAngle = (45 * Math.PI) / 180;
         const theta = maxAngle * relativeIntersectY;
-        this.dir.dx = this.dir.dx < 0 ? 1 : -1;
+
+        // put ball on top of the paddle after collision
+        if ((paddle.side ?? "") === "left") {
+            this.dir.dx = 1;
+            this.pos.x = paddle.posX + paddle.width + this.radius + 0.5;
+        } else {
+            this.dir.dx = -1;
+            this.pos.x = paddle.posX - this.radius - 0.5;
+        }
+
         this.dir.dy = Math.sin(theta);
+
         this.nbrCollision++;
         if (this.nbrCollision == 1) {
             this.speed *= 2;

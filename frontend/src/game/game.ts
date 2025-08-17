@@ -185,9 +185,27 @@ export class PongGame {
         this.ctx.fillText(`${this.scores.player2}`, (3 * this.canvas.width) / 4, this.canvas.height / 16);
     }
 
-    private checkCollision(): Paddle | null {
-        if (this.paddles.right.collidesWithBall(this.ball)) return this.paddles.right;
-        if (this.paddles.left.collidesWithBall(this.ball)) return this.paddles.left;
+    private predictBallPos(elapsed: number) {
+        const ball = this.ball;
+
+        const dx = ball.dir.dx;
+        const dy = ball.dir.dy;
+        const direction = Math.hypot(dx, dy) || 1;
+        const directionNormalizedX = dx / direction;
+        const directionNormalizedY = dy / direction;
+
+        const distance = ball.speed * elapsed;
+
+        const nextX = ball.pos.x + directionNormalizedX * distance;
+        const nextY = ball.pos.y + directionNormalizedY * distance;
+
+        return { x: nextX, y: nextY };
+    }
+
+    private checkCollision(elapsed: number): Paddle | null {
+        const nextPos = this.predictBallPos(elapsed);
+        if (this.paddles.right.collidesWithCircle(nextPos.x, nextPos.y, this.ball.radius)) return this.paddles.right;
+        if (this.paddles.left.collidesWithCircle(nextPos.x, nextPos.y, this.ball.radius)) return this.paddles.left;
         return null;
     }
 
@@ -219,7 +237,7 @@ export class PongGame {
             if (this.aiController) this.aiController.feedAi(this.ball);
         }
 
-        let collisionPaddle = this.checkCollision();
+        let collisionPaddle = this.checkCollision(elapsed);
         if (!this.isGameOver()) {
             this.ball.update(this.canvas, collisionPaddle, elapsed);
         }

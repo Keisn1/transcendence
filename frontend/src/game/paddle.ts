@@ -1,5 +1,3 @@
-import { Ball } from "./ball";
-
 export interface Paddles {
     left: Paddle;
     right: Paddle;
@@ -50,26 +48,35 @@ export class Paddle {
         ctx.fillRect(this.posX, this.posY, this.width, this.height);
     }
 
-    collidesWithBall(ball: Ball): boolean {
-        if (isBallInsidePaddle(ball, this) && !this.justCollided) {
+    public collidesWithCircle(ballX: number, ballY: number, radius: number): boolean {
+        const left = this.posX;
+        const right = this.posX + this.width;
+        const top = this.posY;
+        const bottom = this.posY + this.height;
+
+        // closest point on paddle to circle center
+        const closestX = Math.max(left, Math.min(ballX, right)); // 
+        const closestY = Math.max(top, Math.min(ballY, bottom));
+
+        // distance from ball center to closes point on paddle
+        const dx = ballX - closestX;
+        const dy = ballY - closestY;
+
+        // pythagoras
+        const collides = dx * dx + dy * dy <= radius * radius;
+
+
+        /*
+         * not colliding -> colliding: return true once and set justCollided = true.
+         * colliding -> colliding: keep returning false
+         * colliding -> not colliding: reset justCollided = false so a future entry can report true again.
+         */
+        if (collides && !this.justCollided) {
             this.justCollided = true;
             return true;
         }
-        this.justCollided = false;
+
+        this.justCollided = !collides ? false : this.justCollided;
         return false;
     }
-}
-
-function isBallInsidePaddle(ball: Ball, paddle: Paddle) {
-    const ballLeft = ball.pos.x - ball.radius;
-    const ballRight = ball.pos.x + ball.radius;
-    const ballBottom = ball.pos.y + ball.radius;
-    const ballTop = ball.pos.y - ball.radius;
-
-    const paddleRightSide = paddle.posX + paddle.width;
-    const paddleLeftSide = paddle.posX;
-    const paddleTop = paddle.posY;
-    const paddleBottom = paddle.posY + paddle.height;
-
-    return ballLeft < paddleRightSide && ballRight > paddleLeftSide && ballBottom > paddleTop && ballTop < paddleBottom;
 }
