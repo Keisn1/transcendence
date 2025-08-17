@@ -91,6 +91,8 @@ export class Navbar extends BaseComponent {
 
         this.menu.classList.add("hidden");
 
+        this.updateNotificationBadge();
+
         if (isAuthenticated && user) {
             this.profileDropdown.classList.remove("hidden");
             authButtons?.classList.add("hidden");
@@ -100,7 +102,6 @@ export class Navbar extends BaseComponent {
                 avatarImg.src = user.avatar;
             }
 
-            this.updateNotificationBadge();
         } else {
             this.profileDropdown.classList.add("hidden");
             authButtons?.classList.remove("hidden");
@@ -180,7 +181,7 @@ export class Navbar extends BaseComponent {
         const requests = await this.fetchFriendRequests();
 
         if (requests.length === 0) {
-            this.notificationDropdownContent.innerHTML = `<p class="text-sm text-gray-500 py-2">No new requests</p>`;
+            this.notificationDropdownContent.innerHTML = `<p class="text-sm px-4 py-3 text-gray-500">No new requests</p>`;
         } else {
             // list of requests
             this.notificationDropdownContent.innerHTML = requests
