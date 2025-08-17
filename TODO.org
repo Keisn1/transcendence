@@ -15,7 +15,7 @@
   - [X] "The user has access to a (friends interface), where they can see their friends and their status. They also have access to basics informations about them (name/nickname, avatar and so forth)."
   - [X] improve placement of the button and onlineStatus
 
-- [ ] not used notifications button in navbar
+- [X] not used notifications button in navbar
   - maybe we can use it for friendship requests
 
 - [ ] Lags are present in the game, especially in the collision of the ball to the corner of the paddle
@@ -34,6 +34,8 @@
 
 - [ ] when a match is played and the user goes back in time, the match is registered multiple times in the database (Kay)
   - [ ] needs to be figured out somehow
+- [ ] strange behaviour of friendship requests
+  - [ ] if the request was sent from user B to user A, user A will see "request sent" on user B userView, even though user A did not send requests himself
 
 * incomplete implementation
 

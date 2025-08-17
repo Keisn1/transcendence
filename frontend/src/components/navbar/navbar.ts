@@ -3,6 +3,7 @@ import { BaseComponent } from "../BaseComponent";
 import { AuthService } from "../../services/auth/auth.service.ts";
 import { AuthController } from "../../controllers/auth.controller.ts";
 import type { User } from "../../types/auth.types.ts";
+import { AuthStorage } from "../../services/auth/auth.storage"; // 
 
 export class Navbar extends BaseComponent {
     private authService: AuthService;
@@ -22,6 +23,11 @@ export class Navbar extends BaseComponent {
     private mobileDashboardLink: HTMLAnchorElement;
     private mobileGameLink: HTMLAnchorElement;
     private mobileTournamentLink: HTMLAnchorElement;
+    private notificationBadge: HTMLElement | null = null;
+    private notificationButton: HTMLElement | null = null;
+    private notificationDropdown: HTMLElement | null = null;
+    private notificationDropdownContent: HTMLElement | null = null;
+    private outsideClickHandler: ((e: Event) => void) | null = null;
 
     constructor() {
         super("div", "navbar-container");
@@ -47,6 +53,20 @@ export class Navbar extends BaseComponent {
         this.userMenuButton = this.container.querySelector<HTMLElement>("#user-menu-button")!;
         this.logoutLink = this.container.querySelector<HTMLElement>("#logout-link")!;
         this.settingsLink = this.container.querySelector<HTMLAnchorElement>("#settings-link")!;
+        this.notificationBadge = this.container.querySelector<HTMLElement>("#notification-badge");
+
+        // find notification elements (after template is inserted)
+        this.notificationButton = this.container.querySelector<HTMLElement>("#notification-button");
+        this.notificationDropdown = this.container.querySelector<HTMLElement>("#notification-dropdown");
+        this.notificationDropdownContent = this.container.querySelector<HTMLElement>("#notification-dropdown-content");
+
+        // click handler on bell
+        if (this.notificationButton) {
+            this.addEventListenerWithCleanup(this.notificationButton, "click", (e: Event) => {
+                e.stopPropagation(); // prevent document click handler from closing immediately
+                this.toggleNotificationDropdown();
+            });
+        }
 
         this.setupEvents();
         this.setupLinks();
@@ -79,10 +99,126 @@ export class Navbar extends BaseComponent {
             if (avatarImg && user.avatar) {
                 avatarImg.src = user.avatar;
             }
+
+            this.updateNotificationBadge();
         } else {
             this.profileDropdown.classList.add("hidden");
             authButtons?.classList.remove("hidden");
+
+            // hide badge when logged out
+            if (this.notificationBadge) {
+                this.notificationBadge.classList.add("hidden");
+                this.notificationBadge.textContent = "";
+            }
         }
+    }
+
+    private async updateNotificationBadge() {
+        if (!this.notificationBadge) return;
+
+        try {
+            const res = await fetch("/api/friendship/requests", {
+                headers: { Authorization: `Bearer ${AuthStorage.getToken()}` },
+            });
+
+            if (!res.ok) {
+                this.notificationBadge.classList.add("hidden");
+                this.notificationBadge.textContent = "";
+                this.notificationBadge.style.display = "none";
+                return;
+            }
+
+            const { requests } = await res.json();
+            const count = Array.isArray(requests) ? requests.length : 0;
+
+            if (count > 0) {
+                this.notificationBadge.textContent = String(count);
+                this.notificationBadge.classList.remove("hidden");
+                this.notificationBadge.style.display = "";
+            } else {
+                this.notificationBadge.classList.add("hidden");
+                this.notificationBadge.textContent = "";
+                this.notificationBadge.style.display = "none";
+            }
+        } catch (err) {
+            console.error("Failed to fetch friend requests:", err);
+            this.notificationBadge.classList.add("hidden");
+            this.notificationBadge.textContent = "";
+            this.notificationBadge.style.display = "none";
+        }
+    }
+
+    // helper to fetch friend requests (returns array or [])
+    private async fetchFriendRequests(): Promise<any[]> {
+        try {
+            const res = await fetch("/api/friendship/requests", {
+                headers: { Authorization: `Bearer ${AuthStorage.getToken()}` },
+            });
+            if (!res.ok) return [];
+            const json = await res.json();
+            return Array.isArray(json.requests) ? json.requests : [];
+        } catch (err) {
+            console.error("Failed fetching friend requests:", err);
+            return [];
+        }
+    }
+
+    private async toggleNotificationDropdown() {
+        if (!this.notificationDropdown || !this.notificationDropdownContent) return;
+
+        const isHidden = this.notificationDropdown.classList.contains("hidden");
+        if (!isHidden) {
+            // hide
+            this.notificationDropdown.classList.add("hidden");
+            this.removeOutsideClickListener();
+            return;
+        }
+
+        this.notificationDropdown.classList.remove("hidden");
+        this.notificationDropdownContent.innerHTML = `<p class="text-sm text-gray-500 py-2">Loading...</p>`;
+
+        const requests = await this.fetchFriendRequests();
+
+        if (requests.length === 0) {
+            this.notificationDropdownContent.innerHTML = `<p class="text-sm text-gray-500 py-2">No new requests</p>`;
+        } else {
+            // list of requests
+            this.notificationDropdownContent.innerHTML = requests
+                .map((r: any) => `
+                    <div class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50">
+                    <img src="${r.avatar}" alt="${r.username}" class="w-10 h-10 rounded-full flex-shrink-0" />
+                    <div class="min-w-0">
+                        <a href="/user/${encodeURIComponent(r.username)}" data-link class="block text-sm font-medium text-gray-900 truncate" target="_blank" rel="noopener noreferrer">${r.username}</a>
+                        <p class="text-xs text-gray-500">sent you a friend request</p>
+                    </div>
+                    <div class="ml-auto flex items-center gap-2">
+                        <span class="text-xs text-gray-400">${r.time ? r.time : ''}</span>
+                    </div>
+                    </div>
+                `).join("");
+        }
+
+        this.addOutsideClickListener();
+    }
+
+    private addOutsideClickListener() {
+        if (this.outsideClickHandler) return; // already added
+        this.outsideClickHandler = (e: Event) => {
+            // if click happens outside of the dropdown and the bell, close it
+            const target = e.target as Node;
+            if (!this.notificationDropdown) return;
+            if (this.notificationDropdown.contains(target)) return;
+            if (this.notificationButton && this.notificationButton.contains(target)) return;
+            this.notificationDropdown.classList.add("hidden");
+            this.removeOutsideClickListener();
+        };
+        document.addEventListener("click", this.outsideClickHandler);
+    }
+
+    private removeOutsideClickListener() {
+        if (!this.outsideClickHandler) return;
+        document.removeEventListener("click", this.outsideClickHandler);
+        this.outsideClickHandler = null;
     }
 
     setupLinks() {
@@ -113,10 +249,12 @@ export class Navbar extends BaseComponent {
     }
 
     destroy() {
-        super.destroy(); // This handles the event listener cleanups
+        super.destroy(); // existing cleanup
 
         if (this.authCleanup) {
             this.authCleanup();
         }
+        // remove global click handler if set
+        this.removeOutsideClickListener();
     }
 }
