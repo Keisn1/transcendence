@@ -5,6 +5,7 @@ import { GdprWarningModal } from "../gdprWarningModal/gdprWarningModal.ts";
 export class GdprButtons extends BaseComponent {
     private deleteButton: HTMLElement;
     private anonymizeButton: HTMLElement;
+    private downloadButton: HTMLElement;
     private onGdprAction?: (action: "delete" | "anonymize") => void;
 
     constructor(onGdprAction?: (action: "delete" | "anonymize") => void) {
@@ -14,6 +15,7 @@ export class GdprButtons extends BaseComponent {
 
         this.deleteButton = this.container.querySelector<HTMLButtonElement>("#delete-data-btn")!;
         this.anonymizeButton = this.container.querySelector<HTMLButtonElement>("#anonymize-data-btn")!;
+        this.downloadButton = this.container.querySelector<HTMLButtonElement>("#download-data-btn")!;
 
         this.setupEvents();
     }
@@ -26,6 +28,10 @@ export class GdprButtons extends BaseComponent {
         this.addEventListenerWithCleanup(this.anonymizeButton, "click", () => {
             this.showWarning("anonymize");
         });
+
+        this.addEventListenerWithCleanup(this.downloadButton, "click", () => {
+            this.downloadUserData();
+        });
     }
 
     private showWarning(action: "delete" | "anonymize") {
@@ -35,6 +41,40 @@ export class GdprButtons extends BaseComponent {
             }
         });
         modal.show();
+    }
+
+    private async downloadUserData() {
+        try {
+            const response = await fetch("/api/gdpr/download", {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+                },
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                // Create and download JSON file
+                const dataStr = JSON.stringify(result.data, null, 2);
+                const dataBlob = new Blob([dataStr], { type: "application/json" });
+                const url = URL.createObjectURL(dataBlob);
+                
+                const downloadLink = document.createElement("a");
+                downloadLink.href = url;
+                downloadLink.download = `user-data-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                
+                URL.revokeObjectURL(url);
+                
+                console.log("User data downloaded successfully");
+            } else {
+                alert(result.error || "Failed to download user data.");
+            }
+        } catch (err) {
+            console.error("Download error:", err);
+            alert("Network error or server unavailable.");
+        }
     }
 
     destroy(): void {
