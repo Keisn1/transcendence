@@ -86,7 +86,7 @@ vaultcmd:
 	@:
 
 copy-db:
-	docker cp auth:/app/db/auth.db .
+	docker cp auth-service:/app/db/auth.db .
 
 copy-matchhistory:
 	docker cp match-service:/app/db/match.db .
