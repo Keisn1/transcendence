@@ -325,4 +325,24 @@ echo "Vault KV and policies setup complete."
 
 # Create completion marker file for services to check
 touch /vault/init/.vault-ready
+sleep 5
+rm /vault/init/auth-service.localhost.crt
+rm /vault/init/auth-service.localhost.key
+rm /vault/init/ca_cert.crt
+rm /vault/init/cert.json
+rm /vault/init/fileservice-cert.json
+rm /vault/init/fileservice-policy.hcl
+rm /vault/init/fileservice.localhost.crt
+rm /vault/init/fileservice.localhost.key
+rm /vault/init/internal-cert.json
+rm /vault/init/.env
+rm /vault/init/matchservice-cert.json
+rm /vault/init/matchservice-policy.hcl
+rm /vault/init/matchservice.localhost.key
+rm /vault/init/matchservice.localhost.crt
+rm /vault/init/pong.localhost.key
+rm /vault/init/pong.localhost.crt
 
+rm /vault/init/user-policy.hcl
+# rm /vault/init/vault-init.json
+rm /.env
