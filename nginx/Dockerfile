@@ -14,6 +14,7 @@ RUN git clone https://github.com/coreruleset/coreruleset /opt/crs
 
 COPY conf/nginx.conf /etc/nginx/nginx.conf
 COPY modsecurity/modsecurity.conf /etc/nginx/modsec/modsecurity.conf
+COPY modsecurity/modsec-api.conf /etc/nginx/modsec/modsec-api.conf
 COPY modsecurity/crs-setup.conf /opt/crs/crs-setup.conf
 
 # Certs will be mounted at runtime via docker-compose volume
