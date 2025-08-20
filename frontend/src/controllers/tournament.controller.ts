@@ -1,9 +1,11 @@
 import { TournamentEvent, TournamentMachine, TournamentState } from "./tournament.machine.ts";
 import Router from "../router";
 import { TournamentService } from "../services/tournament/tournament.service.ts";
-import type { MatchResult, Match } from "../types/match.types.ts";
+import type { MatchResult, Match, PostMatchBody } from "../types/match.types.ts";
 import type { PublicUser } from "../types/auth.types.ts";
 import { v4 as uuidv4 } from "uuid";
+import { MatchService } from "../services/match/match.service.ts";
+import type { GameMode } from "../types/game.types.ts";
 
 export class Tournament {
     id: string = "";
@@ -60,6 +62,7 @@ export class TournamentController {
     private tournamentMachine: TournamentMachine; // Controller manages state
     private tournamentMachineDefault: TournamentMachine;
     private router: Router;
+    private gameStartTime: number = 0;
 
     private constructor(router: Router) {
         this.tournamentService = TournamentService.getInstance();
@@ -112,6 +115,7 @@ export class TournamentController {
     // Controller handles state transitions
     startMatch(): void {
         console.log("start button clicked");
+        this.gameStartTime = Date.now(); // Add this line
         this.tournamentMachine?.update(TournamentEvent.START, this.tournament!);
         this.router.navigateTo(`/tournament`);
     }
@@ -122,12 +126,38 @@ export class TournamentController {
         this.router.navigateTo(`/tournament-default`);
     }
 
-    finishMatch(result: MatchResult): void {
+    async finishMatch(result: MatchResult) {
         this.tournament.matches[this.tournament.nextMatchIdx].result = result;
         this.tournament.nextMatchIdx++;
         if (!this.tournament.hasMoreMatches()) this.tournament.generateNextRound();
+
+        await this.saveMatchToBackend(result);
+
         this.tournamentMachine?.update(TournamentEvent.FINISH, this.tournament);
         this.router.navigateTo("/tournament");
+    }
+
+    private async saveMatchToBackend(result: MatchResult): Promise<void> {
+        try {
+            const currentMatch = this.tournament.matches[this.tournament.nextMatchIdx - 1]; // -1 because we already incremented
+            const duration = Date.now() - this.gameStartTime; // You'll need to track this
+
+            const matchBody: PostMatchBody = {
+                player1Id: currentMatch.player1.id,
+                player2Id: currentMatch.player2.id,
+                player1Score: result.player1Score,
+                player2Score: result.player2Score,
+                gameMode: "tournament" as GameMode,
+                duration,
+                tournamentId: this.tournament.id,
+            };
+
+            const matchService = MatchService.getInstance();
+            await matchService.saveMatch(matchBody);
+            console.log("Tournament match saved to backend");
+        } catch (error) {
+            console.error("Failed to save tournament match:", error);
+        }
     }
 
     finishMatchDefault(result: MatchResult): void {

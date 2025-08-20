@@ -95,6 +95,7 @@ export class GameComponent extends BaseComponent {
             this.gameControls.toggleStartBtn();
         }
 
+        if (this.options.tournamentId) return;
         // Register game result to backend
         await this.saveMatch();
     };
