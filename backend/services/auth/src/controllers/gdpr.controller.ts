@@ -128,7 +128,7 @@ export async function anonymizeUser(request: FastifyRequest, reply: FastifyReply
         // 3. Finally anonymize in auth-service (users table)
         // Note: Avatar is set to default-pfp.png, old avatar file becomes orphaned
         const result = await (request.server as any).db.run(
-            "UPDATE users SET username = ?, email = ?, password_hash = '', avatar = 'default-pfp.png', updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+            "UPDATE users SET username = ?, email = ?, password_hash = '', avatar = '/uploads/default-pfp.png', updated_at = CURRENT_TIMESTAMP WHERE id = ?",
             [`anon_${Date.now()}`, `anon_${Date.now()}@example.com`, userId],
         );
 
@@ -194,7 +194,7 @@ export async function downloadUserData(request: FastifyRequest, reply: FastifyRe
             });
 
             if (matchResponse.ok) {
-                const matches = await matchResponse.json() as any[];
+                const matches = (await matchResponse.json()) as any[];
                 matchStats.matchHistory = matches;
                 matchStats.totalMatches = matches.length;
 
@@ -246,7 +246,7 @@ export async function downloadUserData(request: FastifyRequest, reply: FastifyRe
                 matchesWon: matchStats.matchesWon,
                 matchesLost: matchStats.matchesLost,
             },
-            matchHistory: matchStats.matchHistory.map(match => ({
+            matchHistory: matchStats.matchHistory.map((match) => ({
                 matchId: match.id,
                 date: match.created_at,
                 gameMode: match.gameMode,
