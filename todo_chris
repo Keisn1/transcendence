@@ -1,55 +1,36 @@
-gdpr:
+list of bugs:
+if invalid user, still loading on profilestats
+if invalid pfp or deleted pfp, maybe go back to default instead of file not found pic
 
-made a template for gdpr plugin.
-it still needs
- - 2fa check
- - frontend
- - db connection
- - actual testing
-
-
-GDPR compliance:
-
-in user settings, privacy tab.
-
-user has the rights to know what data is stored, and for how long // read up on it.
-
--username
--email
--passwordhash
--2fa secret
--stats of games played for example
-
-
-block certain file extensions for pfp upload. important
-
-new 15.8
-modsec needs special rules for internal communications. 
-
-
-modsecurity  extra rule for the auth service because its currently disabled
-check stats of anonymized/deleted users 
+new 18.8
 
 
 later:
+block certain file extensions for pfp upload. important
 double check all the webbased attacks, ask llm
 gdpr compliance reread
-download button if time
 
 
 done:
+check stats of anonymized/deleted users 
 check general stats/compare with actual same stats
-nginx service is failing to boot on first launch on new pc. //should be fixed
 find cleaner solution for the ignoring of the warning of 
     https self signed cert which gdpr struggle with without the env call //done
 gdpr endpoints need to update/delete matchstats, played matches whatever
 new encrypt/decrypt key for 2fa secrets in vault abrufbar //done. llm abused. contact me if errors arise
 new service needs certificates and jwtsecret anbindung done
 
+
 getting checked by kay:
+modsec needs special rules for internal communications. 
+modsecurity  extra rule for the auth service because its currently disabled
+download button if time
+
 
 actually done:
+nginx service is failing to boot on first launch on new pc. //should be fixed
 2fa check for gdpr deletion/anonymization done
+
 
 devbuild:
 backend :
