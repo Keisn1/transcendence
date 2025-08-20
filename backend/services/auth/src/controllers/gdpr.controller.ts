@@ -1,13 +1,18 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 
-import https from 'https';
-import fetch from 'node-fetch';
-import fs from 'fs';
+import https from "https";
+import fetch from "node-fetch";
+import fs from "fs";
+import { Agent } from "http";
 // Create agent once, reuse for all internal service calls
-const internalServiceAgent = new https.Agent({
-    ca: fs.readFileSync('/vault/init/ca_cert.crt'), // Trust Vault's CA
-});
 
+let internalServiceAgent: Agent = new Agent();
+if (process.env.ENV === "production") {
+    internalServiceAgent = new https.Agent({
+        ca: fs.readFileSync("/vault/init/ca_cert.crt"), // Trust Vault's CA
+        rejectUnauthorized: false, // Accept self-signed CA for internal services
+    });
+}
 
 // Helper function to get the correct protocol and port based on environment
 function getServiceUrl(serviceName: string, port: number): string {
@@ -38,13 +43,23 @@ export async function deleteUser(request: FastifyRequest, reply: FastifyReply) {
         // 1. Delete from match-service
         const matchServiceUrl = getServiceUrl("match-service", 3002);
 
-        const matchResponse = await fetch(`${matchServiceUrl}/gdpr/delete/${userId}`, {
-            method: "DELETE",
-            agent: internalServiceAgent,
-            headers: {
-                Authorization: `Bearer ${generateServiceToken()}`,
-            },
-        });
+        let matchResponse = null;
+        if (process.env.ENV === "production") {
+            matchResponse = await fetch(`${matchServiceUrl}/gdpr/delete/${userId}`, {
+                method: "DELETE",
+                agent: internalServiceAgent,
+                headers: {
+                    Authorization: `Bearer ${generateServiceToken()}`,
+                },
+            });
+        } else {
+            matchResponse = await fetch(`${matchServiceUrl}/gdpr/delete/${userId}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${generateServiceToken()}`,
+                },
+            });
+        }
 
         if (!matchResponse.ok) {
             const errorText = await matchResponse.text().catch(() => "Unknown error");

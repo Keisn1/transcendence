@@ -3,7 +3,7 @@ import { BaseComponent } from "../BaseComponent";
 import { AuthService } from "../../services/auth/auth.service.ts";
 import { AuthController } from "../../controllers/auth.controller.ts";
 import type { User } from "../../types/auth.types.ts";
-import { AuthStorage } from "../../services/auth/auth.storage"; // 
+import { AuthStorage } from "../../services/auth/auth.storage"; //
 
 export class Navbar extends BaseComponent {
     private authService: AuthService;
@@ -91,9 +91,8 @@ export class Navbar extends BaseComponent {
 
         this.menu.classList.add("hidden");
 
-        this.updateNotificationBadge();
-
         if (isAuthenticated && user) {
+            this.updateNotificationBadge();
             this.profileDropdown.classList.remove("hidden");
             authButtons?.classList.add("hidden");
 
@@ -101,7 +100,6 @@ export class Navbar extends BaseComponent {
             if (avatarImg && user.avatar) {
                 avatarImg.src = user.avatar;
             }
-
         } else {
             this.profileDropdown.classList.add("hidden");
             authButtons?.classList.remove("hidden");
@@ -185,7 +183,8 @@ export class Navbar extends BaseComponent {
         } else {
             // list of requests
             this.notificationDropdownContent.innerHTML = requests
-                .map((r: any) => `
+                .map(
+                    (r: any) => `
                     <div class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50">
                     <img src="${r.avatar}" alt="${r.username}" class="w-10 h-10 rounded-full flex-shrink-0" />
                     <div class="min-w-0">
@@ -193,10 +192,12 @@ export class Navbar extends BaseComponent {
                         <p class="text-xs text-gray-500">sent you a friend request</p>
                     </div>
                     <div class="ml-auto flex items-center gap-2">
-                        <span class="text-xs text-gray-400">${r.time ? r.time : ''}</span>
+                        <span class="text-xs text-gray-400">${r.time ? r.time : ""}</span>
                     </div>
                     </div>
-                `).join("");
+                `,
+                )
+                .join("");
         }
 
         this.addOutsideClickListener();

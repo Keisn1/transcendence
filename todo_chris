@@ -25,7 +25,7 @@ block certain file extensions for pfp upload. important
 
 new 15.8
 modsec needs special rules for internal communications. 
-the https agent works, but not if i activate modsecurity...
+
 
 modsecurity  extra rule for the auth service because its currently disabled
 check stats of anonymized/deleted users 
