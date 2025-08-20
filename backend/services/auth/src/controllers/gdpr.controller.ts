@@ -107,7 +107,7 @@ export async function anonymizeUser(request: FastifyRequest, reply: FastifyReply
         // 1. Anonymize in match-service
         try {
             const matchServiceUrl = getServiceUrl("match-service", 3002);
-            const matchResponse = await fetch(`${matchServiceUrl}/api/gdpr/anonymize/${userId}`, {
+            const matchResponse = await fetch(`${matchServiceUrl}/gdpr/anonymize/${userId}`, {
                 method: "PUT",
                 agent: internalServiceAgent,
                 headers: {
@@ -141,5 +141,137 @@ export async function anonymizeUser(request: FastifyRequest, reply: FastifyReply
     } catch (error: any) {
         console.error("GDPR: Anonymization error:", error);
         return reply.status(500).send({ error: "Anonymization failed" });
+    }
+}
+
+export async function downloadUserData(request: FastifyRequest, reply: FastifyReply) {
+    const userId = (request as any).user.id;
+
+    try {
+        console.log("GDPR: Downloading user data for user ID:", userId);
+
+        // Helper function to generate service token using Fastify's JWT
+        const generateServiceToken = () => {
+            return (request.server as any).jwt.sign(
+                {
+                    iss: "auth-service",
+                    aud: "internal-services",
+                    sub: "system",
+                    scope: "gdpr:download",
+                },
+                { expiresIn: "5m" },
+            );
+        };
+
+        // 1. Get user data from auth-service
+        const userData = await (request.server as any).db.query(
+            "SELECT id, username, email, avatar, twofa_enabled, created_at, updated_at FROM users WHERE id = ?",
+            [userId],
+        );
+
+        if (!userData || userData.length === 0) {
+            return reply.status(404).send({ error: "User not found" });
+        }
+
+        const user = userData[0];
+
+        // 2. Get match statistics from match-service
+        let matchStats = {
+            totalMatches: 0,
+            matchesWon: 0,
+            matchesLost: 0,
+            matchHistory: [] as any[],
+        };
+
+        try {
+            const matchServiceUrl = getServiceUrl("match-service", 3002);
+            const matchResponse = await fetch(`${matchServiceUrl}/api/match/user/${userId}`, {
+                method: "GET",
+                agent: internalServiceAgent,
+                headers: {
+                    Authorization: `Bearer ${generateServiceToken()}`,
+                },
+            });
+
+            if (matchResponse.ok) {
+                const matches = await matchResponse.json() as any[];
+                matchStats.matchHistory = matches;
+                matchStats.totalMatches = matches.length;
+
+                // Calculate wins/losses
+                for (const match of matches) {
+                    let userScore = null;
+                    let opponentScore = null;
+
+                    if (match.player1Id === userId) {
+                        userScore = match.player1Score;
+                        opponentScore = match.player2Score;
+                    } else if (match.player2Id === userId) {
+                        userScore = match.player2Score;
+                        opponentScore = match.player1Score;
+                    }
+
+                    if (userScore !== null && opponentScore !== null) {
+                        if (userScore > opponentScore) {
+                            matchStats.matchesWon++;
+                        } else {
+                            matchStats.matchesLost++;
+                        }
+                    }
+                }
+            } else {
+                console.warn(`GDPR: Failed to fetch match data: ${matchResponse.status}`);
+            }
+        } catch (error: any) {
+            console.warn("GDPR: Match-service fetch error (continuing anyway):", error.message || String(error));
+        }
+
+        // 3. Compile user data export
+        const userDataExport = {
+            exportInfo: {
+                exportDate: new Date().toISOString(),
+                userId: user.id,
+                exportType: "GDPR Data Request",
+            },
+            personalData: {
+                username: user.username,
+                email: user.email,
+                avatar: user.avatar,
+                twoFactorAuthEnabled: Boolean(user.twofa_enabled),
+                accountCreated: user.created_at,
+                lastUpdated: user.updated_at,
+            },
+            statistics: {
+                totalMatches: matchStats.totalMatches,
+                matchesWon: matchStats.matchesWon,
+                matchesLost: matchStats.matchesLost,
+            },
+            matchHistory: matchStats.matchHistory.map(match => ({
+                matchId: match.id,
+                date: match.created_at,
+                gameMode: match.gameMode,
+                duration: match.duration,
+                yourScore: match.player1Id === userId ? match.player1Score : match.player2Score,
+                opponentScore: match.player1Id === userId ? match.player2Score : match.player1Score,
+                result: (() => {
+                    const yourScore = match.player1Id === userId ? match.player1Score : match.player2Score;
+                    const opponentScore = match.player1Id === userId ? match.player2Score : match.player1Score;
+                    return yourScore > opponentScore ? "won" : "lost";
+                })(),
+            })),
+        };
+
+        console.log("GDPR: User data export compiled successfully");
+
+        reply.status(200).send({
+            success: true,
+            data: userDataExport,
+        });
+    } catch (error: any) {
+        console.error("GDPR: Download user data error:", error);
+        return reply.status(500).send({
+            error: "Failed to download user data",
+            details: error.message,
+        });
     }
 }
