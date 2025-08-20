@@ -66,6 +66,18 @@ export async function deleteUser(request: FastifyRequest, reply: FastifyReply) {
             throw new Error(`Match-service deletion failed: ${matchResponse.status} - ${errorText}`);
         }
 
+        
+        const friendshipCount = await (request.server as any).db.query(
+        "SELECT COUNT(*) as count FROM friendships WHERE requester_id = ? OR addressee_id = ?",
+        [userId, userId]);
+        
+        // Delete all friendships where user is either requester or addressee
+        const friendshipResult = await (request.server as any).db.query(
+        "DELETE FROM friendships WHERE requester_id = ? OR addressee_id = ?",
+        [userId, userId]);
+
+        console.log(`GDPR: Deleted ${friendshipCount[0]?.count || 0} friendship records for user ${userId}`);
+
         // 3. Finally delete from auth-service (users table)
         // Note: Avatar files become orphaned but inaccessible since user row is deleted
         const authResult = await (request.server as any).db.run("DELETE FROM users WHERE id = ?", [userId]);
@@ -124,6 +136,15 @@ export async function anonymizeUser(request: FastifyRequest, reply: FastifyReply
                 error.message || String(error),
             );
         }
+        console.log(`GDPR: Deleting friendship data for anonymized user ${userId}`);
+        
+        const friendshipCount = await (request.server as any).db.query(
+        "SELECT COUNT(*) as count FROM friendships WHERE requester_id = ? OR addressee_id = ?",
+        [userId, userId]);
+        
+        await (request.server as any).db.query(
+        "DELETE FROM friendships WHERE requester_id = ? OR addressee_id = ?",
+        [userId, userId]);
 
         // 3. Finally anonymize in auth-service (users table)
         // Note: Avatar is set to default-pfp.png, old avatar file becomes orphaned
@@ -174,6 +195,30 @@ export async function downloadUserData(request: FastifyRequest, reply: FastifyRe
         }
 
         const user = userData[0];
+
+        const friendshipData = await (request.server as any).db.query(
+            `
+            SELECT 
+                f.id, 
+                f.status, 
+                f.created_at, 
+                f.updated_at,
+                CASE 
+                    WHEN f.requester_id = ? THEN 'sent'
+                    ELSE 'received'
+                END as request_type,
+                CASE 
+                    WHEN f.requester_id = ? THEN u2.username
+                    ELSE u1.username
+                END as other_user_username
+            FROM friendships f
+            LEFT JOIN users u1 ON f.requester_id = u1.id
+            LEFT JOIN users u2 ON f.addressee_id = u2.id
+            WHERE f.requester_id = ? OR f.addressee_id = ?
+            ORDER BY f.created_at DESC
+            `,
+            [userId, userId, userId, userId],
+        );
 
         // 2. Get match statistics from match-service
         let matchStats = {
@@ -240,6 +285,17 @@ export async function downloadUserData(request: FastifyRequest, reply: FastifyRe
                 twoFactorAuthEnabled: Boolean(user.twofa_enabled),
                 accountCreated: user.created_at,
                 lastUpdated: user.updated_at,
+            },
+            friendshipData: {
+                totalFriendships: friendshipData.length,
+                friendships: friendshipData.map((friendship: any) => ({
+                    friendshipId: friendship.id,
+                    status: friendship.status,
+                    requestType: friendship.request_type,
+                    otherUser: friendship.other_user_username,
+                    createdAt: friendship.created_at,
+                    updatedAt: friendship.updated_at,
+                })),
             },
             statistics: {
                 totalMatches: matchStats.totalMatches,

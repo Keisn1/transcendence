@@ -7,13 +7,13 @@ new 20.8
 
 later:
 block certain file extensions for pfp upload. important
-double check all the webbased attacks, ask llm
-gdpr compliance reread
 
 semidone:
-removed many of the files in init after initialization. can't remove vault-init.json yet, it bricks restarts.
 
 done:
+double check all the webbased attacks, ask llm
+gdpr compliance reread
+removed many of the files in init after initialization. can't remove vault-init.json yet, it bricks restarts.
 check stats of anonymized/deleted users 
 check general stats/compare with actual same stats
 find cleaner solution for the ignoring of the warning of 

@@ -345,4 +345,4 @@ rm /vault/init/pong.localhost.crt
 
 rm /vault/init/user-policy.hcl
 # rm /vault/init/vault-init.json
-rm /.env
+rm /transcendence/.env
