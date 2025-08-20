@@ -21,7 +21,7 @@
 - [X] Lags are present in the game, especially in the collision of the ball to the corner of the paddle
 
 * Bugs
-- [ ] profile-change -> 2fa enabled in frontend again
+- [X] profile-change -> 2fa enabled in frontend again
 
 - [ ] remove notification when no one is signed in
 
@@ -45,16 +45,18 @@
 
 * incomplete implementation
 
+- [ ] check for unhandled errors (no 500s if there is a good reason for failure)
+  - [ ] go through backend endpoints and check
+  - [ ] check with LLM
+
+- [ ] when file upload fails then it should keep the old avatar
+
 - [ ] make sure that gdpr is deleting/anonymizing/information is still working (Kay)
 
 - [ ] delete old avatars when they are updated (Kay/Chris)
   - [ ] deletion of avatars when user requests deletion of data
     - depends on deletion of avatars in general
   - [ ] outfactor default-pfp.png (it is present in some places of the code, we should factor this out to somewhere, where it can be defined application wide) (Kay)
-
-- [ ] check for unhandled errors (no 500s if there is a good reason for failure)
-  - [ ] go through backend endpoints and check
-  - [ ] check with LLM
 
 - [ ] check for warnings
   - [ ] any warning that happens shall not include any comments
@@ -63,13 +65,14 @@
 - [ ] make sure every jwt gets a proper timeout (Kay)
 
 - [ ] files are accepted to much (Kay)
+  - Chris sagt: server treats everyting as file (which is already good but can be improved)
   - [ ] restrict gif/jpeg/png
   - [ ] sanitization/validation on the files
 
 - [ ] double check input validation! (1. "Ensure that the website is secured. Check the database to verify that passwords are hashed. Check the server for server-side validation/sanitization on forms and any user input. If this isn't done, the evaluation ends now.")
   - https://www.esecurityplanet.com/endpoint/prevent-web-attacks-using-input-sanitization/
-  1. [ ] make a list of every user input anywhere inside the app
-  2. [ ] check every user input and sanitize and validate
+  - [ ] make a list of every user input anywhere inside the app
+  - [ ] check every user input and sanitize and validate
 
 * code quality
 - [ ] delete all console.logs in all services and in frontend
