@@ -91,6 +91,10 @@ export async function updateUser(request: FastifyRequest, reply: FastifyReply): 
     const id = request.user.id;
     const { username, email, password, avatar } = request.body as UpdateUserBody;
 
+    console.log(username);
+    console.log(email);
+    console.log(password);
+    console.log(avatar);
     const fields: string[] = [];
     const values: any[] = [];
 
@@ -128,10 +132,11 @@ export async function updateUser(request: FastifyRequest, reply: FastifyReply): 
         }
 
         const resultQuery = await request.server.db.query(
-            "SELECT id, username, email, avatar FROM users WHERE id = ?",
+            "SELECT id, username, avatar, twofa_enabled as twoFaEnabled FROM users WHERE id = ?",
             [id],
         );
         const updated = resultQuery[0] as UpdateUserResponse;
+        console.log(updated);
 
         return reply.status(200).send({ user: updated });
     } catch (err: any) {
@@ -163,11 +168,10 @@ export const updateUserSchema = {
                     properties: {
                         id: { type: "string" },
                         username: { type: "string" },
-                        email: { type: "string" },
                         avatar: { type: "string", format: "uri-reference" },
                         twoFaEnabled: { type: "boolean" },
                     },
-                    required: ["id", "username", "email", "avatar"],
+                    required: ["id", "username", "avatar", "twoFaEnabled"],
                 },
             },
             additionalProperties: false,

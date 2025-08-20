@@ -126,7 +126,6 @@ export class ProfileComponent extends BaseComponent {
             this.pendingAvatarUrl = null;
         } catch (error) {
             console.error("Failed to update profile:", error);
-            // Show error message to user
         }
     }
 
@@ -154,7 +153,7 @@ export class ProfileComponent extends BaseComponent {
     private populateUserData() {
         if (!this.profile) return;
 
-        console.log("user: ", this.profile);
+        console.log("profile: ", this.profile);
         if (this.usernameEl) this.usernameEl.textContent = this.profile.username;
         if (this.emailEl) this.emailEl.textContent = this.profile.email;
     }

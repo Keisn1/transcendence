@@ -23,15 +23,17 @@
 * Bugs
 - [ ] profile-change -> 2fa enabled in frontend again
 
-- [ ] add friends button is on the user view of the current user
+- [ ] remove notification when no one is signed in
 
-- [ ] don't be able to type any more into slot after pressing register and success (disable test field)
+- [X] "add friends" button is on the user view of the current user
 
-- [ ] when a match is played and the user goes back in time, the match is registered multiple times in the database (Kay)
-  - [ ] needs to be figured out somehow
+- [X] don't be able to type any more into slot after pressing register and success (disable test field)
 
-- [ ] strange behaviour of friendship requests
-  - [ ] if the request was sent from user B to user A, user A will see "request sent" on user B userView, even though user A did not send requests himself
+- [X] when a match is played and the user goes back in time, the match is registered multiple times in the database (Kay)
+  - [X] needs to be figured out somehow
+
+- [X] strange behaviour of friendship requests
+  - [X] if the request was sent from user B to user A, user A will see "request sent" on user B userView, even though user A did not send requests himself
 
 - [ ] treating the security hole that a logged in user can actually post a tournament with any valid uuids
   - [ ] need to check if the users exist
