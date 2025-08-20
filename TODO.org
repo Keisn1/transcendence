@@ -22,7 +22,16 @@
 
 * Bugs
 - [ ] profile-change -> 2fa enabled in frontend again
+
+- [ ] add friends button is on the user view of the current user
+
 - [ ] don't be able to type any more into slot after pressing register and success (disable test field)
+
+- [ ] when a match is played and the user goes back in time, the match is registered multiple times in the database (Kay)
+  - [ ] needs to be figured out somehow
+
+- [ ] strange behaviour of friendship requests
+  - [ ] if the request was sent from user B to user A, user A will see "request sent" on user B userView, even though user A did not send requests himself
 
 - [ ] treating the security hole that a logged in user can actually post a tournament with any valid uuids
   - [ ] need to check if the users exist
@@ -32,14 +41,10 @@
         const token = request.server.jwt.sign({userId: asdf, verified: true}, { expiresIn: "5min" });
       #+end_src
 
-- [ ] when a match is played and the user goes back in time, the match is registered multiple times in the database (Kay)
-  - [ ] needs to be figured out somehow
-- [ ] strange behaviour of friendship requests
-  - [ ] if the request was sent from user B to user A, user A will see "request sent" on user B userView, even though user A did not send requests himself
-
 * incomplete implementation
 
 - [ ] make sure that gdpr is deleting/anonymizing/information is still working (Kay)
+
 - [ ] delete old avatars when they are updated (Kay/Chris)
   - [ ] deletion of avatars when user requests deletion of data
     - depends on deletion of avatars in general
@@ -73,10 +78,7 @@
 - [ ] download button for users data (Kay)
   - [ ] now imperative with new information of friendship between users
   - [ ] need to talk to Chris about this
-
-- [ ] not used notifications button in navbar
-  - maybe we can use it for friendship requests
-
+** extra
 - [ ] not working "forgot password" in login
   - don't see it in the subject (but interesting for sure)
 
@@ -85,10 +87,10 @@
   - [ ] ask Alex
   - [X] chris is of the same opinion (only one)
 
-- [ ] ask Chris about the firewall
-  - [ ] Chris is working on this
+- [X] ask Chris about the firewall
+  - [X] Chris is working on this
 
-- [ ] XSS attacks? (kept more as an reminder)
-  - [ ] let's try to hack it with the help of an llm
+- [X] XSS attacks? (kept more as an reminder)
+  - [X] let's try to hack it with the help of an llm
 
 - [ ] setup CORS with fastify and environment variables (kay)

@@ -11,7 +11,7 @@ export class UserDisplayComponent extends BaseComponent {
     private username?: string;
 
     private userAvatar: HTMLImageElement;
-    private userName: HTMLElement;
+    private usernameElement: HTMLElement;
 
     private friendRequestButton?: FriendRequestButton;
     private onlineStatus?: OnlineStatus;
@@ -26,7 +26,7 @@ export class UserDisplayComponent extends BaseComponent {
         this.container.innerHTML = userDisplayTemplate;
 
         this.userAvatar = this.container.querySelector("#user-avatar")!;
-        this.userName = this.container.querySelector("#user-name")!;
+        this.usernameElement = this.container.querySelector("#user-name")!;
 
         if (username) this.attachControls(username);
 
@@ -39,12 +39,12 @@ export class UserDisplayComponent extends BaseComponent {
                 const user = this.authService.getCurrentUser();
                 if (user) {
                     this.userAvatar.src = user.avatar;
-                    this.userName.textContent = user.username;
+                    this.usernameElement.textContent = user.username;
                 }
             } else {
                 const publicUser = await this.userService.getUserByUsername(this.username);
                 this.userAvatar.src = publicUser.avatar;
-                this.userName.textContent = publicUser.username;
+                this.usernameElement.textContent = publicUser.username;
             }
         } catch (err) {
             console.error("Failed to load user info:", err);
@@ -57,7 +57,7 @@ export class UserDisplayComponent extends BaseComponent {
         this.friendRequestButton = new FriendRequestButton(username);
         this.onlineStatus = new OnlineStatus(username);
 
-        const nameWrapper = this.userName.parentElement!;
+        const nameWrapper = this.usernameElement.parentElement!;
         const controlsWrapper = document.createElement("div");
         controlsWrapper.className = "mt-2 flex items-center space-x-2";
 

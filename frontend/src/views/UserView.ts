@@ -3,6 +3,7 @@ import { Navbar } from "../components/navbar/navbar.ts";
 import type Router from "../router.ts";
 import { AuthService } from "../services/auth/auth.service.ts";
 import { UserContent } from "../components/userContent/userContent.component.ts";
+import { DashboardContent } from "../components/dashboardContent/dashboard.component.ts";
 
 export default class extends AbstractView {
     private navbar: Navbar | null = null;
@@ -23,15 +24,19 @@ export default class extends AbstractView {
         this.navbar = new Navbar();
         document.body.appendChild(this.navbar.getContainer());
 
+        AuthService.getInstance().getCurrentUser();
         if (!this.params) {
             console.log("no parameters give");
             return;
         }
         if (!("username" in this.params)) {
-            console.log("no id in params");
+            console.log("no username in params");
         }
 
-        this.userContent = new UserContent(this.params.username);
+        const username = this.params.username;
+        if (username === AuthService.getInstance().getCurrentUser()?.username) this.userContent = new UserContent();
+        else this.userContent = new UserContent(this.params.username);
+
         document.body.appendChild(this.userContent.getContainer());
     }
 

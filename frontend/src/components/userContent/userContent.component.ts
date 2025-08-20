@@ -6,7 +6,7 @@ export class UserContent extends BaseComponent {
     private userDisplay: UserDisplayComponent;
     private matchHistory: MatchHistoryComponent;
 
-    constructor(username: string) {
+    constructor(username?: string) {
         super("div", "dashboard-content");
 
         this.container.className = "max-w-6xl mx-auto mt-8 px-4";
