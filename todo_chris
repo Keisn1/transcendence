@@ -23,6 +23,9 @@ user has the rights to know what data is stored, and for how long // read up on 
 
 
 new 15.8
+modsec needs special rules for internal communications. 
+the https agent works, but not if i activate modsecurity...
+
 modsecurity  extra rule for the auth service because its currently disabled
 check stats of anonymized/deleted users 
 
