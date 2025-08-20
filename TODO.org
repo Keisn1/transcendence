@@ -73,6 +73,7 @@
 - [ ] delete all console.logs in all services and in frontend
 - [ ] gpdr.controllers are still missing schemas and body and response types (Chris)
 - [ ] refactor new frontend component introduced with friendship-feature
+- [ ] define server name in nginx.conf + other improvement (ask LLM)
 
 * Feature
 - [ ] download button for users data (Kay)
