@@ -22,6 +22,17 @@ user has the rights to know what data is stored, and for how long // read up on 
 
 
 
+new 15.8
+find cleaner solution for the ignoring of the warning of 
+    https self signed cert which gdpr struggle with without the env call
+double check all the webbased attacks, ask llm
+modsecurity  extra rule for the auth service because its currently disabled
+tls cert call auth service gdpr
+download button if time
+gdpr compliance reread
+
+
+
 
 new 13.8
 check stats of anonymized/deleted users 
@@ -44,6 +55,7 @@ frontend -> npm install, npm run dev:proxy
 new terminal
 backend -> docker compose build
 docker compose up -d 
+
 
 
 
