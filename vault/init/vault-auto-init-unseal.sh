@@ -171,8 +171,9 @@ vault write pki/config/urls \
 # Create a role for issuing HTTPS certificates
 echo "Creating PKI role for HTTPS..."
 vault write pki/roles/https-cert-role \
-    allowed_domains="pong.localhost" \
+    allowed_domains="pong.localhost,match-service,file-service,auth-service" \
     allow_subdomains=true \
+    allow_bare_domains=true \
     max_ttl="72h"
 
 echo "PKI secrets engine configured for HTTPS certificates."
@@ -254,6 +255,7 @@ INTKEY_PATH="/vault/init/${INTERNAL_DOMAIN}.key"
 echo "Requesting internal certificate for $INTERNAL_DOMAIN..."
 vault write -format=json pki/issue/https-cert-role \
     common_name="$INTERNAL_DOMAIN" \
+    alt_names="match-service" \
     ttl="72h" > /vault/init/matchservice-cert.json
 
 # Extract cert, issuing CA, and private key

@@ -1,5 +1,14 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 
+import https from 'https';
+import fetch from 'node-fetch';
+import fs from 'fs';
+// Create agent once, reuse for all internal service calls
+const internalServiceAgent = new https.Agent({
+    ca: fs.readFileSync('/vault/init/ca_cert.crt'), // Trust Vault's CA
+});
+
+
 // Helper function to get the correct protocol and port based on environment
 function getServiceUrl(serviceName: string, port: number): string {
     const isProduction = process.env.ENV === "production";
@@ -31,6 +40,7 @@ export async function deleteUser(request: FastifyRequest, reply: FastifyReply) {
 
         const matchResponse = await fetch(`${matchServiceUrl}/gdpr/delete/${userId}`, {
             method: "DELETE",
+            agent: internalServiceAgent,
             headers: {
                 Authorization: `Bearer ${generateServiceToken()}`,
             },
@@ -84,6 +94,7 @@ export async function anonymizeUser(request: FastifyRequest, reply: FastifyReply
             const matchServiceUrl = getServiceUrl("match-service", 3002);
             const matchResponse = await fetch(`${matchServiceUrl}/api/gdpr/anonymize/${userId}`, {
                 method: "PUT",
+                agent: internalServiceAgent,
                 headers: {
                     Authorization: `Bearer ${generateServiceToken()}`,
                 },
