@@ -54,7 +54,7 @@ JWT_SECRET=$(vault write -field=random_bytes sys/tools/random bytes=64 | base64)
 # Store it in the KV store
 vault kv put secret/jwt key="$JWT_SECRET"
 echo "Stored JWT secret in Vault:"
-vault kv get -field=key secret/jwt
+#vault kv get -field=key secret/jwt
 
 # --- Create Vault policy for AppRole ---
 cat <<EOF > /vault/init/user-policy.hcl
@@ -284,7 +284,6 @@ export ROLEMATCHSERVICE_ID=$(vault read -field=role_id auth/approle/role/matchse
 export SECRETMATCHSERVICE_ID=$(vault write -f -field=secret_id auth/approle/role/matchservice-role/secret-id)
 
 
-echo "catting EVEN harder rn."
 cat << EOF >> /vault/init/.env
 VAULT_FILESERVICE_ID=$ROLEFILESERVICE_ID
 VAULT_FILESERVICESECRET_ID=$SECRETFILESERVICE_ID
@@ -316,16 +315,38 @@ echo "2FA encryption key 'twofa-encryption' created in transit engine"
 
 
 
-echo "VAULT_TOKEN before is: $VAULT_TOKEN" #DISABLE IN PROD
+#echo "VAULT_TOKEN before is: $VAULT_TOKEN" #DISABLE IN PROD
 # --- Authenticate using AppRole ---
 VAULT_TOKEN=$(vault write -field=token auth/approle/login role_id="$ROLE_ID" secret_id="$SECRET_ID")
 echo "Logged in with AppRole token."
-echo "VAULT_TOKEN after is: $VAULT_TOKEN" #DISABLE IN PROD
+#echo "VAULT_TOKEN after is: $VAULT_TOKEN" #DISABLE IN PROD
 echo "Vault KV and policies setup complete."
 
 # Create completion marker file for services to check
 touch /vault/init/.vault-ready
-sleep 5
+sleep 10
+
+
+shred -vfz -n 3 /vault/init/auth-service.localhost.crt 2>/dev/null || true
+shred -vfz -n 3 /vault/init/auth-service.localhost.key 2>/dev/null || true
+shred -vfz -n 3 /vault/init/ca_cert.crt 2>/dev/null || true
+shred -vfz -n 3 /vault/init/cert.json 2>/dev/null || true
+shred -vfz -n 3 /vault/init/fileservice-cert.json 2>/dev/null || true
+shred -vfz -n 3 /vault/init/fileservice-policy.hcl 2>/dev/null || true
+shred -vfz -n 3 /vault/init/fileservice.localhost.crt 2>/dev/null || true
+shred -vfz -n 3 /vault/init/fileservice.localhost.key 2>/dev/null || true
+shred -vfz -n 3 /vault/init/internal-cert.json 2>/dev/null || true
+shred -vfz -n 3 /vault/init/.env 2>/dev/null || true
+shred -vfz -n 3 /vault/init/matchservice-cert.json 2>/dev/null || true
+shred -vfz -n 3 /vault/init/matchservice-policy.hcl 2>/dev/null || true
+shred -vfz -n 3 /vault/init/matchservice.localhost.key 2>/dev/null || true
+shred -vfz -n 3 /vault/init/matchservice.localhost.crt 2>/dev/null || true
+shred -vfz -n 3 /vault/init/pong.localhost.key 2>/dev/null || true
+shred -vfz -n 3 /vault/init/pong.localhost.crt 2>/dev/null || true
+shred -vfz -n 3 /vault/init/user-policy.hcl 2>/dev/null || true
+# shred -vfz -n 3 /transcendence/.env 2>/dev/null || true
+# shred -vfz -n 3 /vault/init/vault-init.json 2>/dev/null || true  # 
+
 rm /vault/init/auth-service.localhost.crt
 rm /vault/init/auth-service.localhost.key
 rm /vault/init/ca_cert.crt
