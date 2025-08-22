@@ -46,11 +46,11 @@
 * incomplete implementation
 - [ ] https for the vault
 
-- [ ] delete old avatars when they are updated (Kay/Chris)
+- [-] delete old avatars when they are updated (Kay/Chris)
   - [ ] deletion of avatars when user requests deletion of data
     - depends on deletion of avatars in general
-  - [ ] outfactor default-pfp.png (it is present in some places of the code, we should factor this out to somewhere, where it can be defined application wide) (Kay)
-  - [ ] secure delete avatar with jwt
+  - [X] outfactor default-pfp.png (it is present in some places of the code, we should factor this out to somewhere, where it can be defined application wide) (Kay)
+  - [X] secure delete avatar with jwt
 
 - [ ] when file upload fails then it should keep the old avatar
 

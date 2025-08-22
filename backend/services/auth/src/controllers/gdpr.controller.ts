@@ -26,6 +26,8 @@ export async function deleteUser(request: FastifyRequest, reply: FastifyReply) {
 
     try {
         console.log(`GDPR: Starting complete deletion for user ${userId}`);
+        const userData = await (request.server as any).db.query("SELECT avatar FROM users WHERE id = ?", [userId]);
+        const userAvatar = userData[0]?.avatar;
 
         // Helper function to generate service token using Fastify's JWT
         const generateServiceToken = () => {
@@ -66,17 +68,24 @@ export async function deleteUser(request: FastifyRequest, reply: FastifyReply) {
             throw new Error(`Match-service deletion failed: ${matchResponse.status} - ${errorText}`);
         }
 
-        
         const friendshipCount = await (request.server as any).db.query(
-        "SELECT COUNT(*) as count FROM friendships WHERE requester_id = ? OR addressee_id = ?",
-        [userId, userId]);
-        
+            "SELECT COUNT(*) as count FROM friendships WHERE requester_id = ? OR addressee_id = ?",
+            [userId, userId],
+        );
+
         // Delete all friendships where user is either requester or addressee
-        const friendshipResult = await (request.server as any).db.query(
-        "DELETE FROM friendships WHERE requester_id = ? OR addressee_id = ?",
-        [userId, userId]);
+        await (request.server as any).db.query("DELETE FROM friendships WHERE requester_id = ? OR addressee_id = ?", [
+            userId,
+            userId,
+        ]);
 
         console.log(`GDPR: Deleted ${friendshipCount[0]?.count || 0} friendship records for user ${userId}`);
+
+        // 2. Delete avatar file if not default
+        if (userAvatar && !isDefaultAvatar(userAvatar)) {
+            const filename = userAvatar.replace("/uploads/", "");
+            await deleteOldAvatar(request, filename, generateServiceToken);
+        }
 
         // 3. Finally delete from auth-service (users table)
         // Note: Avatar files become orphaned but inaccessible since user row is deleted
@@ -137,14 +146,16 @@ export async function anonymizeUser(request: FastifyRequest, reply: FastifyReply
             );
         }
         console.log(`GDPR: Deleting friendship data for anonymized user ${userId}`);
-        
+
         const friendshipCount = await (request.server as any).db.query(
-        "SELECT COUNT(*) as count FROM friendships WHERE requester_id = ? OR addressee_id = ?",
-        [userId, userId]);
-        
-        await (request.server as any).db.query(
-        "DELETE FROM friendships WHERE requester_id = ? OR addressee_id = ?",
-        [userId, userId]);
+            "SELECT COUNT(*) as count FROM friendships WHERE requester_id = ? OR addressee_id = ?",
+            [userId, userId],
+        );
+
+        await (request.server as any).db.query("DELETE FROM friendships WHERE requester_id = ? OR addressee_id = ?", [
+            userId,
+            userId,
+        ]);
 
         // 3. Finally anonymize in auth-service (users table)
         // Note: Avatar is set to default-pfp.png, old avatar file becomes orphaned
@@ -330,4 +341,35 @@ export async function downloadUserData(request: FastifyRequest, reply: FastifyRe
             details: error.message,
         });
     }
+}
+
+// Helper function to delete avatar (reuse from updateUser.controller.ts)
+async function deleteOldAvatar(request: FastifyRequest, filename: string, generateServiceToken: () => string) {
+    try {
+        const fileServiceUrl = getServiceUrl("file-service", 3001);
+        const response = await fetch(`${fileServiceUrl}/api/internal/avatar/${filename}`, {
+            method: "DELETE",
+            agent: internalServiceAgent,
+            headers: {
+                Authorization: `Bearer ${generateServiceToken()}`,
+            },
+        });
+
+        if (!response.ok) {
+            console.warn(`GDPR: Failed to delete avatar ${filename}: ${response.status}`);
+        } else {
+            console.log(`GDPR: Successfully deleted avatar: ${filename}`);
+        }
+    } catch (error) {
+        console.warn(`GDPR: Error deleting avatar ${filename}:`, error);
+        // Continue with user deletion even if avatar deletion fails
+    }
+}
+
+function isDefaultAvatar(avatarPath: string): boolean {
+    return (
+        avatarPath === "/uploads/default-pfp.png" ||
+        avatarPath === "default-pfp.png" ||
+        avatarPath.endsWith("/default-pfp.png")
+    );
 }

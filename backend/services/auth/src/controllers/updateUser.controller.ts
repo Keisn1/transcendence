@@ -60,17 +60,29 @@ export async function getUserById(
     const { userId } = request.params;
     if (userId == "00000000-0000-0000-0000-000000000000") {
         return reply.status(200).send({
-            publicUser: { id: "00000000-0000-0000-0000-000000000000", username: "unknown", avatar: "default-pfp.png" },
+            publicUser: {
+                id: "00000000-0000-0000-0000-000000000000",
+                username: "unknown",
+                avatar: "uploads/default-pfp.png",
+            },
         });
     }
     if (userId == "00000000-0000-0000-0000-000000000001") {
         return reply.status(200).send({
-            publicUser: { id: "00000000-0000-0000-0000-000000000001", username: "AI Easy", avatar: "default-pfp.png" },
+            publicUser: {
+                id: "00000000-0000-0000-0000-000000000001",
+                username: "AI Easy",
+                avatar: "uploads/default-pfp.png",
+            },
         });
     }
     if (userId == "00000000-0000-0000-0000-000000000002") {
         return reply.status(200).send({
-            publicUser: { id: "00000000-0000-0000-0000-000000000002", username: "AI Hard", avatar: "default-pfp.png" },
+            publicUser: {
+                id: "00000000-0000-0000-0000-000000000002",
+                username: "AI Hard",
+                avatar: "uploads/default-pfp.png",
+            },
         });
     }
 
@@ -151,7 +163,7 @@ export async function updateUser(request: FastifyRequest, reply: FastifyReply): 
             return reply.status(404).send({ error: "User not found" });
         }
 
-        if (avatar && oldAvatar && oldAvatar !== avatar && oldAvatar !== "/uploads/default-pfp.png") {
+        if (avatar && oldAvatar && oldAvatar !== avatar && !isDefaultAvatar(oldAvatar)) {
             const filename = oldAvatar.replace("/uploads/", "");
             await deleteOldAvatar(request, filename);
         }
@@ -170,6 +182,15 @@ export async function updateUser(request: FastifyRequest, reply: FastifyReply): 
         }
         return reply.status(500).send({ error: "Update failed" });
     }
+}
+
+// Helper function
+function isDefaultAvatar(avatarPath: string): boolean {
+    return (
+        avatarPath === "/uploads/default-pfp.png" ||
+        avatarPath === "default-pfp.png" ||
+        avatarPath.endsWith("/default-pfp.png")
+    );
 }
 
 // Helper function to delete old avatar
