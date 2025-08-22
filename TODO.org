@@ -1,6 +1,6 @@
 #+title: Todo
 
-* Erik
+* DONE Erik
 - [X] Ensure that the AI adapts to different gameplay scenarios and user interactions.
   - maybe add some radomness to the moves?
   - make difficulty a little bit adaptive to the game score? (an extra)
@@ -44,30 +44,29 @@
       #+end_src
 
 * incomplete implementation
-
-- [ ] check for unhandled errors (no 500s if there is a good reason for failure)
-  - [ ] go through backend endpoints and check
-  - [ ] check with LLM
-
-- [ ] when file upload fails then it should keep the old avatar
-
-- [ ] make sure that gdpr is deleting/anonymizing/information is still working (Kay)
+- [ ] https for the vault
 
 - [ ] delete old avatars when they are updated (Kay/Chris)
   - [ ] deletion of avatars when user requests deletion of data
     - depends on deletion of avatars in general
   - [ ] outfactor default-pfp.png (it is present in some places of the code, we should factor this out to somewhere, where it can be defined application wide) (Kay)
 
-- [ ] check for warnings
-  - [ ] any warning that happens shall not include any comments
-  - [ ] check with LLM
+- [ ] when file upload fails then it should keep the old avatar
 
-- [ ] make sure every jwt gets a proper timeout (Kay)
+- [ ] sign up, show if a user is already present (if there is a conflict)
 
 - [ ] files are accepted to much (Kay)
   - Chris sagt: server treats everyting as file (which is already good but can be improved)
   - [ ] restrict gif/jpeg/png
   - [ ] sanitization/validation on the files
+
+- [ ] check for unhandled errors (no 500s if there is a good reason for failure)
+  - [ ] go through backend endpoints and check
+  - [ ] check with LLM
+
+- [X] make sure that gdpr is deleting/anonymizing/information is still working (Kay)
+
+- [X] make sure every jwt gets a proper timeout (Kay)
 
 - [ ] double check input validation! (1. "Ensure that the website is secured. Check the database to verify that passwords are hashed. Check the server for server-side validation/sanitization on forms and any user input. If this isn't done, the evaluation ends now.")
   - https://www.esecurityplanet.com/endpoint/prevent-web-attacks-using-input-sanitization/
@@ -83,19 +82,19 @@
 
 - [ ] define server name in nginx.conf + other improvement (ask LLM)
 
-* Feature
-- [ ] download button for users data (Kay)
-  - [ ] now imperative with new information of friendship between users
-  - [ ] need to talk to Chris about this
+* DONE Feature
+- [X] download button for users data (Kay)
+  - [X] now imperative with new information of friendship between users
+  - [X] need to talk to Chris about this
 
 ** extra
-- [ ] not working "forgot password" in login
+- [X] not working "forgot password" in login
   - don't see it in the subject (but interesting for sure)
-  - [ ] remove the forgot password
+  - [X] remove the forgot password
 
-* need more information
-- [-] maybe need to implement the other 2fa options
-  - [ ] ask Alex
+* DONE need more information
+- [X] maybe need to implement the other 2fa options
+  - [X] ask Alex
   - [X] chris is of the same opinion (only one)
 
 - [X] ask Chris about the firewall
@@ -104,4 +103,4 @@
 - [X] XSS attacks? (kept more as an reminder)
   - [X] let's try to hack it with the help of an llm
 
-- [ ] setup CORS with fastify and environment variables (kay)
+- [X] setup CORS with fastify and environment variables (kay)
