@@ -75,18 +75,23 @@
   - [ ] check every user input and sanitize and validate
 
 * code quality
-- [ ] delete all console.logs in all services and in frontend
+- [X] delete all console.logs in all services and in frontend
+
 - [ ] gpdr.controllers are still missing schemas and body and response types (Chris)
-- [ ] refactor new frontend component introduced with friendship-feature
+
+- [X] refactor new frontend component introduced with friendship-feature
+
 - [ ] define server name in nginx.conf + other improvement (ask LLM)
 
 * Feature
 - [ ] download button for users data (Kay)
   - [ ] now imperative with new information of friendship between users
   - [ ] need to talk to Chris about this
+
 ** extra
 - [ ] not working "forgot password" in login
   - don't see it in the subject (but interesting for sure)
+  - [ ] remove the forgot password
 
 * need more information
 - [-] maybe need to implement the other 2fa options
