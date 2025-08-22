@@ -1,6 +1,25 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { genSaltSync, hashSync } from "bcrypt";
 import { GetOnlineStatusResponse, PublicUser, UpdateUserBody, UpdateUserResponse } from "../types/auth.types";
+import https from "https";
+import fetch from "node-fetch";
+import fs from "fs";
+import { Agent } from "http";
+
+// Helper functions (copy from gdpr.controller.ts)
+let internalServiceAgent: Agent = new Agent();
+if (process.env.ENV === "production") {
+    internalServiceAgent = new https.Agent({
+        ca: fs.readFileSync("/vault/init/ca_cert.crt"),
+        rejectUnauthorized: false,
+    });
+}
+
+function getServiceUrl(serviceName: string, port: number): string {
+    const isProduction = process.env.ENV === "production";
+    const protocol = isProduction ? "https" : "http";
+    return `${protocol}://${serviceName}:${port}`;
+}
 
 export async function getOnlineStatus(
     request: FastifyRequest<{ Params: { userId: string } }>,
@@ -89,6 +108,13 @@ export async function updateUser(request: FastifyRequest, reply: FastifyReply): 
     const id = request.user.id;
     const { username, email, password, avatar } = request.body as UpdateUserBody;
 
+    // Get current user data to check old avatar
+    let oldAvatar = null;
+    if (avatar) {
+        const currentUser = await request.server.db.query("SELECT avatar FROM users WHERE id = ?", [id]);
+        oldAvatar = currentUser[0]?.avatar;
+    }
+
     const fields: string[] = [];
     const values: any[] = [];
 
@@ -125,6 +151,11 @@ export async function updateUser(request: FastifyRequest, reply: FastifyReply): 
             return reply.status(404).send({ error: "User not found" });
         }
 
+        if (avatar && oldAvatar && oldAvatar !== avatar && oldAvatar !== "/uploads/default-pfp.png") {
+            const filename = oldAvatar.replace("/uploads/", "");
+            await deleteOldAvatar(request, filename);
+        }
+
         const resultQuery = await request.server.db.query(
             "SELECT id, username, avatar, twofa_enabled as twoFaEnabled FROM users WHERE id = ?",
             [id],
@@ -138,6 +169,41 @@ export async function updateUser(request: FastifyRequest, reply: FastifyReply): 
             return reply.status(409).send({ error: "Username or email already in use" });
         }
         return reply.status(500).send({ error: "Update failed" });
+    }
+}
+
+// Helper function to delete old avatar
+async function deleteOldAvatar(request: FastifyRequest, filename: string) {
+    try {
+        const generateServiceToken = () => {
+            return request.server.jwt.sign(
+                {
+                    iss: "auth-service",
+                    aud: "file-service",
+                    sub: "system",
+                    scope: "file:delete",
+                },
+                { expiresIn: "5m" },
+            );
+        };
+
+        const fileServiceUrl = getServiceUrl("file-service", 3001);
+        const response = await fetch(`${fileServiceUrl}/api/internal/avatar/${filename}`, {
+            method: "DELETE",
+            agent: internalServiceAgent,
+            headers: {
+                Authorization: `Bearer ${generateServiceToken()}`,
+            },
+        });
+
+        if (!response.ok) {
+            console.warn(`Failed to delete old avatar ${filename}: ${response.status}`);
+        } else {
+            console.log(`Successfully deleted old avatar: ${filename}`);
+        }
+    } catch (error) {
+        console.warn(`Error deleting old avatar ${filename}:`, error);
+        // Don't fail the user update if avatar deletion fails
     }
 }
 
