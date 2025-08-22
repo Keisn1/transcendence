@@ -24,7 +24,6 @@ export class FriendshipRequests extends BaseComponent {
                 headers: { Authorization: `Bearer ${AuthStorage.getToken()}` },
             });
             const { requests } = await response.json();
-            console.log(requests);
 
             const container = this.container.querySelector("#requests-container")!;
 

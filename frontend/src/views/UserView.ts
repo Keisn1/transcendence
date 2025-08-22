@@ -10,7 +10,6 @@ export default class extends AbstractView {
 
     constructor(router?: Router, params?: any) {
         super(router, params);
-        console.log(params);
         this.setTitle("User");
     }
 

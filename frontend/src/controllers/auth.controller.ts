@@ -33,8 +33,6 @@ export class AuthController {
         this.onlineStatusService.stopTracking();
         this.authService.logout();
 
-        console.log("inside logout");
-        console.log(currentPath);
         const authRequiredPaths = ["/profile", "/settings", "/settings/gdpr"];
 
         if (authRequiredPaths.includes(currentPath)) {

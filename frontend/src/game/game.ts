@@ -244,8 +244,6 @@ export class PongGame {
 
         this.drawNewState();
         if (this.isGameOver()) {
-            console.log("exiting game loop");
-
             // Call the finish callback
             if (this.onFinishCallback) {
                 this.onFinishCallback();

@@ -35,10 +35,10 @@ export async function postMatch(request: FastifyRequest<{ Body: PostMatchBody }>
         );
 
         if (body.gameMode === "tournament") {
-            await request.server.db.run(
-                `INSERT INTO tournament_matches (tournament_id, match_id) VALUES (?, ?)`,
-                [body.tournamentId, matchId]
-            );
+            await request.server.db.run(`INSERT INTO tournament_matches (tournament_id, match_id) VALUES (?, ?)`, [
+                body.tournamentId,
+                matchId,
+            ]);
         }
 
         return reply.status(201).send({ id: matchId, message: "Match recorded successfully" });
@@ -64,7 +64,6 @@ export async function getMatchById(
         if (!response.length) {
             return reply.status(404).send({ error: "Match not found" });
         }
-        console.log(response[0]);
         const matchResponse: GetMatchResponse = response[0];
         return reply.status(200).send(matchResponse);
     } catch (error) {

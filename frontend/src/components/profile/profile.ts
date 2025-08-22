@@ -152,8 +152,6 @@ export class ProfileComponent extends BaseComponent {
 
     private populateUserData() {
         if (!this.profile) return;
-
-        console.log("profile: ", this.profile);
         if (this.usernameEl) this.usernameEl.textContent = this.profile.username;
         if (this.emailEl) this.emailEl.textContent = this.profile.email;
     }

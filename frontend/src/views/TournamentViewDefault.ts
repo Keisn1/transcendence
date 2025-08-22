@@ -34,14 +34,7 @@ export default class extends AbstractView {
 
     private renderByState() {
         // Clean up previous component
-        console.log("render tournamentViewDefault by state");
         this.currentComponent?.destroy();
-
-        console.log(
-            "Tournament being rendered with tournamentDefault: ",
-            this.tournamentController.getTournamentDefault(),
-        );
-        console.log("matches results", this.tournamentController.getTournamentDefault()?.matches[0]?.result);
         const state = this.tournamentController.getTournamentMachineDefault().getState();
         switch (state) {
             case TournamentState.UNINITIALIZED:

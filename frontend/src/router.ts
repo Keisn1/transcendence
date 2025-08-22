@@ -82,7 +82,6 @@ export default class Router {
         let match = potentialMatches.find((potentialMatch) => potentialMatch.result !== null);
 
         if (!match) {
-            console.log("not found");
             match = {
                 route: routes[0],
                 result: [location.pathname],
@@ -90,12 +89,9 @@ export default class Router {
         }
 
         if (this.currentView && typeof this.currentView.destroy === "function") {
-            console.log("destroying a view");
             this.currentView.destroy();
         }
 
-        console.log("creating new view");
-        console.log("params Match:", this.getParams(match));
         this.currentView = new match.route.view(this, this.getParams(match));
         this.currentView.render();
     }

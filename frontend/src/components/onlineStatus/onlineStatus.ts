@@ -23,7 +23,6 @@ export class OnlineStatus extends BaseComponent {
             });
             const { status } = await friendshipResponse.json();
 
-            console.log("status is: ", status);
             if (status !== "accepted") return; // Only show for friends
 
             // Get online status

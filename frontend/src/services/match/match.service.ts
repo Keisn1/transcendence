@@ -14,7 +14,6 @@ export class MatchService {
     }
 
     async saveMatch(match: PostMatchBody): Promise<void> {
-        console.log(match);
         const response = await fetch("/api/match", {
             method: "POST",
             headers: {

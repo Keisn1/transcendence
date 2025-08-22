@@ -29,7 +29,6 @@ export class TournamentCreationPanelDefault extends BaseComponent {
     }
 
     private handleAddPlayer(e: Event) {
-        console.log("hello");
         e.preventDefault();
         if (this.addedPlayersCount >= 4) return;
 
@@ -61,7 +60,6 @@ export class TournamentCreationPanelDefault extends BaseComponent {
 
         slot.remove();
         this.addedPlayersCount--;
-        console.log("After removal:", this.registeredPlayers);
     }
 
     private async registerHandler(ev: Event, slot: HTMLElement, slotId: string) {
@@ -97,7 +95,6 @@ export class TournamentCreationPanelDefault extends BaseComponent {
             this.showMessage(err.message || "Registration failed", "error");
             registerBtn.disabled = false;
         }
-        console.log("After registration:", this.registeredPlayers);
     }
 
     private async handleStartTournament(e: Event) {

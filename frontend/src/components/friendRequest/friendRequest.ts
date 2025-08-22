@@ -35,7 +35,6 @@ export class FriendRequestButton extends BaseComponent {
             });
             const { status } = await response.json();
 
-            console.log("status is", status);
             if (status === "accepted") {
                 this.button.textContent = "Friends";
                 this.button.disabled = true;

@@ -158,7 +158,6 @@ export class MatchHistoryComponent extends BaseComponent {
         const target = e.target as HTMLElement;
 
         const username = target.dataset.username;
-        console.log(target.dataset);
         if (!username) return;
 
         UserController.getInstance().navigateToUser(`/user/${encodeURIComponent(username)}`);

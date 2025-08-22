@@ -264,7 +264,6 @@ export class AuthService {
 
         if (user.twoFaEnabled) {
             this.pendingVerifyData = { token: data.token, user };
-            console.log(this.pendingVerifyData);
         }
 
         return user;
@@ -274,7 +273,6 @@ export class AuthService {
         if (!this.pendingVerifyData) {
             throw new Error("No pending login session");
         }
-        console.log(this.pendingVerifyData);
 
         const response = await fetch("/api/auth/2fa/verify", {
             method: "POST",

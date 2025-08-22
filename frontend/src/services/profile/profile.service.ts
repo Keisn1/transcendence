@@ -27,8 +27,6 @@ export class ProfileService {
         if (!response.ok) throw new Error("Profile update failed");
 
         const data: UpdateUserResponse = await response.json();
-        console.log(data);
-        console.log("data from PUT /api/user", data);
 
         // Notify AuthService to update cached user
         AuthService.getInstance().updateCurrentUser(data.user);

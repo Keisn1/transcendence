@@ -16,7 +16,6 @@ export class UserController {
     }
 
     public navigateToUser(url: string) {
-        console.log("Url: ", url);
         this.router.navigateTo(url);
     }
 }
