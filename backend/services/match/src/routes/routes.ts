@@ -8,8 +8,13 @@ import {
     getUserMatchesSchema,
 } from "../controllers/match.controller";
 import { PostMatchBody } from "../types/match.types";
-import { PostTournamentBody } from "../types/tournament.types";
-import { postTournament, postTournamentSchema } from "../controllers/tournament.controller";
+import { PostTournamentBody, PostTournamentWithVerificationBody } from "../types/tournament.types";
+import {
+    postTournament,
+    postTournamentSchema,
+    postTournamentWithVerification,
+    postTournamentWithVerificationSchema,
+} from "../controllers/tournament.controller";
 import { deleteUserData, anonymizeUserData } from "../controllers/gdpr.controller";
 
 export async function routes(fastify: FastifyInstance) {
@@ -36,6 +41,12 @@ export async function routes(fastify: FastifyInstance) {
                 "",
                 { preHandler: fastify.jwtAuth, schema: postTournamentSchema },
                 postTournament,
+            );
+            // Add verified tournament endpoint
+            fastify.post<{ Body: PostTournamentWithVerificationBody }>(
+                "/verified",
+                { preHandler: fastify.jwtAuth, schema: postTournamentWithVerificationSchema },
+                postTournamentWithVerification,
             );
         },
         { prefix: "tournament" },

@@ -179,4 +179,15 @@ export class TournamentController {
         this.tournamentMachineDefault = new TournamentMachine();
         this.router.navigateTo("/tournament-default");
     }
+
+    public async createTournamentWithVerification(playerTokens: { user: PublicUser; token: string }[]): Promise<void> {
+        const players = playerTokens.map((pt) => pt.user);
+        const tournament = new Tournament(players);
+
+        tournament.id = await this.tournamentService.createTournamentWithVerification(playerTokens);
+
+        this.tournament = tournament;
+        this.tournamentMachine.update(TournamentEvent.LOAD, this.tournament);
+        this.router.navigateTo(`/tournament`);
+    }
 }

@@ -1,6 +1,6 @@
-import { AuthService } from "../services/auth/auth.service.ts";
+import { AuthService, type VerifyUserResponse } from "../services/auth/auth.service.ts";
 import Router from "../router";
-import { type LoginBody, type SignupForm, type User } from "../types/auth.types.ts";
+import { type LoginBody, type SignupForm } from "../types/auth.types";
 import { OnlineStatusService } from "../services/user/onlineStatus.service.ts";
 import { AuthStorage } from "../services/auth/auth.storage.ts";
 
@@ -86,11 +86,11 @@ export class AuthController {
         this.router.navigateTo("/profile");
     }
 
-    public async verifyUser(userCredentials: LoginBody): Promise<User> {
+    public async verifyUser(userCredentials: LoginBody): Promise<VerifyUserResponse> {
         return await this.authService.verifyUser(userCredentials);
     }
 
-    public async complete2FAVerify(token: string): Promise<User> {
+    public async complete2FAVerify(token: string): Promise<VerifyUserResponse> {
         return await this.authService.complete2FAVerify(token);
     }
 }

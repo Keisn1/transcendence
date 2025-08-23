@@ -10,6 +10,11 @@ import type {
 } from "../../types/auth.types";
 import { AuthStorage } from "./auth.storage";
 
+export interface VerifyUserResponse {
+    user: User;
+    verificationToken: string;
+}
+
 export class AuthService {
     private pendingLoginData: { token: string; user: User } | null = null;
     private pendingVerifyData: { token: string; user: User } | null = null;
@@ -246,7 +251,8 @@ export class AuthService {
         this.notifyListeners();
     }
 
-    async verifyUser(credentials: LoginBody): Promise<User> {
+    async verifyUser(credentials: LoginBody): Promise<VerifyUserResponse> {
+        console.log("verifying user");
         const response = await fetch("/api/auth/verify", {
             method: "POST",
             headers: {
@@ -256,22 +262,26 @@ export class AuthService {
         });
 
         if (!response.ok) {
-            throw new Error("Login failed");
+            throw new Error("Verification failed");
         }
 
         const data: LoginResponse = await response.json();
         const user: User = data.user;
 
+        console.log("user: ", user);
         if (user.twoFaEnabled) {
+            console.log("setting pending verifyData");
             this.pendingVerifyData = { token: data.token, user };
+            return { user, verificationToken: "" }; // Token comes after 2FA
+        } else {
+            return { user, verificationToken: data.token };
         }
-
-        return user;
     }
 
-    async complete2FAVerify(token: string): Promise<User> {
+    async complete2FAVerify(token: string): Promise<VerifyUserResponse> {
+        console.log("completing 2fa");
         if (!this.pendingVerifyData) {
-            throw new Error("No pending login session");
+            throw new Error("No pending verification session");
         }
 
         const response = await fetch("/api/auth/2fa/verify", {
@@ -288,8 +298,28 @@ export class AuthService {
             throw new Error(error.error || "Invalid 2FA code");
         }
 
-        const user: User = this.pendingVerifyData.user;
-        this.pendingLoginData = null;
-        return user;
+        const user = this.pendingVerifyData.user;
+        const verificationToken = this.pendingVerifyData.token; // Use the existing token as verification
+        this.pendingVerifyData = null;
+
+        return { user, verificationToken };
+    }
+
+    async getVerificationToken(userId: string): Promise<string> {
+        const response = await fetch("/api/auth/verification-token", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${AuthStorage.getToken()}`,
+            },
+            body: JSON.stringify({ userId }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to get verification token");
+        }
+
+        const { token } = await response.json();
+        return token;
     }
 }

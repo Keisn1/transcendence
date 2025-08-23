@@ -6,13 +6,14 @@ import type { PublicUser } from "../../../types/auth.types.ts";
 import { v4 as uuidv4 } from "uuid";
 import { AuthController } from "../../../controllers/auth.controller.ts";
 import { TwoFactorVerification } from "../../twoFactorVerification/twoFactorVerification.ts";
+import { AuthService } from "../../../services/auth/auth.service.ts";
 
 export class TournamentCreationPanel extends BaseComponent {
     private tournamentForm: HTMLFormElement;
     private playersContainer: HTMLElement;
     private addPlayerBtn: HTMLButtonElement;
     private addedPlayersCount: number = 0;
-    private registeredPlayers: PublicUser[] = [];
+    private registeredPlayers: { user: PublicUser; token: string }[] = [];
 
     constructor() {
         super("div", "tournament-container");
@@ -57,7 +58,7 @@ export class TournamentCreationPanel extends BaseComponent {
 
         const playerId = slot.dataset.playerId;
         if (playerId) {
-            this.registeredPlayers = this.registeredPlayers.filter((p) => p.id !== playerId);
+            this.registeredPlayers = this.registeredPlayers.filter((p) => p.user.id !== playerId);
         }
 
         slot.remove();
@@ -78,29 +79,40 @@ export class TournamentCreationPanel extends BaseComponent {
         }
 
         try {
-            const user = await AuthController.getInstance().verifyUser({
+            const verifyResult = await AuthController.getInstance().verifyUser({
                 email: emailInput.value,
                 password: passwordInput.value,
             });
 
-            if (user.twoFaEnabled) {
-                const ok = await this.show2FAVerification();
-                if (!ok) {
+            let finalToken = "";
+
+            if (verifyResult.user.twoFaEnabled) {
+                const twoFAToken = await this.show2FAVerification();
+                if (!twoFAToken) {
                     registerBtn.disabled = false;
                     return this.showMessage("2FA not completed — registration aborted", "error");
                 }
+                // Get the verification token after 2FA completion
+                const verify2FAResult = await AuthController.getInstance().complete2FAVerify(twoFAToken); // token already provided in modal
+                finalToken = verify2FAResult.verificationToken;
+            } else {
+                finalToken = verifyResult.verificationToken;
             }
 
-            const publicUser: PublicUser = {
-                id: user.id,
-                username: user.username,
-                avatar: user.avatar,
+            const registrationData = {
+                user: {
+                    id: verifyResult.user.id,
+                    username: verifyResult.user.username,
+                    avatar: verifyResult.user.avatar,
+                },
+                token: finalToken,
             };
 
-            if (this.registeredPlayers.some((p) => p.id === publicUser.id))
+            if (this.registeredPlayers.some((p) => p.user.id === registrationData.user.id))
                 throw new Error("Player already registered");
-            this.registeredPlayers.push(publicUser);
-            slot.dataset.playerId = user.id;
+
+            this.registeredPlayers.push(registrationData);
+            slot.dataset.playerId = registrationData.user.id;
             this.showMessage("User registered successfully");
         } catch (err: any) {
             this.showMessage(err.message || "Registration failed", "error");
@@ -108,35 +120,29 @@ export class TournamentCreationPanel extends BaseComponent {
         }
     }
 
-    private show2FAVerification(): Promise<boolean> {
+    private show2FAVerification(): Promise<string | null> {
         return new Promise((resolve) => {
             try {
                 const verification = new TwoFactorVerification(
                     "Enter your 2FA code to complete login:",
                     async (token) => {
-                        try {
-                            await AuthController.getInstance().complete2FAVerify(token);
-                            verification.getContainer().remove();
-                            verification.destroy();
-                            resolve(true); // success
-                        } catch (error) {
-                            // let TwoFactorVerification show the error, keep modal open
-                            console.error("2FA verify failed:", error);
-                            throw error; // Let TwoFactorVerification handle error display
-                        }
+                        // Don't verify here - just return the token
+                        verification.getContainer().remove();
+                        verification.destroy();
+                        resolve(token); // Return the 2FA token
                     },
                     () => {
                         AuthController.getInstance().clearPendingVerify();
                         verification.getContainer().remove();
                         verification.destroy();
-                        resolve(false);
+                        resolve(null);
                     },
                 );
 
                 this.container.appendChild(verification.getContainer());
             } catch (err) {
                 console.error("error creating 2FA modal:", err);
-                resolve(false);
+                resolve(null);
             }
         });
     }
@@ -151,7 +157,7 @@ export class TournamentCreationPanel extends BaseComponent {
         }
 
         try {
-            await TournamentController.getInstance().createTournament(this.registeredPlayers);
+            await TournamentController.getInstance().createTournamentWithVerification(this.registeredPlayers);
             this.showMessage("Tournament was successfully created");
         } catch (err: any) {
             this.showMessage(err.message || "Could not create tournament", "error");

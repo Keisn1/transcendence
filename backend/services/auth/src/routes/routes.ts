@@ -37,6 +37,29 @@ export async function routes(fastify: FastifyInstance) {
             fastify.post("/login", { schema: loginSchema }, login);
             fastify.post("/verify", { schema: loginSchema }, login);
             fastify.get("/health", healthRoute);
+            fastify.post(
+                "/verification-token",
+                {
+                    preHandler: fastify.jwtAuth,
+                    schema: {
+                        body: {
+                            type: "object",
+                            properties: {
+                                userId: { type: "string" },
+                            },
+                            required: ["userId"],
+                        },
+                    },
+                },
+                async (request, reply) => {
+                    const { userId } = request.body as { userId: string };
+
+                    // Create short-lived verification token (5 minutes)
+                    const token = fastify.jwt.sign({ userId }, { expiresIn: "5m" });
+
+                    return { token };
+                },
+            );
             fastify.register(
                 (fastify: FastifyInstance) => {
                     fastify.post("/init", { preHandler: fastify.jwtAuth }, init2FA);

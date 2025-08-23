@@ -1,4 +1,5 @@
 import { Tournament } from "../../controllers/tournament.controller.ts";
+import type { PublicUser } from "../../types/auth.types.ts";
 import { type PostTournamentResponse, type PostTournamentBody } from "../../types/tournament.types.ts";
 import { AuthStorage } from "../auth/auth.storage.ts";
 
@@ -33,6 +34,32 @@ export class TournamentService {
             throw new Error(`Failed to save tournament: ${errMsg}`);
         }
         const data: PostTournamentResponse = await response.json();
+        return data.id;
+    }
+
+    async createTournamentWithVerification(playerTokens: { user: PublicUser; token: string }[]): Promise<string> {
+        const tournamentBody = {
+            playerTokens: playerTokens.map((pt) => ({
+                playerId: pt.user.id,
+                token: pt.token,
+            })),
+        };
+
+        const response = await fetch("/api/tournament/verified", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${AuthStorage.getToken()}`,
+            },
+            body: JSON.stringify(tournamentBody),
+        });
+
+        if (!response.ok) {
+            const errMsg = await response.text();
+            throw new Error(`Failed to create tournament: ${errMsg}`);
+        }
+
+        const data = await response.json();
         return data.id;
     }
 }
