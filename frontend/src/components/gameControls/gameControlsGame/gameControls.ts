@@ -44,8 +44,19 @@ export class GameControlsComponent extends BaseComponent implements IGameControl
 
     private handleStart() {
         const level = this.aiSelect.value as GameMode;
+        this.startBtn.disabled = true; // Disable button when game starts
         this.startBtn.textContent = "Restart Game";
         this.startCallbacks.forEach((cb) => cb(level));
+    }
+
+    toggleStartBtn() {
+        if (this.startBtn.disabled) {
+            this.startBtn.disabled = false;
+            this.startBtn.textContent = "Restart Game";
+        } else {
+            this.startBtn.disabled = true;
+            this.startBtn.textContent = "Game in Progress...";
+        }
     }
 
     reset() {

@@ -20,7 +20,7 @@
 
 - [X] Lags are present in the game, especially in the collision of the ball to the corner of the paddle
 
-* Bugs
+* DONE Bugs
 - [X] profile-change -> 2fa enabled in frontend again
 
 - [X] remove notification when no one is signed in
@@ -35,14 +35,15 @@
 - [X] strange behaviour of friendship requests
   - [X] if the request was sent from user B to user A, user A will see "request sent" on user B userView, even though user A did not send requests himself
 
-- [ ] treating the security hole that a logged in user can actually post a tournament with any valid uuids
-  - [ ] need to check if the users exist
-  - [ ] need to have some token verification
+- [X] treating the security hole that a logged in user can actually post a tournament with any valid uuids
+  - [X] need to check if the users exist
+  - [X] need to have some token verification
     - maybe something like
       #+begin_src typescript
         const token = request.server.jwt.sign({userId: asdf, verified: true}, { expiresIn: "5min" });
       #+end_src
-
+- [ ] chris bug: hitting start too often
+  - [ ] disable restart when it is not finished
 * incomplete implementation
 - [X] https for the vault
   - no vault endpoint in production at all
