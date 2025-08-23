@@ -8,8 +8,21 @@ export default async function uploadAvatar(
 ) {
     const data = await request.file();
 
-    if (!data || !data.mimetype.startsWith("image/")) {
-        return reply.code(400).send({ error: "Invalid file" });
+    if (!data) {
+        return reply.code(400).send({ error: "No file provided" });
+    }
+
+    // Check if it's an image and specifically allowed formats
+    const allowedMimeTypes = [
+        "image/gif",
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+    ];
+    if (!allowedMimeTypes.includes(data.mimetype)) {
+        return reply.code(400).send({
+            error: "Invalid file format. Only GIF, JPEG, and PNG images are allowed",
+        });
     }
 
     const filename = `avatar-${Date.now()}.${data.filename.split(".").pop()}`;

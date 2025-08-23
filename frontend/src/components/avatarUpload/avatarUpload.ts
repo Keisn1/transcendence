@@ -40,6 +40,12 @@ export class AvatarUpload extends BaseComponent {
 
             const file = (e.target as HTMLInputElement).files?.[0];
             if (file) {
+                // Validate file before processing
+                if (!this.validateFile(file)) {
+                    this.fileInput.value = ""; // Clear the input
+                    return;
+                }
+
                 // Preview immediately
                 const reader = new FileReader();
                 reader.onload = (e) => {
@@ -52,6 +58,27 @@ export class AvatarUpload extends BaseComponent {
                 reader.readAsDataURL(file);
             }
         });
+    }
+
+    private validateFile(file: File): boolean {
+        const allowedTypes = ["image/gif", "image/jpeg", "image/jpg", "image/png"];
+
+        if (!allowedTypes.includes(file.type)) {
+            this.showError("Please select a GIF, JPEG, or PNG image file.");
+            return false;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            // 5MB limit
+            this.showError("File size must be less than 5MB.");
+            return false;
+        }
+
+        return true;
+    }
+
+    private showError(message: string) {
+        alert(message);
     }
 
     private async uploadAvatar(file: File) {
