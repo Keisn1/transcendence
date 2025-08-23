@@ -85,6 +85,8 @@ export class FriendshipRequests extends BaseComponent {
                 });
 
                 this.loadRequests(); // Reload the list
+                // Notify navbar to update badge
+                window.dispatchEvent(new CustomEvent("friendRequestUpdated"));
             } catch (error) {
                 console.error("Failed to respond to friend request:", error);
             }

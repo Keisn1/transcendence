@@ -28,6 +28,7 @@ export class Navbar extends BaseComponent {
     private notificationDropdown: HTMLElement | null = null;
     private notificationDropdownContent: HTMLElement | null = null;
     private outsideClickHandler: ((e: Event) => void) | null = null;
+    private friendRequestHandler: (() => void) | null = null;
 
     constructor() {
         super("div", "navbar-container");
@@ -96,7 +97,11 @@ export class Navbar extends BaseComponent {
             this.profileDropdown.classList.remove("hidden");
             authButtons?.classList.add("hidden");
 
-            // Update avatar if available
+            // Show notification button for authenticated users
+            if (this.notificationButton) {
+                this.notificationButton.classList.remove("hidden");
+            }
+
             if (avatarImg && user.avatar) {
                 avatarImg.src = user.avatar;
             }
@@ -104,10 +109,13 @@ export class Navbar extends BaseComponent {
             this.profileDropdown.classList.add("hidden");
             authButtons?.classList.remove("hidden");
 
-            // hide badge when logged out
+            // Hide both badge and button when logged out
             if (this.notificationBadge) {
                 this.notificationBadge.classList.add("hidden");
                 this.notificationBadge.textContent = "";
+            }
+            if (this.notificationButton) {
+                this.notificationButton.classList.add("hidden");
             }
         }
     }
@@ -248,6 +256,16 @@ export class Navbar extends BaseComponent {
             authController.logout();
         };
         this.addEventListenerWithCleanup(this.logoutLink, "click", handleLogout);
+
+        // Fix the event listener - store the handler function
+        const handleFriendRequestUpdate = () => {
+            this.updateNotificationBadge();
+        };
+
+        window.addEventListener("friendRequestUpdated", handleFriendRequestUpdate);
+
+        // Store for cleanup
+        this.friendRequestHandler = handleFriendRequestUpdate;
     }
 
     destroy() {
@@ -258,5 +276,10 @@ export class Navbar extends BaseComponent {
         }
         // remove global click handler if set
         this.removeOutsideClickListener();
+
+        // Clean up friend request listener
+        if (this.friendRequestHandler) {
+            window.removeEventListener("friendRequestUpdated", this.friendRequestHandler);
+        }
     }
 }
