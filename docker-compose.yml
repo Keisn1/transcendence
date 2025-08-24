@@ -21,7 +21,7 @@ services:
     environment:
       - ENV=production
     volumes:
-      - ./backend/services/file/uploads:/app/uploads
+      # - ./backend/services/file/uploads:/app/uploads
       - ./vault/init:/vault/init
     depends_on:
       - vault
@@ -52,9 +52,9 @@ services:
       - ./vault/init:/vault/init
       - ./frontend/dist:/usr/share/nginx/html
     depends_on:
-    - auth-service
-    - file-service  
-    - match-service
+      - auth-service
+      - file-service
+      - match-service
 
   vault:
     container_name: vault

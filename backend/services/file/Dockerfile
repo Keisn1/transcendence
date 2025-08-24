@@ -9,6 +9,8 @@ WORKDIR /app
 
 # Copy source code
 COPY src/ ./src/
+RUN mkdir uploads
+COPY uploads/default-pfp.png uploads/default-pfp.png
 
 # Copy package files
 COPY tsconfig.json .
