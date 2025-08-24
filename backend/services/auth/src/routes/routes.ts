@@ -18,8 +18,10 @@ import {
     getOnlineStatusSchema,
 } from "../controllers/updateUser.controller";
 import {
+    getFriends,
     getFriendshipStatus,
     getFriendshipStatusSchema,
+    getFriendsSchema,
     getPendingRequests,
     getPendingRequestsSchema,
     respondToRequest,
@@ -153,6 +155,14 @@ export async function routes(fastify: FastifyInstance) {
                     schema: getFriendshipStatusSchema,
                 },
                 getFriendshipStatus,
+            );
+            fastify.get(
+                "/friends",
+                {
+                    preHandler: fastify.jwtAuth,
+                    schema: getFriendsSchema,
+                },
+                getFriends,
             );
         },
         { prefix: "friendship" },

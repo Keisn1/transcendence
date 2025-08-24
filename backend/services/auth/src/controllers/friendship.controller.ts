@@ -252,3 +252,64 @@ export const getFriendshipStatusSchema = {
         },
     },
 } as const;
+
+export async function getFriends(request: FastifyRequest, reply: FastifyReply): Promise<{ friends: any[] }> {
+    const userId = request.user.id;
+
+    const friends = await request.server.db.query(
+        `
+        SELECT
+            CASE
+                WHEN f.requester_id = ? THEN u2.id
+                ELSE u1.id
+            END as friend_id,
+            CASE
+                WHEN f.requester_id = ? THEN u2.username
+                ELSE u1.username
+            END as username,
+            CASE
+                WHEN f.requester_id = ? THEN u2.avatar
+                ELSE u1.avatar
+            END as avatar,
+            CASE
+                WHEN f.requester_id = ? THEN u2.is_online
+                ELSE u1.is_online
+            END as isOnline,
+            CASE
+                WHEN f.requester_id = ? THEN u2.last_seen
+                ELSE u1.last_seen
+            END as lastSeen
+        FROM friendships f
+        LEFT JOIN users u1 ON f.requester_id = u1.id
+        LEFT JOIN users u2 ON f.addressee_id = u2.id
+        WHERE (f.requester_id = ? OR f.addressee_id = ?) AND f.status = 'accepted'
+        ORDER BY isOnline DESC, lastSeen DESC
+        `,
+        [userId, userId, userId, userId, userId, userId, userId],
+    );
+
+    return reply.status(200).send({ friends });
+}
+
+export const getFriendsSchema = {
+    response: {
+        200: {
+            type: "object",
+            properties: {
+                friends: {
+                    type: "array",
+                    items: {
+                        type: "object",
+                        properties: {
+                            friend_id: { type: "string" },
+                            username: { type: "string" },
+                            avatar: { type: "string" },
+                            isOnline: { type: "boolean" },
+                            lastSeen: { type: ["string", "null"] },
+                        },
+                    },
+                },
+            },
+        },
+    },
+} as const;

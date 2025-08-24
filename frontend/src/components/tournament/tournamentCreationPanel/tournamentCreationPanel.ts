@@ -6,7 +6,6 @@ import type { PublicUser } from "../../../types/auth.types.ts";
 import { v4 as uuidv4 } from "uuid";
 import { AuthController } from "../../../controllers/auth.controller.ts";
 import { TwoFactorVerification } from "../../twoFactorVerification/twoFactorVerification.ts";
-import { AuthService } from "../../../services/auth/auth.service.ts";
 
 export class TournamentCreationPanel extends BaseComponent {
     private tournamentForm: HTMLFormElement;
