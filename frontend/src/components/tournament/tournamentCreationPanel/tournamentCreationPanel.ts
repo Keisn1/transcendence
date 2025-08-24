@@ -50,6 +50,12 @@ export class TournamentCreationPanel extends BaseComponent {
         registerBtn.addEventListener("click", async (ev) => {
             this.registerHandler(ev, slot, slotId);
         });
+
+        // Disable Add Player button if we've reached the maximum
+        if (this.addedPlayersCount >= 4) {
+            this.addPlayerBtn.disabled = true;
+            this.addPlayerBtn.textContent = "Maximum Players Reached";
+        }
     }
 
     private removeHandler(ev: Event, slot: HTMLElement) {
@@ -62,18 +68,29 @@ export class TournamentCreationPanel extends BaseComponent {
 
         slot.remove();
         this.addedPlayersCount--;
+
+        if (this.addedPlayersCount < 4) {
+            this.addPlayerBtn.disabled = false;
+            this.addPlayerBtn.textContent = "Add Player";
+        }
     }
 
     private async registerHandler(ev: Event, slot: HTMLElement, slotId: string) {
         ev.preventDefault();
         const registerBtn = ev.target as HTMLButtonElement;
-        registerBtn.disabled = true;
+
+        // Disable ALL buttons during registration
+        this.disableAllButtons();
+
+        // Update the specific register button being used
+        registerBtn.textContent = "Registering...";
 
         const emailInput = slot.querySelector<HTMLInputElement>(`#email-${slotId}`);
         const passwordInput = slot.querySelector<HTMLInputElement>(`#password-${slotId}`);
 
         if (!emailInput || !passwordInput) {
             this.showMessage("Input elements not found", "error");
+            this.enableAllButtons();
             return;
         }
 
@@ -88,11 +105,11 @@ export class TournamentCreationPanel extends BaseComponent {
             if (verifyResult.user.twoFaEnabled) {
                 const twoFAToken = await this.show2FAVerification();
                 if (!twoFAToken) {
-                    registerBtn.disabled = false;
+                    this.enableAllButtons();
                     return this.showMessage("2FA not completed — registration aborted", "error");
                 }
-                // Get the verification token after 2FA completion
-                const verify2FAResult = await AuthController.getInstance().complete2FAVerify(twoFAToken); // token already provided in modal
+
+                const verify2FAResult = await AuthController.getInstance().complete2FAVerify(twoFAToken);
                 finalToken = verify2FAResult.verificationToken;
             } else {
                 finalToken = verifyResult.verificationToken;
@@ -113,9 +130,12 @@ export class TournamentCreationPanel extends BaseComponent {
             this.registeredPlayers.push(registrationData);
             slot.dataset.playerId = registrationData.user.id;
             this.showMessage("User registered successfully");
+
+            // Re-enable all buttons after successful registration
+            this.enableAllButtons();
         } catch (err: any) {
             this.showMessage(err.message || "Registration failed", "error");
-            registerBtn.disabled = false;
+            this.enableAllButtons();
         }
     }
 
@@ -125,15 +145,18 @@ export class TournamentCreationPanel extends BaseComponent {
                 const verification = new TwoFactorVerification(
                     "Enter your 2FA code to complete login:",
                     async (token) => {
-                        // Don't verify here - just return the token
                         verification.getContainer().remove();
                         verification.destroy();
-                        resolve(token); // Return the 2FA token
+                        resolve(token);
                     },
                     () => {
                         AuthController.getInstance().clearPendingVerify();
                         verification.getContainer().remove();
                         verification.destroy();
+
+                        // Re-enable all buttons when 2FA is cancelled
+                        this.enableAllButtons();
+
                         resolve(null);
                     },
                 );
@@ -141,6 +164,7 @@ export class TournamentCreationPanel extends BaseComponent {
                 this.container.appendChild(verification.getContainer());
             } catch (err) {
                 console.error("error creating 2FA modal:", err);
+                this.enableAllButtons(); // Re-enable on error
                 resolve(null);
             }
         });
@@ -185,5 +209,44 @@ export class TournamentCreationPanel extends BaseComponent {
 
     destroy(): void {
         super.destroy();
+    }
+
+    private disableAllButtons() {
+        // Disable Add Player button
+        this.addPlayerBtn.disabled = true;
+        this.addPlayerBtn.textContent = "Registration in Progress...";
+
+        // Disable all Remove buttons
+        const removeButtons = this.container.querySelectorAll<HTMLButtonElement>(".remove-btn");
+        removeButtons.forEach((btn) => {
+            btn.disabled = true;
+            btn.textContent = "Wait...";
+        });
+
+        // Disable all Register buttons except the one currently being used
+        const registerButtons = this.container.querySelectorAll<HTMLButtonElement>(".register-player-btn");
+        registerButtons.forEach((btn) => (btn.disabled = true));
+    }
+
+    private enableAllButtons() {
+        // Re-enable Add Player button (unless at max capacity)
+        if (this.addedPlayersCount < 4) {
+            this.addPlayerBtn.disabled = false;
+            this.addPlayerBtn.textContent = "Add Player";
+        }
+
+        // Re-enable all Remove buttons
+        const removeButtons = this.container.querySelectorAll<HTMLButtonElement>(".remove-btn");
+        removeButtons.forEach((btn) => {
+            btn.disabled = false;
+            btn.textContent = "Remove";
+        });
+
+        // Re-enable all Register buttons
+        const registerButtons = this.container.querySelectorAll<HTMLButtonElement>(".register-player-btn");
+        registerButtons.forEach((btn) => {
+            btn.disabled = false;
+            btn.textContent = "Register";
+        });
     }
 }
