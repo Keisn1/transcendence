@@ -1,6 +1,7 @@
 import { BaseComponent } from "../BaseComponent";
 import { AuthStorage } from "../../services/auth/auth.storage";
 import { UserService } from "../../services/user/user.service";
+import { FriendshipEventsService } from "../../services/friendshipEvents/friendshipEvents.service";
 
 export class FriendRequestButton extends BaseComponent {
     private button: HTMLButtonElement;
@@ -71,6 +72,9 @@ export class FriendRequestButton extends BaseComponent {
                 this.button.textContent = "Request Sent";
                 this.button.disabled = true;
                 this.button.className = "px-4 py-2 bg-gray-600 text-white rounded";
+
+                // Use service to notify
+                FriendshipEventsService.getInstance().notifyFriendRequestSent();
             }
         } catch (error) {
             console.error("Failed to send friend request:", error);

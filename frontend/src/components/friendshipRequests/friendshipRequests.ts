@@ -1,5 +1,6 @@
 import { BaseComponent } from "../BaseComponent";
 import { AuthStorage } from "../../services/auth/auth.storage";
+import { FriendshipEventsService } from "../../services/friendshipEvents/friendshipEvents.service";
 
 export class FriendshipRequests extends BaseComponent {
     constructor() {
@@ -85,8 +86,13 @@ export class FriendshipRequests extends BaseComponent {
                 });
 
                 this.loadRequests(); // Reload the list
+
                 // Notify navbar to update badge
-                window.dispatchEvent(new CustomEvent("friendRequestUpdated"));
+                if (action === "accept") {
+                    FriendshipEventsService.getInstance().notifyFriendRequestAccepted();
+                } else {
+                    FriendshipEventsService.getInstance().notifyFriendRequestDeclined();
+                }
             } catch (error) {
                 console.error("Failed to respond to friend request:", error);
             }

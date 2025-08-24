@@ -5,6 +5,7 @@ import friendsListTemplate from "./friendsList.html?raw";
 
 export class FriendsList extends BaseComponent {
     private friendsContent: HTMLElement;
+    private friendshipUpdateHandler: () => void;
 
     constructor() {
         super("div", "friends-list");
@@ -12,6 +13,11 @@ export class FriendsList extends BaseComponent {
 
         this.friendsContent = this.container.querySelector("#friends-content")!;
         this.addEventListenerWithCleanup(this.friendsContent, "click", this.onUserClick.bind(this));
+
+        this.friendshipUpdateHandler = () => {
+            this.loadFriends();
+        };
+        window.addEventListener("friendshipChanged", this.friendshipUpdateHandler);
 
         this.loadFriends();
     }
@@ -102,5 +108,11 @@ export class FriendsList extends BaseComponent {
                 <p class="text-red-500">${message}</p>
             </div>
         `;
+    }
+
+    destroy(): void {
+        // Add this: Clean up the event listener
+        window.removeEventListener("friendshipChanged", this.friendshipUpdateHandler);
+        super.destroy();
     }
 }
