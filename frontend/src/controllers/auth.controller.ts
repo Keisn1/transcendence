@@ -81,9 +81,14 @@ export class AuthController {
     }
 
     public async signUp(formData: SignupForm): Promise<void> {
-        await this.authService.signUp(formData);
-        this.onlineStatusService.startTracking();
-        this.router.navigateTo("/profile");
+        try {
+            await this.authService.signUp(formData);
+            this.onlineStatusService.startTracking();
+            this.router.navigateTo("/profile");
+        } catch (error) {
+            // Re-throw the error so SignUp component can handle it
+            throw error;
+        }
     }
 
     public async verifyUser(userCredentials: LoginBody): Promise<VerifyUserResponse> {

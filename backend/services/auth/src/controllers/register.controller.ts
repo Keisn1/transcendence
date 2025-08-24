@@ -51,7 +51,7 @@ export async function register(
             return reply.status(502).send({ error: "External service unavailable" });
         }
         if (error.message.includes("UNIQUE constraint")) {
-            return reply.status(409).send({ error: "User already exists" });
+            return reply.status(409).send({ error: "Username or email already exists" });
         }
         return reply.status(500).send({ error: "Registration failed" });
     }

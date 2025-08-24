@@ -124,7 +124,9 @@ export class AuthService {
         });
 
         if (!response.ok) {
-            throw new Error("Sign up failed");
+            const errorData = await response.json().catch(() => ({}));
+            const errorMessage = errorData.error || `HTTP ${response.status}`;
+            throw new Error(errorMessage);
         }
 
         const data: RegisterResponse = await response.json();

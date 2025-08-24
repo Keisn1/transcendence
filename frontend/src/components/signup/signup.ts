@@ -5,10 +5,10 @@ import { type SignupForm } from "../../types/auth.types.ts";
 
 const MIN_LEN_USERNAME = 3;
 const MIN_LEN_PASSWORD = 8;
-const MAX_LEN_PASSWORD = 128;   // practical
-const MAX_LEN_USERNAME = 20;    // practical
-const MIN_LEN_EMAIL = 3;      // RFC 5321
-const MAX_LEN_EMAIL = 254;      // RFC 5321
+const MAX_LEN_PASSWORD = 128; // practical
+const MAX_LEN_USERNAME = 20; // practical
+const MIN_LEN_EMAIL = 3; // RFC 5321
+const MAX_LEN_EMAIL = 254; // RFC 5321
 const ZERO_WIDTH_RE = /[\u200B-\u200D\uFEFF]/g;
 
 // trim whitespace, zero-width chars and NFKC normalisation
@@ -30,12 +30,7 @@ function isValidEmail(email: string): boolean {
 
 //  minimum of two character classes
 function isStrongPassword(pw: string): boolean {
-    const classes = [
-        /[a-z]/.test(pw),
-        /[A-Z]/.test(pw),
-        /\d/.test(pw),
-        /[^A-Za-z0-9]/.test(pw),
-    ];
+    const classes = [/[a-z]/.test(pw), /[A-Z]/.test(pw), /\d/.test(pw), /[^A-Za-z0-9]/.test(pw)];
     const count = classes.filter(Boolean).length;
     return count >= 2; // satisfy two constraints
 }
@@ -66,7 +61,15 @@ export class SignUp extends BaseComponent {
             await authController.signUp(sanitized);
         } catch (error) {
             console.error("Sign up failed:", error);
-            this.showError("Sign up failed. Please try again.");
+            const errorMessage = error instanceof Error ? error.message : "Sign up failed";
+
+            if (errorMessage.includes("already exists") || errorMessage.includes("already taken")) {
+                this.showError("Username or email is already taken. Please choose different ones.");
+            } else if (errorMessage.includes("UNIQUE constraint")) {
+                this.showError("Username or email is already taken. Please choose different ones.");
+            } else {
+                this.showError(errorMessage);
+            }
         }
     }
 
