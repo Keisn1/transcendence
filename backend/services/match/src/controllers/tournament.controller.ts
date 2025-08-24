@@ -1,76 +1,7 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { v4 as uuidv4 } from "uuid";
-import {
-    PostTournamentBody,
-    PostTournamentResponse,
-    PostTournamentWithVerificationBody,
-} from "../types/tournament.types";
-
-export async function postTournament(
-    request: FastifyRequest<{ Body: PostTournamentBody }>,
-    reply: FastifyReply,
-): Promise<PostTournamentResponse> {
-    const { playerIds: playerIds } = request.body;
-
-    if (!playerIds || ![2, 4].includes(playerIds.length)) {
-        return reply.status(400).send({ error: "Tournament must have exactly 2 or 4 players" });
-    }
-
-    const tournamentId = uuidv4();
-    try {
-        // Start transaction
-        await request.server.db.run("BEGIN TRANSACTION");
-
-        // Insert tournament
-        await request.server.db.run(`INSERT INTO tournaments (id, player_count) VALUES (?, ?)`, [
-            tournamentId,
-            playerIds.length,
-        ]);
-
-        // Insert participants
-        for (let i = 0; i < playerIds.length; i++) {
-            await request.server.db.run(
-                `INSERT INTO tournament_participants (tournament_id, player_id) VALUES (?, ?)`,
-                [tournamentId, playerIds[i]],
-            );
-        }
-
-        // Commit if everything succeeded
-        await request.server.db.run("COMMIT");
-
-        const response: PostTournamentResponse = { id: tournamentId };
-        return reply.status(201).send(response);
-    } catch (err) {
-        // Rollback on any error
-        await request.server.db.run("ROLLBACK");
-        return reply.status(500).send({ error: "Failed to create tournament" });
-    }
-}
-
-export const postTournamentSchema = {
-    body: {
-        type: "object",
-        properties: {
-            playerIds: {
-                type: "array",
-                items: { type: "string" },
-                minItems: 2,
-                maxItems: 4,
-            },
-        },
-        required: ["playerIds"],
-        additionalProperties: false,
-    },
-    response: {
-        201: {
-            type: "object",
-            properties: {
-                id: { type: "string" },
-            },
-            required: ["id"],
-        },
-    },
-} as const;
+import { PostTournamentResponse, PostTournamentWithVerificationBody } from "../types/tournament.types";
+import { isValidUUID } from "../utils/validation";
 
 export async function postTournamentWithVerification(
     request: FastifyRequest<{ Body: PostTournamentWithVerificationBody }>,
@@ -78,8 +9,35 @@ export async function postTournamentWithVerification(
 ): Promise<PostTournamentResponse> {
     const { playerTokens } = request.body;
 
-    if (!playerTokens || playerTokens.length < 2 || playerTokens.length > 4 || playerTokens.length % 2 !== 0) {
+    // Validate input structure
+    if (!playerTokens || !Array.isArray(playerTokens)) {
+        return reply.status(400).send({ error: "playerTokens must be an array" });
+    }
+
+    if (![2, 4].includes(playerTokens.length)) {
         return reply.status(400).send({ error: "Tournament must have 2 or 4 players" });
+    }
+
+    // Validate each player token
+    for (const pt of playerTokens) {
+        if (!pt.playerId || !pt.token) {
+            return reply.status(400).send({ error: "Each player token must have playerId and token" });
+        }
+
+        if (!isValidUUID(pt.playerId)) {
+            return reply.status(400).send({ error: "Invalid player ID format" });
+        }
+
+        if (typeof pt.token !== "string" || pt.token.length < 10) {
+            return reply.status(400).send({ error: "Invalid token format" });
+        }
+    }
+
+    // Check for duplicate players
+    const playerIds = playerTokens.map((pt) => pt.playerId);
+    const uniquePlayerIds = new Set(playerIds);
+    if (uniquePlayerIds.size !== playerIds.length) {
+        return reply.status(400).send({ error: "Duplicate players not allowed" });
     }
 
     // Verify all tokens

@@ -2,19 +2,15 @@ import { FastifyRequest, FastifyReply } from "fastify";
 import { PostMatchBody } from "../types/match.types";
 import { v4 as uuidv4 } from "uuid";
 import { GetMatchResponse } from "../types/match.types";
+import { isValidUUID, validateMatchData } from "../utils/validation";
 
 export async function postMatch(request: FastifyRequest<{ Body: PostMatchBody }>, reply: FastifyReply): Promise<void> {
     const body = request.body;
 
-    if (
-        !body ||
-        !body.player1Id ||
-        !body.player2Id ||
-        typeof body.player1Score !== "number" ||
-        typeof body.player2Score !== "number" ||
-        !body.gameMode
-    ) {
-        return reply.status(400).send({ error: "Invalid match payload" });
+    // Validate input data
+    const validation = validateMatchData(body);
+    if (!validation.valid) {
+        return reply.status(400).send({ error: validation.errors[0] });
     }
 
     try {
@@ -59,6 +55,12 @@ export async function getMatchById(
     reply: FastifyReply,
 ): Promise<GetMatchResponse> {
     const { id } = request.params;
+
+    // Validate UUID format
+    if (!isValidUUID(id)) {
+        return reply.status(400).send({ error: "Invalid match ID format" });
+    }
+
     try {
         const response = await request.server.db.query(`SELECT * FROM matches WHERE id = ?`, [id]);
         if (!response.length) {
@@ -77,6 +79,10 @@ export async function getUserMatches(
     reply: FastifyReply,
 ): Promise<GetMatchResponse[]> {
     const { userId } = request.params;
+
+    if (!isValidUUID(userId)) {
+        return reply.status(400).send({ error: "Invalid user ID format" });
+    }
 
     try {
         const matches = await request.server.db.query(

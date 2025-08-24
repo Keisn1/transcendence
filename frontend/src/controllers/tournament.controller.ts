@@ -92,6 +92,7 @@ export class TournamentController {
 
     public async createTournamentDefault(players: PublicUser[]): Promise<void> {
         this.tournamentDefault = new Tournament(players);
+        this.tournamentDefault.id = "0";
         this.tournamentMachineDefault.update(TournamentEvent.LOAD, this.tournamentDefault);
         this.router.navigateTo(`/tournament-default`);
     }

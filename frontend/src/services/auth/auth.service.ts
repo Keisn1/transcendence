@@ -270,7 +270,6 @@ export class AuthService {
         const data: LoginResponse = await response.json();
         const user: User = data.user;
 
-        console.log("user: ", user);
         if (user.twoFaEnabled) {
             console.log("setting pending verifyData");
             this.pendingVerifyData = { token: data.token, user };

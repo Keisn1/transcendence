@@ -1,5 +1,12 @@
+import { isValidUUID } from "../utils/validation";
+
 export async function deleteUserData(request: any, reply: any) {
     const { userId } = request.params;
+
+    // Validate user ID
+    if (!isValidUUID(userId)) {
+        return reply.status(400).send({ error: "Invalid user ID format" });
+    }
 
     try {
         // Delete all matches where user participated
@@ -37,6 +44,10 @@ export async function deleteUserData(request: any, reply: any) {
 
 export async function anonymizeUserData(request: any, reply: any) {
     const { userId } = request.params;
+
+    if (!isValidUUID(userId)) {
+        return reply.status(400).send({ error: "Invalid user ID format" });
+    }
 
     try {
         // For anonymization, we keep the match records with their user IDs
