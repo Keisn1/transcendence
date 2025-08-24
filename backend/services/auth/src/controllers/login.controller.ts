@@ -1,9 +1,23 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { compareSync } from "bcrypt";
 import { LoginBody, LoginResponse } from "../types/auth.types";
+import { isValidEmail, sanitizeVisibleInput } from "../utils/validation";
 
 export async function login(request: FastifyRequest<{ Body: LoginBody }>, reply: FastifyReply): Promise<LoginResponse> {
     const { email, password } = request.body;
+
+    if (!email || !password) {
+        return reply.status(400).send({ error: "Email and password are required" });
+    }
+
+    const sanitizedEmail = sanitizeVisibleInput(email);
+    if (!isValidEmail(sanitizedEmail)) {
+        return reply.status(400).send({ error: "Invalid email format" });
+    }
+
+    if (password.length < 1 || password.length > 128) {
+        return reply.status(400).send({ error: "Invalid password length" });
+    }
 
     try {
         const userRecords = await request.server.db.query(

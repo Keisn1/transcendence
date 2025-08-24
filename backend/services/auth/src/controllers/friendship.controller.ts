@@ -9,6 +9,11 @@ import {
     SendFriendRequestResponse,
 } from "../types/auth.types";
 
+export function isValidUUID(uuid: string): boolean {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(uuid);
+}
+
 export async function getFriendshipStatus(
     request: FastifyRequest<{ Params: { userId: string } }>,
     reply: FastifyReply,
@@ -41,6 +46,15 @@ export async function respondToRequest(
 ): Promise<RespondToRequestResponse> {
     const { friendshipId } = request.params;
     const { action } = request.body;
+
+    if (!friendshipId || !isValidUUID(friendshipId)) {
+        return reply.status(400).send({ error: "Invalid friendship ID format" });
+    }
+
+    if (!action || !["accept", "decline"].includes(action)) {
+        return reply.status(400).send({ error: "Action must be 'accept' or 'decline'" });
+    }
+
     const userId = request.user.id;
 
     // Verify the friendship exists and belongs to current user
@@ -72,6 +86,11 @@ export async function sendFriendRequest(
     reply: FastifyReply,
 ): Promise<SendFriendRequestResponse> {
     const { userId } = request.params;
+
+    if (!userId || !isValidUUID(userId)) {
+        return reply.status(400).send({ error: "Invalid user ID format" });
+    }
+
     const requesterId = request.user.id;
 
     if (requesterId === userId) {

@@ -3,6 +3,10 @@ import speakeasy from "speakeasy";
 import qrcode from "qrcode";
 import { complete2FABody, Complete2FaResponse } from "../types/auth.types";
 
+function validateTwoFAToken(token: string): boolean {
+    return /^\d{6}$/.test(token); // 6-digit numeric code
+}
+
 export async function disable2FA(request: FastifyRequest, reply: FastifyReply) {
     const user = request.user;
     const { token } = request.body as { token: string };
@@ -33,6 +37,10 @@ export async function verify2FA(request: FastifyRequest, reply: FastifyReply) {
     const user = request.user;
     const { token } = request.body as { token: string };
     if (!token) return reply.status(400).send({ error: "Missing token" });
+
+    if (!token || !validateTwoFAToken(token)) {
+        return reply.status(400).send({ error: "Invalid 2FA code format" });
+    }
 
     // Check if 2FA is enabled and get encrypted secret
     const rows = await request.server.db.query(`SELECT twofa_enabled FROM users WHERE id = ?`, [user.id]);
@@ -85,6 +93,10 @@ export async function complete2FA(request: FastifyRequest, reply: FastifyReply):
 
     const { token } = request.body as complete2FABody;
     if (!token) return reply.status(400).send({ error: "Missing token" });
+
+    if (!token || !validateTwoFAToken(token)) {
+        return reply.status(400).send({ error: "Invalid 2FA code format" });
+    }
 
     // Get decrypted secret to verify
     const secret = await request.server.db.get2FASecret(user.id);
