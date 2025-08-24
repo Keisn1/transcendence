@@ -16,30 +16,30 @@ export class Settings extends BaseComponent {
     }
 
     private renderButtons() {
-        console.log("button get rerendered");
         const user = AuthService.getInstance().getCurrentUser();
         const buttonsContainer = this.container.querySelector(".buttons-container")!;
 
         if (user?.twoFaEnabled) {
             buttonsContainer.innerHTML = `
-                <button id="disable-2fa-btn" class="w-full px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
-                    Disable 2FA
-                </button>
-            `;
+            <button id="disable-2fa-btn" class="w-full px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                Disable 2FA
+            </button>
+        `;
             const disableBtn = buttonsContainer.querySelector("#disable-2fa-btn") as HTMLButtonElement;
             this.addEventListenerWithCleanup(disableBtn, "click", () => this.handleDisable2FA());
         } else {
             buttonsContainer.innerHTML = `
-                <button id="enable-2fa-btn" class="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                    Enable 2FA
-                </button>
-            `;
+            <button id="enable-2fa-btn" class="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                Enable 2FA
+            </button>
+        `;
             const enableBtn = buttonsContainer.querySelector("#enable-2fa-btn") as HTMLButtonElement;
             this.addEventListenerWithCleanup(enableBtn, "click", () => this.handleEnable2FA());
         }
     }
 
     private async handleEnable2FA() {
+        this.setButtonState("#enable-2fa-btn", true, "Setting up 2FA...");
         const enableBtn = this.container.querySelector("#enable-2fa-btn") as HTMLButtonElement;
         enableBtn.disabled = true;
 
@@ -49,15 +49,13 @@ export class Settings extends BaseComponent {
             this.twoFactorSetup = new TwoFactorSetup(
                 qrCodeSvg,
                 () => {
-                    // Cleanup when 2FA setup is complete
                     this.twoFactorSetup?.destroy();
                     this.twoFactorSetup = null;
-                    this.renderButtons(); // Re-render buttons after enabling
+                    this.renderButtons();
                 },
                 () => {
-                    // Re-enable button when setup is closed
-                    enableBtn.disabled = false;
                     this.twoFactorSetup = null;
+                    this.renderButtons();
                 },
             );
 
@@ -66,11 +64,13 @@ export class Settings extends BaseComponent {
             console.error("Error setting up 2FA:", error);
             const message = error instanceof Error ? error.message : "Failed to initiate 2FA";
             alert(`Failed to initiate 2FA: ${message}`);
-            enableBtn.disabled = false;
+            this.renderButtons(); // Reset button state
         }
     }
 
     private async handleDisable2FA() {
+        this.setButtonState("#disable-2fa-btn", true, "Disabling 2FA...");
+
         this.twoFactorVerification = new TwoFactorVerification(
             "Enter your 2FA code to disable 2FA:",
             async (token) => {
@@ -79,18 +79,26 @@ export class Settings extends BaseComponent {
 
                 this.twoFactorVerification?.getContainer().remove();
                 this.twoFactorVerification?.destroy();
-                this.twoFactorVerification = null; // Clean up reference
+                this.twoFactorVerification = null;
                 this.renderButtons();
                 alert("2FA disabled successfully!");
             },
             () => {
-                // Clean up when closed
                 this.twoFactorVerification?.destroy();
                 this.twoFactorVerification = null;
+                this.renderButtons(); // Reset button state
             },
         );
 
         this.container.appendChild(this.twoFactorVerification.getContainer());
+    }
+
+    private setButtonState(buttonId: string, disabled: boolean, text?: string) {
+        const button = this.container.querySelector(buttonId) as HTMLButtonElement;
+        if (button) {
+            button.disabled = disabled;
+            if (text) button.textContent = text;
+        }
     }
 
     destroy(): void {
