@@ -2,14 +2,21 @@ import { FastifyRequest, FastifyReply } from "fastify";
 import { genSaltSync, hashSync } from "bcrypt";
 import { RegisterBody, RegisterResponse, User } from "../types/auth.types";
 import { v4 as uuidv4 } from "uuid";
+import { sanitizeVisibleInput, validateRegisterInput } from "../utils/validation";
 
 export async function register(
     request: FastifyRequest<{ Body: RegisterBody }>,
     reply: FastifyReply,
 ): Promise<RegisterResponse> {
-    let { username, email, password } = request.body;
+    const validation = validateRegisterInput(request.body);
+    if (!validation.valid) {
+        return reply.status(400).send({ error: validation.errors[0] });
+    }
 
-    username = username.toLowerCase();
+    // Sanitize inputs
+    const username = sanitizeVisibleInput(request.body.username).toLowerCase();
+    const email = sanitizeVisibleInput(request.body.email);
+    const password = request.body.password; // Don't sanitize passwords
 
     try {
         // Hash password (stays in auth service)

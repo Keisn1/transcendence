@@ -45,18 +45,18 @@
 - [X] chris bug: hitting start too often
   - [X] disable restart when it is not finished
 * incomplete implementation
-- [ ] have a friends list in the dashboard view
+- [X] have a friends list in the dashboard view
+
+- [ ] double check input validation! (1. "Ensure that the website is secured. Check the database to verify that passwords are hashed. Check the server for server-side validation/sanitization on forms and any user input. If this isn't done, the evaluation ends now.")
+  - https://www.esecurityplanet.com/endpoint/prevent-web-attacks-using-input-sanitization/
+  - [ ] make a list of every user input anywhere inside the app
+  - [ ] check every user input and sanitize and validate
 
 - [ ] sign up, show if a user is already present (if there is a conflict)
 
 - [ ] check for unhandled errors (no 500s if there is a good reason for failure)
   - [ ] go through backend endpoints and check
   - [ ] check with LLM
-
-- [ ] double check input validation! (1. "Ensure that the website is secured. Check the database to verify that passwords are hashed. Check the server for server-side validation/sanitization on forms and any user input. If this isn't done, the evaluation ends now.")
-  - https://www.esecurityplanet.com/endpoint/prevent-web-attacks-using-input-sanitization/
-  - [ ] make a list of every user input anywhere inside the app
-  - [ ] check every user input and sanitize and validate
 
 - [X] https for the vault
   - no vault endpoint in production at all

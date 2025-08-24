@@ -1,6 +1,7 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import path from "path";
 import fs from "fs/promises";
+import { validateAvatarFile } from "../utils/utils";
 
 export default async function uploadAvatar(
     request: FastifyRequest,
@@ -12,17 +13,9 @@ export default async function uploadAvatar(
         return reply.code(400).send({ error: "No file provided" });
     }
 
-    // Check if it's an image and specifically allowed formats
-    const allowedMimeTypes = [
-        "image/gif",
-        "image/jpeg",
-        "image/jpg",
-        "image/png",
-    ];
-    if (!allowedMimeTypes.includes(data.mimetype)) {
-        return reply.code(400).send({
-            error: "Invalid file format. Only GIF, JPEG, and PNG images are allowed",
-        });
+    const validation = validateAvatarFile(data);
+    if (!validation.valid) {
+        return reply.status(400).send({ error: validation.error });
     }
 
     const filename = `avatar-${Date.now()}.${data.filename.split(".").pop()}`;

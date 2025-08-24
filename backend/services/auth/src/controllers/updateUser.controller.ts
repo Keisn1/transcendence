@@ -5,6 +5,13 @@ import https from "https";
 import fetch from "node-fetch";
 import fs from "fs";
 import { Agent } from "http";
+import {
+    isStrongPassword,
+    isValidEmail,
+    isValidUsername,
+    sanitizeVisibleInput,
+    validateAvatarPath,
+} from "../utils/validation";
 
 // Helper functions (copy from gdpr.controller.ts)
 let internalServiceAgent: Agent = new Agent();
@@ -118,10 +125,11 @@ export async function getUserByUsername(
 
 export async function updateUser(request: FastifyRequest, reply: FastifyReply): Promise<UpdateUserResponse> {
     const id = request.user.id;
-    const { username, email, password, avatar } = request.body as UpdateUserBody;
+    const body = request.body as UpdateUserBody;
 
     // Get current user data to check old avatar
     let oldAvatar = null;
+    const avatar = body.avatar;
     if (avatar) {
         const currentUser = await request.server.db.query("SELECT avatar FROM users WHERE id = ?", [id]);
         oldAvatar = currentUser[0]?.avatar;
@@ -130,23 +138,40 @@ export async function updateUser(request: FastifyRequest, reply: FastifyReply): 
     const fields: string[] = [];
     const values: any[] = [];
 
-    if (username) {
+    if (body.username !== undefined) {
+        const username = sanitizeVisibleInput(body.username).toLowerCase();
+        if (username.length < 3 || username.length > 20 || !isValidUsername(username)) {
+            return reply.status(400).send({ error: "Invalid username" });
+        }
         fields.push("username = ?");
         values.push(username);
     }
-    if (email) {
+
+    if (body.email !== undefined) {
+        const email = sanitizeVisibleInput(body.email);
+        if (email.length < 3 || email.length > 254 || !isValidEmail(email)) {
+            return reply.status(400).send({ error: "Invalid email" });
+        }
         fields.push("email = ?");
         values.push(email);
     }
-    if (password) {
+
+    if (body.password !== undefined) {
+        if (body.password.length < 8 || body.password.length > 128 || !isStrongPassword(body.password)) {
+            return reply.status(400).send({ error: "Invalid password" });
+        }
         const salt = genSaltSync(10);
-        const passwordHash = hashSync(password, salt);
+        const passwordHash = hashSync(body.password, salt);
         fields.push("password_hash = ?");
         values.push(passwordHash);
     }
-    if (avatar) {
+
+    if (body.avatar) {
+        if (!validateAvatarPath(body.avatar)) {
+            return reply.status(400).send({ error: "Invalid avatar path" });
+        }
         fields.push("avatar = ?");
-        values.push(avatar);
+        values.push(body.avatar);
     }
 
     if (fields.length === 0) {
