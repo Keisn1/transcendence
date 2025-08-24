@@ -66,6 +66,7 @@ export class Navbar extends BaseComponent {
             this.addEventListenerWithCleanup(this.notificationButton, "click", (e: Event) => {
                 e.stopPropagation(); // prevent document click handler from closing immediately
                 this.toggleNotificationDropdown();
+                if (!this.menu.classList.contains("hidden")) this.menu.classList.toggle("hidden");
             });
         }
 
@@ -247,7 +248,10 @@ export class Navbar extends BaseComponent {
     }
 
     setupEvents() {
-        const toggleMenu = () => this.menu.classList.toggle("hidden");
+        const toggleMenu = () => {
+            this.menu.classList.toggle("hidden");
+            if (this.notificationBadge) this.notificationBadge.classList.add("hidden");
+        };
         this.addEventListenerWithCleanup(this.userMenuButton, "click", toggleMenu);
 
         const handleLogout = (e: Event) => {
