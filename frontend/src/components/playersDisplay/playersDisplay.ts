@@ -40,18 +40,19 @@ export class PlayersDisplay extends BaseComponent {
     }
 
     private renderTournament(players: { player1: PublicUser; player2: PublicUser }) {
-        const player1Span = (players.player1.id && players.player1.id !== ZERO_UUID)
-            ? `<span class="cursor-pointer text-black underline-none hover:text-indigo-600" data-username="${players.player1.username}">${players.player1.username}</span>`
-            : `<span>${players.player1.username}</span>`
+        const player1Span =
+            players.player1.id && players.player1.id !== ZERO_UUID
+                ? `<span class="cursor-pointer text-black underline-none hover:text-indigo-600" data-username="${players.player1.username}">${players.player1.username}</span>`
+                : `<span>${players.player1.username}</span>`;
 
-        const player2Span = (players.player2.id && players.player2.id !== ZERO_UUID)
-            ? `<span class="cursor-pointer text-black underline-none hover:text-indigo-600" data-username="${players.player2.username}">${players.player2.username}</span>`
-            : `<span>${players.player2.username}</span>`
-
+        const player2Span =
+            players.player2.id && players.player2.id !== ZERO_UUID
+                ? `<span class="cursor-pointer text-black underline-none hover:text-indigo-600" data-username="${players.player2.username}">${players.player2.username}</span>`
+                : `<span>${players.player2.username}</span>`;
 
         const player2Content = `
             <img src="${players.player2.avatar}"
-                 alt="${players.player2.username}"
+                 alt=""
                  class="w-12 h-12 rounded-full border-2 border-white">
             <span class="font-semibold text-lg">${player2Span}</span>
         `;
@@ -93,7 +94,7 @@ export class PlayersDisplay extends BaseComponent {
         if (!username) return;
 
         // window.open(`/user/${encodeURIComponent(username)}`, '_self');
-        window.open(`/user/${encodeURIComponent(username)}`, '_blank');
+        window.open(`/user/${encodeURIComponent(username)}`, "_blank");
         return;
     }
 

@@ -1,3 +1,5 @@
+all: build up
+
 up:
 	docker compose up -d
 
@@ -14,7 +16,7 @@ build: build-frontend
 	docker compose build
 
 build-frontend:
-	docker build -t frontend-builder ./frontend
+	docker build -t frontend-builder --no-cache ./frontend
 	docker create --name temp-frontend frontend-builder
 	docker cp temp-frontend:/dist ./frontend/
 	docker rm temp-frontend
