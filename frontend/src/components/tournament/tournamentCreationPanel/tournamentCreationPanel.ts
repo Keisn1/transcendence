@@ -216,6 +216,11 @@ export class TournamentCreationPanel extends BaseComponent {
         this.addPlayerBtn.disabled = true;
         this.addPlayerBtn.textContent = "Registration in Progress...";
 
+        // Disable Create Tournament button
+        const submitBtn = this.tournamentForm.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Registration in Progress...";
+
         // Disable all Remove buttons
         const removeButtons = this.container.querySelectorAll<HTMLButtonElement>(".remove-btn");
         removeButtons.forEach((btn) => {
@@ -234,6 +239,11 @@ export class TournamentCreationPanel extends BaseComponent {
             this.addPlayerBtn.disabled = false;
             this.addPlayerBtn.textContent = "Add Player";
         }
+
+        // Re-enable Create Tournament button
+        const submitBtn = this.tournamentForm.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Create Tournament";
 
         // Re-enable all Remove buttons
         const removeButtons = this.container.querySelectorAll<HTMLButtonElement>(".remove-btn");
