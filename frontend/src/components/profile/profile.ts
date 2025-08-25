@@ -5,6 +5,7 @@ import { AvatarUpload } from "../avatarUpload/avatarUpload";
 import { AuthStorage } from "../../services/auth/auth.storage";
 import { ProfileService } from "../../services/profile/profile.service";
 import { ProfileStatsComponent } from "../profileStats/profileStats";
+import { sanitizeVisibleInput, validateEmail, validateUsername } from "../../utils/validation";
 
 export class ProfileComponent extends BaseComponent {
     private profile: Profile | null = null;
@@ -103,15 +104,35 @@ export class ProfileComponent extends BaseComponent {
         if (!this.profile) return;
 
         const updatedData: any = {};
+        const errors: string[] = [];
 
-        if (this.editUsernameInput.value !== this.profile.username) {
-            updatedData.username = this.editUsernameInput.value;
+        // Sanitize inputs
+        const sanitizedUsername = sanitizeVisibleInput(this.editUsernameInput.value);
+        const sanitizedEmail = sanitizeVisibleInput(this.editEmailInput.value);
+
+        // Validate and collect changes
+        if (sanitizedUsername !== this.profile.username) {
+            errors.push(...validateUsername(sanitizedUsername));
+            if (errors.length === 0) {
+                updatedData.username = sanitizedUsername;
+            }
         }
-        if (this.editEmailInput.value !== this.profile.email) {
-            updatedData.email = this.editEmailInput.value;
+
+        if (sanitizedEmail !== this.profile.email) {
+            errors.push(...validateEmail(sanitizedEmail));
+            if (errors.length === 0) {
+                updatedData.email = sanitizedEmail;
+            }
         }
+
         if (this.pendingAvatarUrl && this.pendingAvatarUrl !== this.profile.avatar) {
             updatedData.avatar = this.pendingAvatarUrl;
+        }
+
+        // Show validation errors if any
+        if (errors.length > 0) {
+            this.showErrors(errors);
+            return;
         }
 
         if (Object.keys(updatedData).length === 0) {
@@ -121,9 +142,10 @@ export class ProfileComponent extends BaseComponent {
 
         try {
             await this.profileService.updateProfile(updatedData);
-            await this.loadProfile(); // Reload fresh data
+            await this.loadProfile();
             this.exitEditMode();
             this.pendingAvatarUrl = null;
+            this.clearErrors();
         } catch (error) {
             console.error("Failed to update profile:", error);
         }
@@ -168,6 +190,30 @@ export class ProfileComponent extends BaseComponent {
         if (cameraIcon) {
             (cameraIcon as HTMLElement).style.display = "none";
         }
+    }
+
+    // Add error handling methods:
+    private showErrors(messages: string[]) {
+        this.clearErrors();
+
+        const errorDiv = document.createElement("div");
+        errorDiv.className = "error-message text-red-600 text-sm mt-2";
+
+        const ul = document.createElement("ul");
+        ul.className = "space-y-1";
+        for (const msg of messages) {
+            const li = document.createElement("li");
+            li.textContent = msg;
+            ul.appendChild(li);
+        }
+        errorDiv.appendChild(ul);
+
+        this.profileForm.insertAdjacentElement("afterend", errorDiv);
+    }
+
+    private clearErrors() {
+        const existingError = this.container.querySelector(".error-message");
+        existingError?.remove();
     }
 
     destroy(): void {

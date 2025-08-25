@@ -2,31 +2,10 @@ import { AuthController } from "../../controllers/auth.controller.ts";
 import { BaseComponent } from "../BaseComponent";
 import signupTemplate from "./signup.html?raw";
 import { type SignupForm } from "../../types/auth.types.ts";
+import { sanitizeVisibleInput, validateEmail, validateUsername } from "../../utils/validation.ts";
 
-const MIN_LEN_USERNAME = 3;
 const MIN_LEN_PASSWORD = 8;
 const MAX_LEN_PASSWORD = 128; // practical
-const MAX_LEN_USERNAME = 20; // practical
-const MIN_LEN_EMAIL = 3; // RFC 5321
-const MAX_LEN_EMAIL = 254; // RFC 5321
-const ZERO_WIDTH_RE = /[\u200B-\u200D\uFEFF]/g;
-
-// trim whitespace, zero-width chars and NFKC normalisation
-function sanitizeVisibleInput(input: string): string {
-    // Trim, remove zero-width/control chars, normalize to NFKC for consistency
-    return input.trim().replace(ZERO_WIDTH_RE, "").normalize("NFKC");
-}
-
-// allow letters, numbers, underscore, dot and dash
-function isValidUsername(username: string): boolean {
-    const re = /^[A-Za-z0-9._-]+$/;
-    return re.test(username);
-}
-
-function isValidEmail(email: string): boolean {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-}
 
 //  minimum of two character classes
 function isStrongPassword(pw: string): boolean {
@@ -95,24 +74,10 @@ export class SignUp extends BaseComponent {
         const errors: string[] = [];
 
         // USERNAME
-        if (data.username.length < MIN_LEN_USERNAME) {
-            errors.push(`Username must be at least ${MIN_LEN_USERNAME} characters.`);
-        }
-        if (data.username.length > MAX_LEN_USERNAME) {
-            errors.push(`Username is too long. Maximum ${MAX_LEN_USERNAME} characters.`);
-        }
-        if (!isValidUsername(data.username)) {
-            errors.push("Username contains invalid characters. Use letters, numbers, '.', '_' or '-'.");
-        }
+        errors.push(...validateUsername(data.username));
 
         // EMAIL
-        if (data.email.length > MAX_LEN_EMAIL) {
-            errors.push(`Email is too long. Maximum ${MAX_LEN_EMAIL} characters.`);
-        } else if (data.email.length < MIN_LEN_EMAIL) {
-            errors.push(`Email is too short. Minimum ${MAX_LEN_EMAIL} characters.`);
-        } else if (!isValidEmail(data.email)) {
-            errors.push("Email format looks invalid.");
-        }
+        errors.push(...validateEmail(data.email));
 
         // PASSWORD
         if (data.password.length < MIN_LEN_PASSWORD) {
