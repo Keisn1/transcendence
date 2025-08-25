@@ -10,8 +10,8 @@ interface Intersection {
 }
 
 interface BallData {
-	dir: BallDirection;
-	pos: BallPosition;
+    dir: BallDirection;
+    pos: BallPosition;
 }
 
 function getKeyCode(key: string): string {
@@ -50,33 +50,33 @@ export class AiController {
         this.paddle = paddle;
         this.canvas = canvas;
         if (difficulty === "easy") this.noiseFraction = 0.5;
-        else this.noiseFraction = 0.3;
+        else this.noiseFraction = 0.2;
         this.startAiLoop();
     }
 
     public feedAi(ball: Ball) {
         this.ballData = {
             pos: { ...ball.pos },
-            dir: { ...ball.dir }
+            dir: { ...ball.dir },
         };
         this.prediction(this.ballData);
     }
 
-	private startAiLoop() {
+    private startAiLoop() {
         this.isRunning = true;
-        
+
         const aiTick = () => {
             if (!this.isRunning) return;
             if (this.ballData) this.updateDirection();
-            
+
             this.pressKey();
             this.actionLoop = requestAnimationFrame(aiTick);
         };
-        
+
         aiTick();
     }
 
-	private updateDirection() {
+    private updateDirection() {
         const paddle = this.paddle;
         const paddleCenter = paddle.posY + paddle.height / 2;
 
@@ -97,27 +97,29 @@ export class AiController {
         const canvas = this.canvas;
 
         const movingTowards =
-            (paddle.side === "left" && ballData.dir.dx < 0) || 
-            (paddle.side === "right" && ballData.dir.dx > 0);
+            (paddle.side === "left" && ballData.dir.dx < 0) || (paddle.side === "right" && ballData.dir.dx > 0);
 
         if (movingTowards) {
-            this.intersection.x = paddle.side === "left"
-                ? paddle.posX + paddle.width
-                : paddle.posX;
+            this.intersection.x = paddle.side === "left" ? paddle.posX + paddle.width : paddle.posX;
 
-            const predictedY = this.predictYIntersection(ballData.pos, ballData.dir, canvas.height, this.intersection.x);
+            const predictedY = this.predictYIntersection(
+                ballData.pos,
+                ballData.dir,
+                canvas.height,
+                this.intersection.x,
+            );
 
             // -(paddle.height * this.noiseFraction) < noise < (paddle.height * this.noiseFraction)
-            const noise = (Math.random() * 2 - 1) * (paddle.height * this.noiseFraction); 
+            const noise = (Math.random() * 2 - 1) * (paddle.height * this.noiseFraction);
 
             // 0 < predictedY + noise < canvas.height
-            this.intersection.y = Math.max(0, Math.min(canvas.height, predictedY + noise)); 
+            this.intersection.y = Math.max(0, Math.min(canvas.height, predictedY + noise));
         } else {
             this.intersection.y = canvas.height / 2;
         }
     }
 
-	private predictYIntersection(
+    private predictYIntersection(
         pos: BallPosition,
         dir: BallDirection,
         canvasHeight: number,
@@ -152,26 +154,24 @@ export class AiController {
         document.dispatchEvent(event);
     }
 
-	private pressKey() {
-		let keyUp = "w";
-		let keyDown = "s";
-		if (this.paddle.side === "right") {
-			keyUp = "ArrowUp";
-			keyDown = "ArrowDown";
-		}
-		if (this.aiDir === "up") {
-			this.simulateKeyEvent(keyDown, "keyup");
-			this.simulateKeyEvent(keyUp,   "keydown");
-		}
-		else if (this.aiDir === "down") {
-			this.simulateKeyEvent(keyUp,   "keyup");
-			this.simulateKeyEvent(keyDown, "keydown");
-		}
-		else if (this.aiDir === "rest") {
-			this.simulateKeyEvent(keyUp,   "keyup");
-			this.simulateKeyEvent(keyDown, "keyup");
-		}
-	}
+    private pressKey() {
+        let keyUp = "w";
+        let keyDown = "s";
+        if (this.paddle.side === "right") {
+            keyUp = "ArrowUp";
+            keyDown = "ArrowDown";
+        }
+        if (this.aiDir === "up") {
+            this.simulateKeyEvent(keyDown, "keyup");
+            this.simulateKeyEvent(keyUp, "keydown");
+        } else if (this.aiDir === "down") {
+            this.simulateKeyEvent(keyUp, "keyup");
+            this.simulateKeyEvent(keyDown, "keydown");
+        } else if (this.aiDir === "rest") {
+            this.simulateKeyEvent(keyUp, "keyup");
+            this.simulateKeyEvent(keyDown, "keyup");
+        }
+    }
 
     destroy() {
         this.isRunning = false;

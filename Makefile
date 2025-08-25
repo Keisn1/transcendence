@@ -7,6 +7,7 @@ tsc:
 	cd backend/services/auth npx tsc --project frontend/tsconfig.json
 
 down:
+	rm -rf frontend/dist
 	docker compose down --remove-orphans
 
 # re: down tsc build up
