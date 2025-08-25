@@ -43,6 +43,7 @@ export interface UpdateUserBody {
     username?: string;
     email?: string;
     password?: string;
+    currentPassword?: string;
     avatar?: string;
 }
 

@@ -31,4 +31,23 @@ export class ProfileService {
         // Notify AuthService to update cached user
         AuthService.getInstance().updateCurrentUser(data.user);
     }
+
+    async updatePassword(currentPassword: string, newPassword: string): Promise<void> {
+        const response = await fetch("/api/user", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${AuthStorage.getToken()}`,
+            },
+            body: JSON.stringify({
+                currentPassword,
+                password: newPassword,
+            }),
+        });
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            throw new Error(error.error || "Password update failed");
+        }
+    }
 }

@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { genSaltSync, hashSync } from "bcrypt";
+import { compareSync, genSaltSync, hashSync } from "bcrypt";
 import { GetOnlineStatusResponse, PublicUser, UpdateUserBody, UpdateUserResponse } from "../types/auth.types";
 import https from "https";
 import fetch from "node-fetch";
@@ -127,6 +127,16 @@ export async function updateUser(request: FastifyRequest, reply: FastifyReply): 
     const id = request.user.id;
     const body = request.body as UpdateUserBody;
 
+    const hasValidFields = body.username || body.email || body.password || body.avatar;
+    if (!hasValidFields) {
+        return reply.status(400).send({ error: "At least one field must be provided for update" });
+    }
+
+    // Password change requires currentPassword
+    if (body.password && !body.currentPassword) {
+        return reply.status(400).send({ error: "Current password is required to change password" });
+    }
+
     // Get current user data to check old avatar
     let oldAvatar = null;
     const avatar = body.avatar;
@@ -156,10 +166,21 @@ export async function updateUser(request: FastifyRequest, reply: FastifyReply): 
         values.push(email);
     }
 
+    // Add this validation before the password update section:
     if (body.password !== undefined) {
+        // If currentPassword is provided, verify it first
+        if (body.currentPassword) {
+            const currentUser = await request.server.db.query("SELECT password_hash FROM users WHERE id = ?", [id]);
+
+            if (!currentUser[0] || !compareSync(body.currentPassword, currentUser[0].password_hash)) {
+                return reply.status(400).send({ error: "Current password is incorrect" });
+            }
+        }
+
         if (body.password.length < 8 || body.password.length > 128 || !isStrongPassword(body.password)) {
             return reply.status(400).send({ error: "Invalid password" });
         }
+
         const salt = genSaltSync(10);
         const passwordHash = hashSync(body.password, salt);
         fields.push("password_hash = ?");
@@ -260,6 +281,7 @@ export const updateUserSchema = {
             username: { type: "string", minLength: 1 },
             email: { type: "string", format: "email" },
             password: { type: "string", minLength: 8 },
+            currentPassword: { type: "string", minLength: 1, maxLength: 128 },
             avatar: { type: "string", format: "uri-reference" },
         },
         additionalProperties: false,

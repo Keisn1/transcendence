@@ -6,6 +6,7 @@ import { AuthStorage } from "../../services/auth/auth.storage";
 import { ProfileService } from "../../services/profile/profile.service";
 import { ProfileStatsComponent } from "../profileStats/profileStats";
 import { sanitizeVisibleInput, validateEmail, validateUsername } from "../../utils/validation";
+import { PasswordChange } from "../passwordChange/passwordChange";
 
 export class ProfileComponent extends BaseComponent {
     private profile: Profile | null = null;
@@ -28,6 +29,9 @@ export class ProfileComponent extends BaseComponent {
     private profileService: ProfileService;
     private avatarContainer: HTMLElement;
 
+    private changePasswordBtn: HTMLButtonElement;
+    private passwordChangeModal: PasswordChange | null = null;
+
     constructor() {
         super("div", "profile-content");
         this.container.innerHTML = profileTemplate;
@@ -48,6 +52,8 @@ export class ProfileComponent extends BaseComponent {
         this.avatarContainer = this.container.querySelector("#avatar-container")!;
         this.profileService = ProfileService.getInstance();
 
+        this.changePasswordBtn = this.container.querySelector("#change-password-btn")!;
+
         this.setupEventListeners();
         this.setupAvatarUpload();
         this.loadProfile();
@@ -61,6 +67,14 @@ export class ProfileComponent extends BaseComponent {
         this.addEventListenerWithCleanup(this.editBtn, "click", () => this.enterEditMode());
         this.addEventListenerWithCleanup(this.cancelBtn, "click", () => this.exitEditMode());
         this.addEventListenerWithCleanup(this.profileForm, "submit", (e) => this.handleSave(e));
+        this.addEventListenerWithCleanup(this.changePasswordBtn, "click", () => this.openPasswordChange());
+    }
+
+    private openPasswordChange() {
+        this.passwordChangeModal = new PasswordChange(() => {
+            this.passwordChangeModal = null;
+        });
+        this.passwordChangeModal.show();
     }
 
     private enterEditMode() {
@@ -217,6 +231,7 @@ export class ProfileComponent extends BaseComponent {
     }
 
     destroy(): void {
+        this.passwordChangeModal?.destroy();
         this.avatarUpload?.destroy();
         this.profileStats?.destroy();
         super.destroy();
