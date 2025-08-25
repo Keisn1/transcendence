@@ -29,7 +29,6 @@ export class MatchService {
         }
     }
 
-    // TODO: erik: make getUserMatches and getMatchesByUser one function with optional userId
     async getMatchesByUser(userId: string): Promise<GetMatchResponse[]> {
         if (!userId) throw new Error("User not authenticated");
 

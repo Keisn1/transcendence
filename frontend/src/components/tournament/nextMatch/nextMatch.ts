@@ -43,16 +43,18 @@ export class NextMatch extends BaseComponent {
 
     private fillNextMatchDetails() {
         const nextMatch = this.tournament.matches[this.tournament.nextMatchIdx];
-        const player1Span = (nextMatch.player1.id && nextMatch.player1.id !== ZERO_UUID)
-            ? `<span class="cursor-pointer font-medium text-black underline-none hover:text-indigo-600" data-username="${nextMatch.player1.username}">${nextMatch.player1.username}</span>`
-            : `<span class="font-medium text-black underline-none">${nextMatch.player1.username}</span>`
-        const player2Span = (nextMatch.player2.id && nextMatch.player2.id !== ZERO_UUID)
-            ? `<span class="cursor-pointer font-medium text-black underline-none hover:text-indigo-600" data-username="${nextMatch.player2.username}">${nextMatch.player2.username}</span>`
-            : `<span class="font-medium text-black underline-none">${nextMatch.player2.username}</span>`
+        const player1Span =
+            nextMatch.player1.id && nextMatch.player1.id !== ZERO_UUID
+                ? `<span class="cursor-pointer font-medium text-black underline-none hover:text-indigo-600" data-username="${nextMatch.player1.username}">${nextMatch.player1.username}</span>`
+                : `<span class="font-medium text-black underline-none">${nextMatch.player1.username}</span>`;
+        const player2Span =
+            nextMatch.player2.id && nextMatch.player2.id !== ZERO_UUID
+                ? `<span class="cursor-pointer font-medium text-black underline-none hover:text-indigo-600" data-username="${nextMatch.player2.username}">${nextMatch.player2.username}</span>`
+                : `<span class="font-medium text-black underline-none">${nextMatch.player2.username}</span>`;
 
         let text = "";
         switch (this.tournamentMachine.getState()) {
-            case TournamentState.READY: // TODO: erik: this case doesn't look right, possibly can be removed
+            case TournamentState.READY:
                 text = `Playing: ${player1Span} vs ${player2Span}`;
                 break;
             case TournamentState.IN_PROGRESS:

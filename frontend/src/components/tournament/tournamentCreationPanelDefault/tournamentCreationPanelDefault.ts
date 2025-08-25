@@ -75,10 +75,9 @@ export class TournamentCreationPanelDefault extends BaseComponent {
             return;
         }
 
-        const alias = aliasInput.value;
-        // TODO: validate alias
-
         try {
+            const alias = aliasInput.value;
+            if (alias === "") throw new Error("Player must have a name");
             if (this.registeredPlayers.some((p) => p.username === alias))
                 throw new Error("Player with this username already registered");
 
