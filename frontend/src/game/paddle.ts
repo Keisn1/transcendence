@@ -35,12 +35,12 @@ export class Paddle {
         }
     }
 
-    moveUp(canvas: HTMLCanvasElement) {
-        this.posY = Math.max(0, Math.min(canvas.height - this.height, this.posY - this.speed));
+    moveUp(canvas: HTMLCanvasElement, elapsed: number) {
+        this.posY = Math.max(0, Math.min(canvas.height - this.height, this.posY - this.speed * elapsed));
     }
 
-    moveDown(canvas: HTMLCanvasElement) {
-        this.posY = Math.max(0, Math.min(canvas.height - this.height, this.posY + this.speed));
+    moveDown(canvas: HTMLCanvasElement, elapsed: number) {
+        this.posY = Math.max(0, Math.min(canvas.height - this.height, this.posY + this.speed * elapsed));
     }
 
     draw(ctx: CanvasRenderingContext2D) {

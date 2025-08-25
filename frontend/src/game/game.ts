@@ -41,6 +41,7 @@ export class PongGame {
     private requestAnimationFrame: number | null = null;
     private result: MatchResult;
     private onFinishCallback?: () => void;
+    private elapsed: number = 0;
 
     constructor(canvas: HTMLCanvasElement, config: GameConfig = {}, onFinish?: () => void) {
         this.onFinishCallback = onFinish;
@@ -60,12 +61,12 @@ export class PongGame {
             ballConfig: {
                 initPos: { x: canvas.width / 2, y: canvas.height / 2 },
                 initDirection: { dx: 1, dy: -0.5 },
-                radius: config.ballConfig?.radius ?? 10,
+                radius: config.ballConfig?.radius ?? canvas.width / 125,
                 speed: config.ballConfig?.speed ?? canvas.width / 3000,
                 color: config.ballConfig?.color ?? "#fff",
             },
             paddleConfig: {
-                speed: config.paddleConfig?.speed ?? 7,
+                speed: config.paddleConfig?.speed ?? canvas.height / 1000,
                 color: config.paddleConfig?.color ?? "#fff",
             },
             winningScore: config.winningScore ?? 5,
@@ -116,10 +117,10 @@ export class PongGame {
 
     private setupControls() {
         const c = this.config.controls;
-        this.inputManager.bindKey(c.player1.up, () => this.paddles.left.moveUp(this.canvas));
-        this.inputManager.bindKey(c.player1.down, () => this.paddles.left.moveDown(this.canvas));
-        this.inputManager.bindKey(c.player2.up, () => this.paddles.right.moveUp(this.canvas));
-        this.inputManager.bindKey(c.player2.down, () => this.paddles.right.moveDown(this.canvas));
+        this.inputManager.bindKey(c.player1.up, () => this.paddles.left.moveUp(this.canvas, this.elapsed));
+        this.inputManager.bindKey(c.player1.down, () => this.paddles.left.moveDown(this.canvas, this.elapsed));
+        this.inputManager.bindKey(c.player2.up, () => this.paddles.right.moveUp(this.canvas, this.elapsed));
+        this.inputManager.bindKey(c.player2.down, () => this.paddles.right.moveDown(this.canvas, this.elapsed));
         this.inputManager.bindKey("p", () => this.togglePause(), "once");
     }
 
@@ -230,6 +231,7 @@ export class PongGame {
 
         if (lastTime === 0) lastTime = timestamp;
         const elapsed = timestamp - lastTime;
+        this.elapsed = elapsed;
 
         this.timePassed += elapsed;
         if (this.timePassed >= this.feedFrequency) {

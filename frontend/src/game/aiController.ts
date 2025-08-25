@@ -50,7 +50,7 @@ export class AiController {
         this.paddle = paddle;
         this.canvas = canvas;
         if (difficulty === "easy") this.noiseFraction = 0.5;
-        else this.noiseFraction = 0.2;
+        else this.noiseFraction = 0.3;
         this.startAiLoop();
     }
 
