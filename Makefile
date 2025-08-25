@@ -1,4 +1,4 @@
-up: build-frontend
+up:
 	docker compose up -d
 
 tsc:
@@ -10,11 +10,15 @@ down:
 # re: down tsc build up
 re: down build up
 
-build:
+build: build-frontend
 	docker compose build
 
 build-frontend:
-	cd frontend && npm run build
+	docker build -t frontend-builder ./frontend
+	docker create --name temp-frontend frontend-builder
+	docker cp temp-frontend:/dist ./frontend/
+	docker rm temp-frontend
+	docker rmi frontend-builder
 
 status:
 	docker ps
